@@ -1,0 +1,38 @@
+---
+// import { Image } from "astro:assets"
+import { decorateTextLinks } from '~/utils/decorateTextLinks'
+import presentation from "~/data/intro";
+import SocialArea from "~/components/SocialArea.astro";
+import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
+
+---
+
+<EvenColumnsLayout as="article" >
+  <div class="flow">
+    <h1 class="fs-primary-heading fw-bold">
+      {presentation.title}
+    </h1>
+
+    <p data-width="wide"
+      set:html={decorateTextLinks(presentation.description)}
+    />
+
+    <div class="">
+      <SocialArea />
+    </div>
+  </div>
+
+  <div class="">
+    <!-- {
+      presentation.profile && (
+        <Image
+          src={presentation.profile}
+          class="w-1/4 self-center rounded-full"
+          alt="Your Profile"
+          width="200"
+          height="200"
+        />
+      )
+    } -->
+  </div>
+</EvenColumnsLayout>

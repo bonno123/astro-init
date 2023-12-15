@@ -1,0 +1,19 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"a"> & {
+  label: string;
+};
+
+const { label, href,  ...rest } = Astro.props;
+---
+
+<a
+  href={href}
+  {...rest}
+  rel="noreferrer"
+  target="_blank"
+>
+  {label}
+  <span class="sr-only">{label} link</span>
+</a>

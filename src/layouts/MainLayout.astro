@@ -1,0 +1,38 @@
+---
+import BaseHead from '~/components/common/BaseHead.astro';
+
+interface Props {
+	title: string;
+}
+
+const { title: layoutTitle } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<BaseHead title={layoutTitle} />
+
+	<body>
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style is:global>
+/* general styling */
+body {
+	font-size: var(--fs-body);
+	font-family: var(--ff-body);
+	color: var(--clr-primary-400);
+}
+
+p:not([class]) {
+	opacity: 0.7;
+	max-width: 32ch;
+}
+
+p[data-width="wide"] {
+	max-width: 42ch;
+}
+</style>

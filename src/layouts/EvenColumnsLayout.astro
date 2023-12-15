@@ -1,0 +1,39 @@
+---
+import type { HTMLTag, Polymorphic } from 'astro/types';
+
+type Props<Tag extends HTMLTag> = Polymorphic<{ 
+  as: Tag,
+}>;
+
+const {
+  as: Element='section',
+  class: providerClass,
+  ...props
+} = Astro.props;
+
+---
+
+<Element
+  class:list={[ providerClass, [ 'padding-block-900' ] ]} 
+  {...props}
+>
+  <div class='page-container'>
+    <div class="even-columns">
+      <slot />
+    </div>
+  </div>
+</Element>
+
+<style>
+  .even-columns {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  @media (min-width: 50em) {
+    .even-columns {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+    }
+  }
+</style>
