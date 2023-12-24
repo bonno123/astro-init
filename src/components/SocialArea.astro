@@ -5,7 +5,7 @@ import intro from "~/data/intro";
 
 <ul role="list" class="flex">
   {
-    intro.socials.map((social, index) => (
+    intro.socials.map((social, _index) => (
       <>
         <li>
           <Link href={social.link} label={social.label} />

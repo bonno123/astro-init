@@ -1,9 +1,10 @@
 ---
 import MainLayout from '~/layouts/MainLayout.astro';
 import ProfileArticle from '~/components/ProfileArticle.astro'
+import siteInfo from '~/data/site-info';
 ---
 
-<MainLayout title="Avik Banik">
+<MainLayout title={siteInfo.description}>
 	<ProfileArticle />
 </MainLayout>
 
