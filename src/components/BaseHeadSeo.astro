@@ -1,0 +1,74 @@
+---
+import { SEO, type Props as SeoProps } from "astro-seo";
+import siteInfo from "~/data/site-info";
+import { formatCanonicalURL } from "~/utils/formatCanonicalUrl";
+
+interface Props {
+	title: string;
+  twitter?: SeoProps['twitter'];
+}
+
+const baseTitle = siteInfo.title;
+const image = siteInfo.image;
+const canonicalURL = new URL(Astro.request.url, Astro.site);
+const locale = "en";
+
+//TODO: add actual title :-> Supposed to be a Very Descriptive Title
+const openGraphDescriptiveTitle = [Astro.props.title, siteInfo.name].filter(Boolean).join(" | ");
+
+const openGraph ={
+  basic: {
+    title: openGraphDescriptiveTitle,
+    type: 'website',
+    image: "https://raw.githubusercontent.com/bonno123/astro-init/b31272c3ad24b9e7c46ef4ce97e424ddb8ccdef4/code_20231222_181000_via_10015_io.png",
+    url: formatCanonicalURL(canonicalURL),
+  },
+  image: {
+    alt: 'a pice of javascript code declres an object of user info'
+  },
+  optional:{
+    locale,
+  }
+  
+} satisfies SeoProps['openGraph'];
+
+const twitter = {
+  title: baseTitle,
+  creator: 'AvikBanik',
+  site: String(canonicalURL),
+  description: openGraphDescriptiveTitle,
+  image: image.src,
+  imageAlt: image.alt,
+  card: "summary_large_image",
+  ...Astro.props.twitter,
+} satisfies SeoProps['twitter'];
+
+// Extending Astro SEO
+const  ExtendTags = {
+  link: [
+    { 
+      rel: "icon", 
+      href: "/favicon.ico" 
+    }
+  ],
+  meta: [
+    // {
+    //   name: "twitter:title",
+    //   content: "Tinker Tailor Soldier Spy"
+    // },
+    // { 
+    //   name: "twitter:description",
+    //   content: "Agent"
+    // },
+  ]
+} satisfies SeoProps['extend']
+---
+
+<SEO
+  title={baseTitle}
+  description={siteInfo.description}
+  canonical={canonicalURL}
+  openGraph={openGraph}
+  twitter={twitter}
+  extend={ExtendTags}
+/>
