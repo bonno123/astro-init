@@ -22,7 +22,7 @@ const siteInfo: SiteInfo = {
 	name: "Avik Banik",
 	title: "Portfolio | Avik Banik",
 	description:
-		"A sample portfolio web application, generated with astro - SSG",
+		"A sample portfolio page, generated with astro - SSG",
 	image: {
 		src: "/og/social.jpg",
 		alt: "Build the web you want",
