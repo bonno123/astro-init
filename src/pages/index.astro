@@ -1,10 +1,13 @@
 ---
 import MainLayout from '~/layouts/MainLayout.astro';
-import ProfileArticle from '~/components/ProfileArticle.astro'
+import ProfileArticle from '~/components/ProfileArticle.astro';
+import TresExperiment from '~/components/vue-components/TresExperiment.vue'; 
 import siteInfo from '~/data/site-info';
 ---
 
 <MainLayout title={siteInfo.description}>
+
+	<TresExperiment client:load/>
 	<ProfileArticle />
 </MainLayout>
 

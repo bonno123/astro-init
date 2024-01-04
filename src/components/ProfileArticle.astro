@@ -1,5 +1,5 @@
 ---
-// import { Image } from "astro:assets"
+import { Image } from "astro:assets";
 import { decorateTextLinks } from '~/utils/decorateTextLinks'
 import presentation from "~/data/intro";
 import SocialArea from "~/components/SocialArea.astro";
@@ -23,7 +23,7 @@ import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
   </div>
 
   <div class="">
-    <!-- {
+    {
       presentation.profile && (
         <Image
           src={presentation.profile}
@@ -33,6 +33,6 @@ import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
           height="200"
         />
       )
-    } -->
+    }
   </div>
 </EvenColumnsLayout>
