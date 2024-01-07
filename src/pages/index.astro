@@ -3,11 +3,13 @@ import MainLayout from '~/layouts/MainLayout.astro';
 import ProfileArticle from '~/components/ProfileArticle.astro';
 import TresExperiment from '~/components/vue-components/TresExperiment.vue'; 
 import siteInfo from '~/data/site-info';
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 ---
 
 <MainLayout title={siteInfo.description}>
-
-	<TresExperiment client:load/>
-	<ProfileArticle />
+	<EvenColumnsLayout >
+		<ProfileArticle />
+		<TresExperiment client:visible/>
+	</EvenColumnsLayout>
 </MainLayout>
 

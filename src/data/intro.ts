@@ -13,7 +13,7 @@ type AboutMe = {
   
 const aboutMe: AboutMe = {
     mail: "banikavik@gmail.com",
-    title: "👋 I’m Avik",
+    title: "Hi, I’m Avik",
     // profile: "/profile.webp",
     description:
         "I'm a *frontend developer* with over *3 years* of experience. I am currently working with *Vue.js Quasar and Typescript*. Outside of work I explore things arbitrarily.",
