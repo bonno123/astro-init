@@ -1,7 +1,6 @@
 <template>
-    <div class="tres-container"> 
+    <div class="tres-container">
         <TresCanvas v-bind="gl">
-
             <TresPerspectiveCamera :args="[45, 1, 0.1, 1000]" />
             <!-- <primitive :object="meshWithMaterial" /> -->
 
@@ -9,7 +8,7 @@
                 ref="boxRef"
                 :scale="1"
             >
-                <TresBoxGeometry :args="[1, 1, 1]" />
+                <TresBoxGeometry :args="[2, 2, 2]" />
                 <TresMeshNormalMaterial />
             </TresMesh>
         </TresCanvas>
@@ -18,6 +17,7 @@
 
 <script setup lang="ts">
 import { TresCanvas, useRenderLoop } from '@tresjs/core';
+import type { TresCanvasProps } from '@tresjs/core/dist/components/TresCanvas.vue.js';
 import { BasicShadowMap, SRGBColorSpace, NoToneMapping } from 'three';
 import type { RendererElement } from 'vue';
 import { shallowRef, type ShallowRef } from 'vue';
@@ -27,7 +27,7 @@ const { onLoop } = useRenderLoop()
 const boxRef: ShallowRef<RendererElement | null> = shallowRef(null)
 
 const gl = {
-    clearColor: '#181C3E',
+    clearColor: '#FFF',
     shadows: true,
     alpha: false,
     shadowMapType: BasicShadowMap,
@@ -42,15 +42,19 @@ const gl = {
     // failIfMajorPerformanceCaveat: false,
     // desynchronized: false,
     // xrCompatible: false,
-};
+} satisfies TresCanvasProps;
 
 
-onLoop(({ delta, elapsed }) => {
-  if (boxRef.value) {
-    boxRef.value.rotation.y += delta
-    boxRef.value.rotation.z = elapsed * 0.2
-  }
-})
+const startAnimateBox = function () {
+    onLoop(({ delta, elapsed }) => {
+        if (boxRef.value) {
+            boxRef.value.rotation.y += delta
+            boxRef.value.rotation.z = elapsed * 0.2
+        }
+    })
+}
+
+startAnimateBox()
 
 
 </script>
@@ -58,12 +62,13 @@ onLoop(({ delta, elapsed }) => {
 <style scoped>
 .tres-container {
     width: 100%;
-    height: 400px;
+    height: 350px;
+    /* aspect-ratio: 1; */
 }
 
 canvas {
     width: 100%;
-    height: 100%;
+    aspect-ratio: 1;
 }
 
 </style>
