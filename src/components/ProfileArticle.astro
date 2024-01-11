@@ -2,19 +2,26 @@
 import { decorateTextLinks } from '~/utils/decorateTextLinks'
 import presentation from "~/data/intro";
 import SocialArea from "~/components/SocialArea.astro";
-
 ---
 
-  <div class="flow">
-    <h1 class="fs-primary-heading fw-bold">
-      {presentation.title}
-    </h1>
+<div class="flow reversed">
+  <h1 class="fs-primary-heading fw-bold">
+    {presentation.title}
+  </h1>
 
-    <p data-width="wide"
-      set:html={decorateTextLinks(presentation.description)}
-    />
+  <p data-width="wide"
+    set:html={decorateTextLinks(presentation.description)}
+  />
 
-    <div class="">
-      <SocialArea />
-    </div>
+  <div class="">
+    <SocialArea />
   </div>
+</div>
+
+<style>
+@media (max-width: 50em) {
+  .reversed {
+      grid-row-start: 2;
+    }
+}
+</style>
