@@ -8,7 +8,7 @@
                 ref="boxRef"
                 :scale="1"
             >
-                <TresBoxGeometry :args="[2, 2, 2]" />
+                <TresBoxGeometry :args="[1.5, 1.5, 1.5]" />
                 <TresMeshNormalMaterial />
             </TresMesh>
         </TresCanvas>
