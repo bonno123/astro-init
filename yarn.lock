@@ -665,13 +665,23 @@
     "@alvarosabu/utils" "^3.1.1"
     "@vueuse/core" "^10.3.0"
 
-"@tresjs/core@^3.6.0":
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/@tresjs/core/-/core-3.6.0.tgz#7405c05d93f00425e89eca3ba4137cc12ced7285"
-  integrity sha512-eG5WFyETwSMmGt/5v+5yTk8nxU2ohyUdE2F6Dv4e7PIMXGsiNaT6ouT3jR9oK4LBU+I/1KZXb0V6HJKCS+AV/Q==
+"@tresjs/core@^3.7.0":
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/@tresjs/core/-/core-3.7.0.tgz#1b4e76f08ce0e08cd63e002aae9bd33ea7b3f354"
+  integrity sha512-Hg6VK7RQuGiXyLlbB+7FdPyS4KERxIpnU8EO/UzmN4/Bfr6I9Kuo1F0LF+5BBFyxBPqc7sD1Dcy7Epj8We9ETg==
   dependencies:
     "@alvarosabu/utils" "^3.1.1"
     "@vueuse/core" "^10.7.0"
+
+"@tweakpane/core@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@tweakpane/core/-/core-2.0.3.tgz#9ac511d1f73d3bcb61b8ddc47b09a6b2e9dfdd53"
+  integrity sha512-qHci4XA1Wngpwy8IzsLh5JEdscz8aDti/9YhyOaq01si+cgNDaZfwzTtXdn1+xTxSnCM+pW4Zb2/4eqn+K1ATw==
+
+"@tweakpane/plugin-essentials@^0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@tweakpane/plugin-essentials/-/plugin-essentials-0.2.1.tgz#9fb7981c00b67c76ac36915a32368ff48ecb2f7a"
+  integrity sha512-VbFU1/uD+CJNFQdfLXUOLjeG5HyUZH97Ox9CxmyVetg1hqjVun3C83HAGFULyhKzl8tSgii8jr304r8QpdHwzQ==
 
 "@types/babel__core@^7.20.4":
   version "7.20.5"
@@ -3555,10 +3565,10 @@ three-stdlib@^2.28.7:
     fflate "^0.6.9"
     potpack "^1.0.1"
 
-three@^0.160.0:
-  version "0.160.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.160.0.tgz#cd1e4dbd01aee0719280a9086d75545db52b7a8f"
-  integrity sha512-DLU8lc0zNIPkM7rH5/e1Ks1Z8tWCGRq6g8mPowdDJpw1CFBJMU7UoJjC6PefXW7z//SSl0b2+GCw14LB+uDhng==
+three@^0.161.0:
+  version "0.161.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.161.0.tgz#38aafaa82fe5467fde2e33933515d1b6beb17d91"
+  integrity sha512-LC28VFtjbOyEu5b93K0bNRLw1rQlMJ85lilKsYj6dgTu+7i17W+JCCEbvrpmNHF1F3NAUqDSWq50UD7w9H2xQw==
 
 through2@^0.6.3:
   version "0.6.5"
@@ -3601,6 +3611,11 @@ tunnel-agent@^0.6.0:
   integrity sha512-McnNiV1l8RYeY8tBgEpuodCC1mLUdbSN+CYBL7kJsJNInOP8UjDDEwdk6Mw60vdLLrr5NHKZhMAOSrR2NZuQ+w==
   dependencies:
     safe-buffer "^5.0.1"
+
+tweakpane@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/tweakpane/-/tweakpane-4.0.3.tgz#6bb8a24706916a33d59ab0e478c2a66a9928fc60"
+  integrity sha512-BlcWOAe8oe4c+k9pmLBARGdWB6MVZMszayekkixQXTgkxTaYoTUpHpwVEp+3HkoamZkomodpbBf0CkguIHTgLg==
 
 type-fest@^2.13.0:
   version "2.19.0"

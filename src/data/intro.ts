@@ -20,23 +20,27 @@ const aboutMe: AboutMe = {
     socials: [
         {
             label: "X",
-            link: "https://twitter.com/",
+            link: "https://twitter.com/avikbanik1",
         },
         {
             label: "Github",
-            link: "https://github.com/",
+            link: "https://github.com/bonno123",
         },
         {
             label: "Linkedin",
-            link: "https://github.com/",
+            link: "https://www.linkedin.com/in/avik-banik-38b097140/",
         },
         {
-            label: "Facebook",
-            link: "https://facebook.com",
+            label: "Codepen",
+            link: "https://codepen.io/Bonno123",
+        },
+        {
+            label: "Kaggle",
+            link: "https://www.kaggle.com/avikbanik",
         },
         {
             label: "Instagram",
-            link: "https://instagram.com",
+            link: "https://www.instagram.com/_sporadikos_/",
         },
     ],
 };

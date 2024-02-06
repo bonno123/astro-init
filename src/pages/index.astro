@@ -9,7 +9,8 @@ import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 <MainLayout title={siteInfo.description}>
 	<EvenColumnsLayout >
 		<ProfileArticle  class="reversed"/>
-		<TresExperiment client:load/>
+
+		<TresExperiment client:only/>
 	</EvenColumnsLayout>
 </MainLayout>
 

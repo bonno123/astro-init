@@ -13,15 +13,18 @@
     "@astrojs/check": "^0.3.2",
     "@astrojs/vue": "^4.0.7",
     "@tresjs/cientos": "^3.7.0",
-    "@tresjs/core": "^3.6.0",
+    "@tresjs/core": "^3.7.0",
     "astro": "^4.0.4",
     "astro-seo": "^0.8.0",
-    "three": "^0.160.0",
+    "three": "^0.161.0",
+    "tweakpane": "^4.0.3",
     "typescript": "^5.3.3",
     "vue": "^3.4.5"
   },
   "packageManager": "yarn@1.22.21",
   "devDependencies": {
+    "@tweakpane/core": "^2.0.3",
+    "@tweakpane/plugin-essentials": "^0.2.1",
     "@types/three": "^0.160.0",
     "sass": "^1.69.5"
   }
