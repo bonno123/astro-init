@@ -1,7 +1,7 @@
 ---
 import MainLayout from '~/layouts/MainLayout.astro';
 import ProfileArticle from '~/components/ProfileArticle.astro';
-import TresExperiment from '~/components/vue-components/TresExperiment.vue'; 
+import Experience from '~/components/vue-components/3DExperience.vue'; 
 import siteInfo from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 ---
@@ -10,7 +10,7 @@ import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 	<EvenColumnsLayout >
 		<ProfileArticle  class="reversed"/>
 
-		<TresExperiment client:only/>
+		<Experience client:only/>
 	</EvenColumnsLayout>
 </MainLayout>
 
