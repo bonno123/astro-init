@@ -5,12 +5,61 @@ import Experience from '~/components/vue-components/3DExperience.vue';
 import siteInfo from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 ---
-
 <MainLayout title={siteInfo.description}>
-	<EvenColumnsLayout >
+	<EvenColumnsLayout>
 		<ProfileArticle  class="reversed"/>
 
-		<Experience client:only/>
+		<astro-heart>
+			<div class="loading">Loading here ...</div>
+
+			<Experience
+				client:only
+				canvasClass='canvas-model'
+			/>
+		</astro-heart>			
 	</EvenColumnsLayout>
 </MainLayout>
 
+<script>
+let currenttime  = new Date().getTime()
+	  
+// Define the behaviour for our new type of HTML element.
+class AstroHeart extends HTMLElement {
+	constructor() {
+		super();
+
+		void import ('~/components/vue-components/3DExperience.vue').then(() => {
+			const canvasModel: HTMLElement | null =  document.querySelector(".canvas-model")
+			const loaderAnimation: HTMLElement | null =  document.querySelector(".loading")
+
+			if (canvasModel !== null ) {
+				canvasModel.style.display = "block"
+
+			} if (loaderAnimation !== null ) {
+				loaderAnimation.style.display = "none"
+			}
+
+		}).finally(() => {
+			console.log('time to render glsl: ', new Date().getTime() - currenttime, 'ms')
+		})
+	}
+}
+
+// Tell the browser to use our AstroHeart class for <astro-heart> elements.
+customElements.define('astro-heart', AstroHeart);
+
+</script>
+
+<style>
+.loading{
+	display:block;
+}
+.canvas-model {
+	display: none;
+}
+
+.loading{
+	height: 20rem;
+	outline: 1px solid grey;
+}
+</style>
