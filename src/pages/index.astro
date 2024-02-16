@@ -10,7 +10,7 @@ import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 		<ProfileArticle  class="reversed"/>
 
 		<astro-heart>
-			<div class="loading">Loading here ...</div>
+			<div class="loading">Wait ...</div>
 
 			<Experience
 				client:only
@@ -58,8 +58,31 @@ customElements.define('astro-heart', AstroHeart);
 	display: none;
 }
 
+/* decorative properties  */
 .loading{
 	height: 20rem;
 	outline: 1px solid grey;
+    border-radius: 55% / 5%;
+
+	/* adding noise */
+	background: 
+    repeating-radial-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 50% 0/2500px 2500px,
+    repeating-conic-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 60% 60%/2500px 2500px;
+	background-blend-mode: difference;
+	animation: loading-animation .2s infinite alternate;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+@keyframes loading-animation{
+  100% {background-position: 50% 0, 55% 50%}
+}
+</style>
+
+<style is:global>
+.canvas-model{
+    border-radius: 55% / 5%;
 }
 </style>

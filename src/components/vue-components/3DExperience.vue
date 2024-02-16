@@ -19,6 +19,7 @@ defineProps<{
     height: 20rem;
     /* aspect-ratio: 1; */
 }
+
 </style>
 
 
