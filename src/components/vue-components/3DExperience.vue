@@ -1,5 +1,5 @@
 <template>
-    <div class="tres-container">
+    <div class="tres-container" :class="containerClass">
         <GLBModelCanvas :class="canvasClass"/>
     </div>
 </template>
@@ -8,7 +8,9 @@
 import GLBModelCanvas from '~/components/vue-components/GLBModelCanvas.vue'
 
 defineProps<{
-    canvasClass?: string
+    canvasClass?: string;
+    containerClass?: string;
+
 }>()
 
 </script>

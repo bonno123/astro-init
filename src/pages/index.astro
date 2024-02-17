@@ -4,19 +4,25 @@ import ProfileArticle from '~/components/ProfileArticle.astro';
 import Experience from '~/components/vue-components/3DExperience.vue'; 
 import siteInfo from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+
+import VcrEffect from '~/components/common/VcrEffect.astro'
 ---
 <MainLayout title={siteInfo.description}>
 	<EvenColumnsLayout>
-		<ProfileArticle  class="reversed"/>
+		<ProfileArticle class="reversed"/>
 
-		<astro-heart>
-			<div class="loading">Wait ...</div>
+			<astro-heart style="position: relative">
+				<Experience
+					client:only
+					transition:animate="slide"
+					canvasClass='canvas-model'
+					containerClass="absolute-position"
+				/>
 
-			<Experience
-				client:only
-				canvasClass='canvas-model'
-			/>
-		</astro-heart>			
+				<div class="loading |absolute-position" >
+					<VcrEffect />
+				</div>
+			</astro-heart>
 	</EvenColumnsLayout>
 </MainLayout>
 
@@ -34,11 +40,13 @@ class AstroHeart extends HTMLElement {
 
 			if (canvasModel !== null ) {
 				canvasModel.style.display = "block"
+				// canvasModel.style.visibility = "visible"
+
 
 			} if (loaderAnimation !== null ) {
-				loaderAnimation.style.display = "none"
+				// loaderAnimation.style.visibility = "hidden"
+				loaderAnimation.style.opacity = '0.1'
 			}
-
 		}).finally(() => {
 			console.log('time to render glsl: ', new Date().getTime() - currenttime, 'ms')
 		})
@@ -51,9 +59,18 @@ customElements.define('astro-heart', AstroHeart);
 </script>
 
 <style>
-.loading{
-	display:block;
+
+.absolute-position{
+	position: absolute;
+	width: 100%;
 }
+
+.loading {
+  visibility:visible;
+  opacity: 1;
+  pointer-events: none;
+}
+
 .canvas-model {
 	display: none;
 }
@@ -64,20 +81,7 @@ customElements.define('astro-heart', AstroHeart);
 	outline: 1px solid grey;
     border-radius: 55% / 5%;
 
-	/* adding noise */
-	background: 
-    repeating-radial-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 50% 0/2500px 2500px,
-    repeating-conic-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 60% 60%/2500px 2500px;
-	background-blend-mode: difference;
-	animation: loading-animation .2s infinite alternate;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
-}
-
-@keyframes loading-animation{
-  100% {background-position: 50% 0, 55% 50%}
+	background-color: #000000;
 }
 </style>
 

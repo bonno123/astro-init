@@ -1,0 +1,105 @@
+<section class="screen">
+  <div id="wrapper">
+    <div id="white-board"></div>
+    <div id="background"></div>
+  </div>
+</section>
+
+<script>
+const main = function() {
+  const offTV = function() {
+    (document.querySelector('#wrapper') as HTMLElement).classList.add('closed');
+    (document.querySelector('#white-board') as HTMLElement).classList.add('showed')
+  }
+
+  const onTV = function() {
+    (document.querySelector('#wrapper') as HTMLElement).classList.remove('closed');
+    (document.querySelector('#white-board') as HTMLElement).classList.remove('showed')
+  }
+
+  onTV()
+
+  setTimeout(() => {
+    offTV()
+  }, 500)
+
+  setTimeout(() => {
+    onTV()
+  }, 950)
+
+};
+
+main()
+</script>
+
+<style lang="scss">
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  outline: none !important;
+}
+
+#wrapper,
+#white-board,
+#background {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  border-radius: 55% / 5%;
+}
+
+#wrapper {
+  right: 0px;
+  bottom: 0px;
+  margin: auto;
+  overflow: hidden;
+}
+#wrapper.closed {
+  -webkit-animation: close-wrapper 210ms 10ms  ease forwards;
+  animation: close-wrapper 210ms 10ms ease  forwards;
+}
+
+#white-board {
+  z-index: 200;
+  opacity: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: none;
+}
+#white-board.showed {
+  -webkit-animation: show 300ms 100ms ease-out forwards;
+ 
+  display: block;
+}
+
+#background {
+  background-size: cover;
+  background: 
+		repeating-radial-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 50% 0/2500px 2500px,
+		repeating-conic-gradient(#ffffff 0 0.0001%,#000000 0 0.0002%) 60% 60%/2500px 2500px;
+	background-blend-mode: difference;
+
+ 	animation: loading-animation .2s infinite alternate;  
+}
+
+@keyframes close-wrapper {
+  68% {
+    width: 100%;
+    height: 1px;
+  }
+  99% {
+    width: 0px;
+    height: 1px;
+  }
+  100% {
+    width: 0px;
+    height: 0px;
+  }
+}
+
+@keyframes loading-animation{
+  100% {
+	  background-position: 50% 0, 55% 50%
+  }
+}
+</style>
