@@ -1,4 +1,12 @@
-<section class="screen">
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<"section"> & {};
+
+const {  ...rest } = Astro.props
+---
+
+<section class="screen" {...rest}>
   <div id="wrapper">
     <div id="white-board"></div>
     <div id="background"></div>
@@ -47,6 +55,8 @@ main()
   top: 0px;
   left: 0px;
   border-radius: 55% / 5%;
+  box-shadow: inset 0 0 10px rgba(31, 29, 29, 0.8);
+
 }
 
 #wrapper {

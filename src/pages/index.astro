@@ -19,9 +19,14 @@ import VcrEffect from '~/components/common/VcrEffect.astro'
 					containerClass="absolute-position"
 				/>
 
-				<div class="loading |absolute-position" >
-					<VcrEffect />
+				<div class="loader">
+					<VcrEffect class="vcr-screen"/>
+
+					<div class="shadow " >
+					</div>
 				</div>
+
+				
 			</astro-heart>
 	</EvenColumnsLayout>
 </MainLayout>
@@ -36,7 +41,7 @@ class AstroHeart extends HTMLElement {
 
 		void import ('~/components/vue-components/3DExperience.vue').then(() => {
 			const canvasModel: HTMLElement | null =  document.querySelector(".canvas-model")
-			const loaderAnimation: HTMLElement | null =  document.querySelector(".loading")
+			const loaderAnimation: HTMLElement | null =  document.querySelector(".screen")
 
 			if (canvasModel !== null ) {
 				canvasModel.style.display = "block"
@@ -58,14 +63,8 @@ customElements.define('astro-heart', AstroHeart);
 
 </script>
 
-<style>
-
-.absolute-position{
-	position: absolute;
-	width: 100%;
-}
-
-.loading {
+<style lang="scss">
+.loader {
   visibility:visible;
   opacity: 1;
   pointer-events: none;
@@ -76,17 +75,61 @@ customElements.define('astro-heart', AstroHeart);
 }
 
 /* decorative properties  */
-.loading{
+.loader{
 	height: 20rem;
-	outline: 1px solid grey;
+	outline: 1px solid black;
     border-radius: 55% / 5%;
 
 	background-color: #000000;
 }
+
+.shadow {
+	height: 20rem;
+	/* background-color: hsl(271, 76%, 53%); */
+	position: relative;
+	border-radius: 55% / 5%;
+
+	box-shadow: 0px 0px 35px 5px rgba(black, 0.597) inset,
+		0px 2px 1px 1px rgba(50, 1, 100, 0.3) inset,
+		0px -2px 1px 0px rgba(11, 5, 90, 0.414) inset;
+
+	// box-shadow: -20px 0 10px -20px rgba(0,0,0,0.5) inset, 20px 0 10px -20px rgba(0,0,0,0.5) inset;
+	// box-shadow: 0 0.25em 2em -2em black, inset 0 0 0 0.5em #0496FF, inset 0 0 0 1em #D81159, inset 0 0 0 1.5em #FFBC42;
+}
+
+.shadow::before,
+.shadow::after {
+  content: '';
+  position: absolute;
+  top: 80%;
+  bottom: 0.7em;
+  z-index: -1;
+  box-shadow: 0 .5em .5em 0em rgba(#000000, .6);
+}
+
+.shadow::before {
+  left: .25em;
+  right: 50%;
+  background: pink;
+  transform: rotate(2deg);
+}
+
+.shadow::after {
+  right: .25em;
+  left: 50%;
+  background: lightblue;
+  transform: rotate(-2deg);
+}
+
 </style>
 
 <style is:global>
 .canvas-model{
     border-radius: 55% / 5%;
+}
+
+.absolute-position{
+	position: absolute;
+	width: 100%;
 }
 </style>

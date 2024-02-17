@@ -26,6 +26,7 @@
         :look-at="0" 
     /> 
 
+    <TresGridHelper />
     <Stars />
 </TresCanvas>
 </template>
@@ -71,11 +72,11 @@ const startAnimateBox = function () {
 startAnimateBox()
 </script>
 
-<style scoped>
+<style>
 
-canvas {
+/* .canvas {
     width: 100%;
     aspect-ratio: 1;
-}
+} */
 
 </style>
