@@ -33,9 +33,6 @@
     border: 0;
 }
 
-
-
-
 /* ================== */
 /* Typography classes */
 /* ================== */
@@ -48,7 +45,7 @@
     margin-inline: auto;
 }
 
-@media (max-width: 50em) {
+@media (max-width: 55em) {
     .text-center-sm-only {
         text-align: center;
     }
@@ -120,7 +117,7 @@
 /* ================== */
 
 // flow spacer
-:where(.flow > :not(:first-child)) {
+:where(.flow > :not(:first-child, :last-child)) {
     margin-top: var(--flow-spacer, 3em);
 }
 
@@ -144,6 +141,9 @@
     margin-block-end: var(--size-700);
 }
 
+.margin-top-400 {
+    margin-block-start: var(--size-400);
+}
 
 /* ================== */
 /* flexbox classes */

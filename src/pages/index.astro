@@ -1,6 +1,6 @@
 ---
 import MainLayout from '~/layouts/MainLayout.astro';
-import ProfileArticle from '~/components/ProfileArticle.astro';
+import Hero from '~/components/Hero.astro';
 import Experience from '~/components/vue-components/3DExperience.vue'; 
 import siteInfo from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
@@ -9,7 +9,7 @@ import VcrEffect from '~/components/common/VcrEffect.astro'
 ---
 <MainLayout title={siteInfo.description}>
 	<EvenColumnsLayout>
-		<ProfileArticle class="reversed"/>
+		<Hero class="reversed"/>
 
 			<astro-heart style="position: relative">
 				<Experience

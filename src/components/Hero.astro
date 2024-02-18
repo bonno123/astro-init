@@ -1,0 +1,30 @@
+---
+// import { decorateTextLinks } from '~/utils/decorateTextLinks'
+// import presentation from "~/data/intro";
+import SocialArea from "~/components/SocialArea.astro";
+---
+
+<div class="flow reversed">
+  <h1 class="fs-primary-heading fw-bold">
+    Here it’s a clean piece of paper
+  </h1>
+
+  <p data-width="wide">
+    Damn it! what next? I hardly can button it all. He-he!
+    Anyway, thanks for visiting this cybernated island.
+    Wait! in case you are a human💀, please feel free to say somethig 
+    or you can reach out to me on any of the following options!
+  </p>
+
+  <div class="margin-top-400">
+    <SocialArea />
+  </div>
+</div>
+
+<style>
+@media (max-width: 55em) {
+  .reversed {
+      grid-row-start: 2;
+    }
+}
+</style>
