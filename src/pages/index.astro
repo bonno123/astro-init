@@ -11,23 +11,18 @@ import VcrEffect from '~/components/common/VcrEffect.astro'
 	<EvenColumnsLayout>
 		<Hero class="reversed"/>
 
-			<astro-heart style="position: relative">
-				<Experience
-					client:only
-					transition:animate="slide"
-					canvasClass='canvas-model'
-					containerClass="absolute-position"
-				/>
-
-				<div class="loader">
-					<VcrEffect class="vcr-screen"/>
-
-					<div class="shadow " >
-					</div>
-				</div>
-
-				
-			</astro-heart>
+		<astro-heart style="position: relative; height: 20rem;">
+			<Experience
+				client:only
+				transition:animate="slide"
+				canvasClass="canvas-model"
+				containerClass="absolute-position"
+			/>
+			<div class="loader">
+				<VcrEffect class="vcr-screen"/>
+				<div class="shadow"/>
+			</div>
+		</astro-heart>
 	</EvenColumnsLayout>
 </MainLayout>
 
