@@ -8,7 +8,7 @@ interface Props {
   twitter?: SeoProps['twitter'];
 }
 
-const baseTitle = siteInfo.title;
+const baseTitle = [Astro.props.title, siteInfo.name].filter(Boolean).join(" | ");
 const image = siteInfo.image;
 const canonicalURL = new URL(Astro.request.url, Astro.site);
 const locale = "en";

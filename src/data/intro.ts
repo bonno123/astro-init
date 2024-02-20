@@ -13,10 +13,22 @@ type AboutMe = {
   
 const aboutMe: AboutMe = {
     mail: "banikavik@gmail.com",
-    title: "Hi, I’m Avik",
+    title: "Hello, I’m Avik",
     // profile: "/profile.webp",
-    description:
-        "I'm a *frontend developer* with over *3 years* of experience. I am currently working with *Vue.js Quasar and Typescript*. Outside of work I explore things arbitrarily.",
+    description: `
+        I am a software engineer veteran of 3+ years.
+        I have a passion for building web applications.
+        I love JavaScript.
+        <br>
+        I have experience in building web applications using JS ecosystem like Vue, Quasar, Node.js. 
+        And also with using Python and its frameworks like FastAPI.
+        I have also worked with databases like Oracle, postgreSQL with Prisma ORM.
+        <br>
+        I am currently working as a software engineer at a startup called RentApp. 
+        and also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
+        I am always open to new opportunities and challenges.
+        Feel free to contact me at contact@avikbanik.com
+    `,
     socials: [
         {
             label: "X",

@@ -48,7 +48,7 @@ class AstroHeart extends HTMLElement {
 				loaderAnimation.style.opacity = '0.1'
 			}
 		}).finally(() => {
-			console.log('time to render glsl: ', new Date().getTime() - currenttime, 'ms')
+			console.info('time to render glsl: ', new Date().getTime() - currenttime, 'ms')
 		})
 	}
 }

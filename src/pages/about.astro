@@ -1,0 +1,14 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+
+import siteInfo from '~/data/site-info';
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import ProfileArticle from '~/components/ProfileArticle.astro';
+---
+
+<MainLayout title={siteInfo.description}>
+	<EvenColumnsLayout>
+		<ProfileArticle class="reversed"/>
+		
+	</EvenColumnsLayout>
+</MainLayout>

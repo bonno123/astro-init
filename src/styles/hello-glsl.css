@@ -1,0 +1,15 @@
+canvas {
+    display : block;
+    min-width : 400px;
+    height : 210px;
+    /* margin : auto; */
+    padding : 0;
+    border : none;
+    background-color : black;
+}
+button {
+    display : block;
+    font-size : inherit;
+    /* margin : auto; */
+    padding : 0.6em;
+}

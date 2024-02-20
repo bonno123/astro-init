@@ -1,8 +1,10 @@
 ---
 import BaseHead from '~/components/common/BaseHead.astro';
+import type { AstroSeoProps } from '~/types';
 
 interface Props {
 	title: string;
+    extendedTags?: AstroSeoProps;
 }
 
 const { title: layoutTitle } = Astro.props;
@@ -10,7 +12,10 @@ const { title: layoutTitle } = Astro.props;
 
 <!doctype html>
 <html lang="en">
-	<BaseHead title={layoutTitle} />
+	<BaseHead 
+		title={layoutTitle}
+		extendedTags={Astro.props.extendedTags}
+	/>
 
 	<body>
 		<main>
@@ -33,6 +38,6 @@ p:not([class]) {
 }
 
 p[data-width="wide"] {
-	max-width: 42ch;
+	max-width: 50ch;
 }
 </style>

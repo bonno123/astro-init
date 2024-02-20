@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "check": "astro check",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -16,6 +17,7 @@
     "@tresjs/core": "^3.7.0",
     "astro": "^4.0.4",
     "astro-seo": "^0.8.0",
+    "html-escaper": "^3.0.3",
     "three": "^0.161.0",
     "tweakpane": "^4.0.3",
     "typescript": "^5.3.3",
@@ -25,6 +27,7 @@
   "devDependencies": {
     "@tweakpane/core": "^2.0.3",
     "@tweakpane/plugin-essentials": "^0.2.1",
+    "@types/html-escaper": "^3.0.2",
     "@types/three": "^0.161.2",
     "sass": "^1.71.0"
   }
