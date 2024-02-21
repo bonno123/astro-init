@@ -1,20 +1,22 @@
 ---
 import BaseHead from '~/components/common/BaseHead.astro';
-import type { AstroSeoProps } from '~/types';
 
 interface Props {
 	title: string;
-    extendedTags?: AstroSeoProps;
+	/**
+	 * to be concantinated with the default meta description
+	 */
+	metaDescription?: string;
 }
 
-const { title: layoutTitle } = Astro.props;
+const { title: layoutTitle, metaDescription } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
-	<BaseHead 
+	<BaseHead
 		title={layoutTitle}
-		extendedTags={Astro.props.extendedTags}
+		metaDescription={metaDescription}
 	/>
 
 	<body>

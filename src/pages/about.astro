@@ -1,14 +1,24 @@
 ---
 import MainLayout from '~/layouts/MainLayout.astro';
 
-import siteInfo from '~/data/site-info';
+import { aboutMeWidget } from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 import ProfileArticle from '~/components/ProfileArticle.astro';
+import SocialArea from '~/components/SocialArea.astro';
 ---
 
-<MainLayout title={siteInfo.description}>
+<MainLayout title={aboutMeWidget.title}>
 	<EvenColumnsLayout>
-		<ProfileArticle class="reversed"/>
+		<div class="">
+			<ProfileArticle
+				title={aboutMeWidget.aboutMe.title}
+				description={aboutMeWidget.aboutMe.description}
+			/>
+
+			<div class="margin-top-400">
+				<SocialArea socials={aboutMeWidget.socialLinks} />
+			  </div>
+		</div>
 		
 	</EvenColumnsLayout>
 </MainLayout>

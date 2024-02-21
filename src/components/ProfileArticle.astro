@@ -1,15 +1,25 @@
 ---
 import { decorateTextLinks } from '~/utils/decorateTextLinks'
-import presentation from "~/data/intro";
+
+interface Props  {
+  title: string,
+  description: string,
+};
+
+const {
+  title,
+  description,
+} = Astro.props;
+
 ---
 
 <div class="flow reversed">
   <h1 class="fs-primary-heading fw-bold">
-    {presentation.title}
+    {title}
   </h1>
 
   <p data-width="wide"
-    set:html={decorateTextLinks(presentation.description)}
+    set:html={decorateTextLinks(description)}
   />
 
   <div class="">

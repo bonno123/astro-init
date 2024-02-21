@@ -2,14 +2,20 @@
 import MainLayout from '~/layouts/MainLayout.astro';
 import Hero from '~/components/Hero.astro';
 import Experience from '~/components/vue-components/3DExperience.vue'; 
-import siteInfo from '~/data/site-info';
+import { heroWidget } from '~/data/site-info';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 
 import VcrEffect from '~/components/common/VcrEffect.astro'
 ---
-<MainLayout title={siteInfo.description}>
+<MainLayout 
+	title={heroWidget.title}
+	metaDescription={heroWidget.description}
+>
 	<EvenColumnsLayout>
-		<Hero class="reversed"/>
+		<Hero
+			title={heroWidget.heroContent.title} 
+			description={heroWidget.heroContent.description}
+		/>
 
 		<astro-heart style="position: relative; height: 20rem;">
 			<Experience
@@ -18,6 +24,7 @@ import VcrEffect from '~/components/common/VcrEffect.astro'
 				canvasClass="canvas-model"
 				containerClass="absolute-position"
 			/>
+
 			<div class="loader">
 				<VcrEffect class="vcr-screen"/>
 				<div class="shadow"/>

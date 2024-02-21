@@ -1,11 +1,23 @@
 ---
+// import type { SocialLink } from "~/data/site-info";
 import Link from "./common/Link.astro";
-import intro from "~/data/intro";
+
+type SocialLink = {
+    label: string;
+    link: string;
+};
+interface Props  {
+  socials: SocialLink[]
+};
+
+const {
+  socials,
+} = Astro.props;
 ---
 
 <ul role="list" class="flex">
   {
-    intro.socials.map((social, _index) => (
+    socials.map((social, _index) => (
       <>
         <li>
           <Link href={social.link} label={social.label} />

@@ -1,20 +1,20 @@
 ---
 import { SEO, type Props as SeoProps } from "astro-seo";
-import siteInfo from "~/data/site-info";
+import { siteInfo, siteName } from "~/data/site-info";
 import { formatCanonicalURL } from "~/utils/formatCanonicalUrl";
 
-interface Props {
-	title: string;
-  twitter?: SeoProps['twitter'];
+interface Props extends SeoProps {
+  title?: string;
+  metaDescription?: string;
 }
 
-const baseTitle = [Astro.props.title, siteInfo.name].filter(Boolean).join(" | ");
+const baseTitle = Astro.props.title || siteName;
 const image = siteInfo.image;
 const canonicalURL = new URL(Astro.request.url, Astro.site);
 const locale = "en";
 
 //TODO: add actual title :-> Supposed to be a Very Descriptive Title
-const openGraphDescriptiveTitle = [Astro.props.title, siteInfo.name].filter(Boolean).join(" | ");
+const openGraphDescriptiveTitle = [Astro.props.title, siteName].filter(Boolean).join(" | ");
 
 const openGraph ={
   basic: {
@@ -63,7 +63,8 @@ const  ExtendTags = {
 
 <SEO
   title={baseTitle}
-  description={siteInfo.description}
+  titleTemplate={siteInfo.title}
+  description={`${Astro.props.metaDescription}, ${siteInfo.description}`}
   canonical={canonicalURL}
   openGraph={openGraph}
   twitter={twitter}

@@ -1,31 +1,25 @@
 ---
 import { decorateTextLinks } from '~/utils/decorateTextLinks';
-import SocialArea from "~/components/SocialArea.astro";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+
 ---
 
 <div class="flow reversed">
   <h1 class="fs-primary-heading fw-bold">
-    Here’s a clean piece of paper
+    {title}
   </h1>
 
   <p data-width="wide"
-    set:html={decorateTextLinks(`
-      What next!🤔 I hardly can button it all!
-      Anyway, thanks for giving a damn to visit *this* island! 🏝️
-      <br>
-
-      This palce belongs to *me* and I am eager to *experiment* many things here.
-      On the way, you can *subscribe* to my newsletter to get updates on what I am doing.
-
-      <br>
-      As we are all human 💀, you can *say* something
-      or reach out to me on any of the following options!`
-    )}
+    set:html={decorateTextLinks(description)}
   />
 
-  <div class="margin-top-400">
-    <SocialArea />
-  </div>
+  <div class=""></div>
 </div>
 
 <style>

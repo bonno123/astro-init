@@ -8,19 +8,10 @@ import Link from '~/components/common/Link.astro';
 const vertScript = `<script type="x-shader/x-vertex" id="vertex-shader">${vertexShader} </script>`;
 const fragScript = `<script type="x-shader/x-fragment" id="fragment-shader"> ${fragmentShader} </script>`;
 
-
 ---
 <MainLayout
 	title={`playground`}
-	extendedTags={{
-		additionalLinkTags: [
-			{
-				href: "src/styles/hello-glsl.css",
-				rel: "stylesheet",
-				type: "text/css"
-			}
-		]
-	}}
+	metaDescription={`show case of glsl canvas and how to use it in astro`}
 >
 	<EvenColumnsLayout>
 		<div class="">
@@ -56,4 +47,6 @@ createHelloOnClient()
 </script>
 
 
-
+<style>
+	@import url('src/styles/glsl-canvas.scss');
+</style>
