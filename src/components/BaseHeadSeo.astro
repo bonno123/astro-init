@@ -1,6 +1,6 @@
 ---
 import { SEO, type Props as SeoProps } from "astro-seo";
-import { siteInfo, siteName } from "~/data/site-info";
+import { siteInfo } from "~/data/site-info";
 import { formatCanonicalURL } from "~/utils/formatCanonicalUrl";
 
 interface Props extends SeoProps {
@@ -8,13 +8,16 @@ interface Props extends SeoProps {
   metaDescription?: string;
 }
 
-const baseTitle = Astro.props.title || siteName;
+const baseTitle = Astro.props.title || import.meta.env.PUBLIC_SITE_NAME;
 const image = siteInfo.image;
 const canonicalURL = new URL(Astro.request.url, Astro.site);
 const locale = "en";
 
 //TODO: add actual title :-> Supposed to be a Very Descriptive Title
-const openGraphDescriptiveTitle = [Astro.props.title, siteName].filter(Boolean).join(" | ");
+const openGraphDescriptiveTitle = [
+  Astro.props.title, 
+  import.meta.env.PUBLIC_SITE_NAME
+].filter(Boolean).join(" | ");
 
 const openGraph ={
   basic: {

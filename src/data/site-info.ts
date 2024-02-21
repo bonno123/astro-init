@@ -21,10 +21,9 @@ export type HeroWidget = {
 	description: string
 	socialLinks: SocialLink[]
 }
-export const siteName = "Avik Banik";
 
 export const siteInfo: SiteInfo = {
-	title: `%s | ${siteName}`,
+	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
 	description: `3D web design, 
 		built with Astro TypeScript, TresJS, super fast static sites; 
 		loading animations, while loading the client-side JavaScript.
@@ -41,15 +40,16 @@ export const heroWidget = {
 	description: "3D landing page with minimalistic design",
 	heroContent: {
 		title: "Here’s a clean piece of paper",
-		description: `Wait what !? 🤔 I guess you are early here. I hardly can button it all! 
+		description: `Wait what !? 🤔 I guess you are early here. I hardly can button it all!
 		<br>
-		Anyway, thanks for giving a damn to *this* island! 🏝️
+		By the way, your visit to *this* island 🏝️ is much appreciated.
 		<br>
-		Here, I will be sharing my design experiments.	
+		Here, I will be sharing my design *experiments*.
 		If you are interested you can *subscribe* to my newsletter to get updates on what I am doing.
-  
+
 		<br>
-		As we are all human 💀, you can also share your thoughts *here* with *me*.
+		<br>
+		And if you are a human💀 and have something in mind for this, can *share* it with *me*.
 		`,
 	},
 	socialLinks: [
@@ -97,13 +97,15 @@ export const aboutMeWidget = {
 			I love JavaScript.
 			<br>
 			I have experience in building web applications using JS ecosystem like Vue, Quasar, Node.js. 
-			And also with using Python and its frameworks like FastAPI.
+			And also with Python's FastAPI.
 			I have also worked with databases like Oracle, postgreSQL with Prisma ORM.
 			<br>
 			<br>
-			I am currently working as a software engineer at a startup called RentApp. 
-			and also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
+			I am currently working as a software engineer at a startup called RentApp.
+			And also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
 			I am always open to new opportunities and challenges.
+			<br>
+			<br>
 			Feel free to contact me at <strong class="fw-bold">${import.meta.env.PUBLIC_CONTACT_EMAIL}</strong>
 			or reach out to me on any of the following options!
     	`,

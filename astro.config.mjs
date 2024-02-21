@@ -6,7 +6,7 @@ export default defineConfig({
   site: 'https://avikbanik.com',
   redirects: {
     '/this': '/',
-    '/experiment': '/dev',
+    '/experiments': '/dev',
     '/me/': '/about',
   },
   integrations: [

@@ -40,8 +40,8 @@ export default function createGLSL() {
 			return null
 		}
 
-		canvas.width = canvas.clientWidth;
-		canvas.height = canvas.clientHeight;
+		// canvas.width = canvas.clientWidth;
+		// canvas.height = canvas.clientHeight;
 
 		var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
 
