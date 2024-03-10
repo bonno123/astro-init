@@ -1,3 +1,5 @@
+import { getRenderingContext } from "~/glsl/utils/getWebGLRenderingContext";
+
 export default function createGLSL() {
 	window.addEventListener("load", setupWebGL, false);
 
@@ -25,40 +27,13 @@ export default function createGLSL() {
 
 	function cleanup() {
 		(gl as WebGLRenderingContext).useProgram(null);
-		if (buffer)
-		(gl as WebGLRenderingContext).deleteBuffer(buffer);
-		if (program) 
-		(gl as WebGLRenderingContext).deleteProgram(program);
-	}
 
-	function getRenderingContext(): WebGLRenderingContext | null {
-		var canvas = document.querySelector("canvas");
-
-		if(!canvas) {
-			console.log('no script found with id=vertex-shader');
-
-			return null
+		if (buffer){
+			(gl as WebGLRenderingContext).deleteBuffer(buffer);
 		}
-
-		// canvas.width = canvas.clientWidth;
-		// canvas.height = canvas.clientHeight;
-
-		var gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
-
-		if (!gl) {
-			var paragraph = document.querySelector("p"); if(!paragraph) return null
-			
-			paragraph.innerHTML = "Failed to get WebGL context."
-			+ "Your browser or device may not support WebGL.";
-
-			return null;
+		if (program) {
+			(gl as WebGLRenderingContext).deleteProgram(program);
 		}
-
-		gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-		gl.clearColor(0.0, 0.0, 0.0, 1.0);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-
-		return gl;
 	}
 
 	function moveBox(evt: MouseEvent) {
@@ -77,9 +52,12 @@ export default function createGLSL() {
 	}
 
 	function setupWebGL (this: Window, evt: Event) {
+		const canvasId = "mdn-hello-glsl";
+		const canvasElem: HTMLCanvasElement | null = document.querySelector("#" + canvasId) ;
+
 		window.removeEventListener(evt.type, setupWebGL, false);
 
-		if (!(gl = getRenderingContext())) return;
+		if ( !(gl = getRenderingContext(canvasElem )) ) return;
 
 		// creating vertex shader
 		var vertexElem = document.querySelector("#vertex-shader");
@@ -143,7 +121,8 @@ export default function createGLSL() {
 		gl.useProgram(program);
 		gl.drawArrays(gl.POINTS, 0, 1);
 
-		var canvasElem = document.querySelector("canvas")!
+		// var canvasElem = document.querySelector("canvas")!
+		if(!canvasElem) return
 		
 		canvasElem.addEventListener( "click", moveBox, false );
 	}
@@ -151,3 +130,4 @@ export default function createGLSL() {
 	window.addEventListener("beforeunload", cleanup, true);
 
 }
+

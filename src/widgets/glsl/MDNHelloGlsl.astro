@@ -1,0 +1,48 @@
+---
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import vertexShader from "~/glsl/mdn-hello-glsl/hello.vert?raw";
+import fragmentShader from "~/glsl/mdn-hello-glsl/hello.frag?raw";
+import Link from '~/components/common/Link.astro';
+
+const vertScript = `<script type="x-shader/x-vertex" id="vertex-shader">${vertexShader} </script>`;
+const fragScript = `<script type="x-shader/x-fragment" id="fragment-shader"> ${fragmentShader} </script>`;
+
+---
+
+<EvenColumnsLayout>
+    <div class="">
+        <canvas id="mdn-hello-glsl">Your browser does not seem to support HTML5 canvas.</canvas>
+    </div>
+
+    <div class="flow">
+        <div class="">
+            <h1 class="fs-secondary-heading fw-bold">Hello GLSL!</h1>
+            <p data-width="wide" class="margin-top-400">Click on the canvas to see the magic happen!</p>
+        </div>
+        
+        @following  
+        <Link
+            label=' hello world program in glsl' 
+            href={`https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/By_example/Hello_vertex_attributes`} 
+        />
+        from MDN
+        
+        <div class=""></div>
+    </div>
+
+</EvenColumnsLayout>
+
+<Fragment set:html={ vertScript } />
+<Fragment set:html={ fragScript } />
+
+
+<script>
+    import  createHelloOnClient  from "~/glsl/mdn-hello-glsl/createHelloOnClient";
+    
+    createHelloOnClient()
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>

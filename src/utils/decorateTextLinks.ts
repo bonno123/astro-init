@@ -3,7 +3,7 @@ export function decorateTextLinks(
 ) {
   return str.replace(
     /\*{1,2}(.*?)\*{1,2}/g,
-    `<a 
+    `<a
       class="fw-medium"
       href="$1" 
     >

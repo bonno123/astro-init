@@ -1,0 +1,50 @@
+---
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import fragmentShader from "~/glsl/bos-hello-world/hello.frag?raw";
+import Link from '~/components/common/Link.astro';
+---
+
+<EvenColumnsLayout>
+    <div class="">
+        <canvas
+            class="glslCanvas"
+            data-fragment={fragmentShader}
+            width="500" 
+            height="300"
+        >
+            Your browser does not support the HTML5 canvas element.
+        </canvas>    
+    </div>
+
+    <div class="flow">
+        <div class="">
+            <h1 class="fs-secondary-heading fw-bold">Hello world!</h1>
+            <p data-width="wide" class="margin-top-400">
+                this is a simple example of a fragment shader that renders a gradient.
+            </p>
+        </div>
+
+        <p>
+            @following
+            <Link
+                label=' example 02'
+                href={`https://thebookofshaders.com/02/`}
+            />
+            from The Book of Shaders
+        </p>
+        
+        <div class=""></div>
+    </div>
+
+</EvenColumnsLayout>
+
+<script>
+// @ts-nocheck
+import GlslCanvas from 'glslCanvas';
+
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>

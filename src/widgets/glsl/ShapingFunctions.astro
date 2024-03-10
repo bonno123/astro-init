@@ -1,0 +1,50 @@
+---
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import LineFragment from "~/glsl/shaping-functions/line.frag?raw";
+import Link from '~/components/common/Link.astro';
+---
+
+<EvenColumnsLayout>
+    <div class="">
+        <canvas
+            class="glslCanvas"
+            data-fragment={LineFragment}
+            width="500" 
+            height="300"
+        >
+            Your browser does not support the HTML5 canvas element.
+        </canvas>    
+    </div>
+
+    <div class="flow">
+        <div class="">
+            <h1 class="fs-secondary-heading fw-bold">Draw a line!</h1>
+            <p data-width="wide" class="margin-top-400">
+                This example shows how to draw a line on the Y axis using a value between 0.0 - 1.0.
+            </p>
+        </div>
+
+        <p>
+            @following
+            <Link
+                label=' example 05'
+                href={`https://thebookofshaders.com/05/`}
+            />
+            from The Book of Shaders
+        </p>
+        
+        <div class=""></div>
+    </div>
+
+</EvenColumnsLayout>
+
+<script>
+// @ts-nocheck
+import GlslCanvas from 'glslCanvas';
+
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>
