@@ -6,8 +6,6 @@ export default defineConfig({
   site: 'https://avikbanik.com',
   redirects: {
     '/this': '/',
-    '/experiments': '/dev',
-    '/me/': '/about',
   },
   integrations: [
     vue({

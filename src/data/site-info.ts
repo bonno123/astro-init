@@ -40,16 +40,17 @@ export const heroWidget = {
 	description: "3D landing page with minimalistic design",
 	heroContent: {
 		title: "Here’s a clean piece of paper",
-		description: `Wait what !? 🤔 I guess you are early here. I hardly can button it all!
+		description: `I guess you are a bit early here. 🤔 I hardly can button it all!
 		<br>
 		By the way, your visit to *this* island 🏝️ is much appreciated.
 		<br>
-		Here, I will be sharing my design *experiments*.
-		If you are interested you can *subscribe* to my newsletter to get updates on what I am doing.
+		<br>
+		Here, I have planned to share my GLSL design *playground*.
+		If you are interested, 💀 you can *subscribe* to my newsletter to get updates on what I am doing.
 
 		<br>
 		<br>
-		And if you are a human💀 and have something in mind for this, can *share* it with *me*.
+		Meanwhile, you can check out my social profiles or know *about* me.
 		`,
 	},
 	socialLinks: [
@@ -92,18 +93,18 @@ export const aboutMeWidget = {
 	aboutMe: {
 		title: "Hello, I’m Avik",
 		description: `
-			I am a software engineer veteran of 3+ years.
-			I have a passion for building web applications.
-			I love JavaScript.
+			I am a software engineer veteran of 3+ years with the passion for web development.
 			<br>
-			I have experience in building web applications using JS ecosystem like Vue, Quasar, Node.js. 
-			And also with Python's FastAPI.
-			I have also worked with databases like Oracle, postgreSQL with Prisma ORM.
+			<br>
+			My expertise lies in building web applications front-end part. Worked mostly 
+			with Vue.js and its ecosystem like Quasar.
+			<br>
+			I also have worked for backend a bit with Node.js and FastAPI, and databases like Oracle, postgreSQL with Prisma ORM.
 			<br>
 			<br>
 			I am currently working as a software engineer at a startup called RentApp.
 			And also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
-			I am always open to new opportunities and challenges.
+			I am always open to new opportunities.
 			<br>
 			<br>
 			Feel free to contact me at <strong class="fw-bold">${import.meta.env.PUBLIC_CONTACT_EMAIL}</strong>
