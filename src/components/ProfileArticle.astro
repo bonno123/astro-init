@@ -1,9 +1,8 @@
 ---
-import { decorateTextLinks } from '~/utils/decorateTextLinks'
-
+import { decorateTextLinks } from '~/utils/decorateTextLinks';
 interface Props  {
   title: string,
-  description: string,
+  description?: string,
 };
 
 const {
@@ -18,13 +17,20 @@ const {
     {title}
   </h1>
 
-  <p data-width="wide"
-    set:html={decorateTextLinks(description)}
-  />
+  {!!description && (
+    <p data-width="wide"
+      set:html={decorateTextLinks(description)}
+    /> )
+  } 
+ 
+    <div class="">
+      <slot />
+    </div>
 
-  <div class="">
-  </div>
+  <div class=""> </div>
 </div>
+
+
 
 <style>
 @media (max-width: 55em) {
