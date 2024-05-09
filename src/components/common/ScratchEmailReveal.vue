@@ -113,7 +113,8 @@ let positionX: number;
 let positionY: number;
 let clearDetectionTimeout: number | null = null;
 
-const hiddenTextCharacters = ref(new Array(import.meta.env.PUBLIC_CONTACT_EMAIL.length).fill('•').join(''));
+// randomize an string
+const hiddenTextCharacters = ref(import.meta.env.PUBLIC_CONTACT_EMAIL.split('').sort(() => Math.random() - 0.5).join(''));
 
 let devicePixelRatio: number;
 let canvasWidth = 0;
