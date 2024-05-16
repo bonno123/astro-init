@@ -1,5 +1,6 @@
 ---
 import { decorateTextLinks } from '~/utils/decorateTextLinks';
+import Chip from '~/components/Chip.astro';
 interface Props  {
   title: string,
   description?: string,
@@ -13,9 +14,18 @@ const {
 ---
 
 <div class="flow reversed">
-  <h1 class="fs-primary-heading fw-bold">
-    {title}
-  </h1>
+
+  <div class="">
+    <div class="margin-bottom-400">
+      <Chip text="Resume" isClickable href='resume'/>
+    </div>
+
+    <h1 class="fs-primary-heading fw-bold">
+      {title}
+    </h1>
+  </div>
+
+
 
   {!!description && (
     <p data-width="wide"

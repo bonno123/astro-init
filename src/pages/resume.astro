@@ -1,0 +1,502 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+import { aboutMeWidget } from '~/data/site-info';
+import CVLayout from '~/layouts/CVLayout.astro';
+
+---
+<MainLayout title={aboutMeWidget.title}>
+	<CVLayout>
+        <article class="cv-article |  padding-700">
+            <div class="cv-article__header | flex">
+                <div class="article-image-container">
+                    <img
+                        src="https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no" 
+                        referrerpolicy="no-referrer" 
+                        alt="Picture of author"
+                    />
+                </div>
+
+                <div class="article-header-info | padding-block-400 text-right">
+                    <h2 class="article-title | fs-secondary-heading">Article Title</h2>
+
+                    <div class="article-meta">
+                        <p class="article-author">Author Name</p>
+                        <p class="article-date">Published on 12th June 2021</p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="margin-top-400"/>
+
+            <div class="content-container | flex">
+                <div class="container-aside">
+                    <!-- <h3 class="text-accent fs-600">Contact</h3> -->
+
+                    <ul class="list-unstyled padding-400">
+                        <li>
+                            <a>
+                                <!-- <i class="fas fa-mobile-alt fa-fw mr-2" data-fa-transform="grow-6"></i> -->
+                                (+91) 1234567890
+                            </a>
+                        </li>
+
+                        <li class="mb-2">
+                            <a href="mailto:contact@avikbanik.com">
+                                <!-- <i class="far fa-envelope fa-fw mr-2" data-fa-transform="grow-3"></i> -->
+                                contact@avikbanik.com
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="https://avikbanik.com">
+                                City: 123456
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="container-main | padding-400">
+                    <h3 class="text-accent fs-700 margin-bottom-400">About me</h3>
+                    <p class="article-content">
+                        Here goes some introduction about me. It could be a brief description of my career goals, skills, and achievements. I am a passionate web developer with a strong foundation in front-end technologies. I have experience in building responsive web applications using modern web technologies. I am a quick learner and always eager to learn new technologies.
+                    </p>
+                </div>
+            </div>
+
+            <button class="read-more-btn" id="download-button">
+                <!-- create a svg icon showing pdf icon -->
+                <svg
+                    class="chip__img"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="feather feather-file-text"
+                >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 8 9 10"></polyline>
+                </svg>
+
+                <i class="chip__label">
+                    Download demo PDF
+                </i>
+            </button>
+
+        </article>
+    </CVLayout>
+</MainLayout>
+
+<script>
+
+import { jsPDF } from "jspdf";
+
+let pdfDocument: jsPDF | null = null;
+
+const resumeData = {
+    logo: {
+        url: "https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no",
+        width: 40,
+        height: 40,
+        margin: {
+            top: 0,
+            left: 0
+        }
+    },
+    personalDetails: {
+        fullName: "Avik Banik",
+        role: "Frontend Web developer",
+        contact: "(+91)1234567890",
+        email: "example@domain.com",
+        portfolio: "avikbanik.com",
+        city: "City",
+        zipCode: "123456",
+        Linkedin: "linkedin.com",
+        github: "github.com",
+        otherLink: "other.com"
+    },
+    summary: "Here goes some introduction about me. It could be a brief description of my career goals, skills, and achievements. I am a passionate web developer with a strong foundation in front-end technologies. I have experience in building responsive web applications using modern web technologies. I am a quick learner and always eager to learn new technologies.",
+    skills: ["HTML", "CSS", "JavaScript", "Vue"],
+    education: {
+        InstituteName: "Institute",
+        degree: "B.Tech",
+        branch: "CSE",
+        percentage: "80%",
+        completionYear: "2021"
+    },
+    experience: {
+        companyName: "Company",
+        role: "Web developer",
+        responsibility: "Responsibility"
+    },
+    project: {
+        projectName: "Project",
+        projectDetails: "Project details",
+        projectUrl: "Project URL"
+    },
+    certificates: ["Certificate 1", "Certificate 2"],
+    achivement: ["Achivement 1", "Achivement 2"]
+};
+
+function isDataValid(data: any) {
+    for (const section in data) {
+        console.log(data.hasOwnProperty(section), section);
+        if (data.hasOwnProperty(section)) {
+            if (typeof data[section] === 'object') {
+                for (const field in data[section]) {
+                    if (data[section].hasOwnProperty(field) && !data[section][field]) {
+                        return false; // If any field is empty or null, return false
+                    }
+                }
+            } else if (!data[section]) {
+                return false; // If any section is empty or null, return false
+            }
+        }
+    }
+    return true; // If all fields have values, return true
+}
+
+const docConfig = {
+    orientation: "p",
+    unit: "mm",
+    // format: [220, 300],
+
+    headerFontSize: 20,
+    labelFontSize: 12,
+    fieldFontSize: 10,
+    subFieldFontSize: 8,
+
+    lineHeight: 6,
+    subLineHeight: 4,
+
+    headerFont: "Times New Roman",
+    headerFontStyle: "bold",
+    fieldFont: "Times New Roman",
+
+} as const;
+
+
+
+function configureDocument(doc: jsPDF) {
+    var docWidth = doc.internal.pageSize.width;
+    var docHeight = doc.internal.pageSize.height;
+
+    var docDivision = docWidth / 3;
+
+    var margin = 10;
+    var maincontentStartPoint = docDivision;
+
+    console.log({docWidth, docHeight});
+
+    var colorBlack = "#000000";
+    var colorGray = "#4d4e53";
+    var colorAccent = "#5d0288";
+
+    //starting at 15mm
+    var currentHeight = 15;
+
+    // header area
+    doc.setFontSize(docConfig.headerFontSize);
+    doc.setTextColor(colorBlack);
+    doc.text(resumeData.personalDetails.fullName, docWidth - 10, currentHeight, { align: "right" });
+    // doc.text(docWidth - 10, currentHeight, resumeData.personalDetails.fullName, "right");
+    // doc.setFontSize(docConfig.fieldFontSize);
+
+
+    // add rect for logo
+    doc.setDrawColor(colorAccent);
+    doc.setFillColor(colorAccent);
+    doc.rect(10 + 1, currentHeight - 5 + 1, 40, 40, "F");
+
+    // logo area
+    doc.addImage(
+        resumeData.logo.url,
+        10 + resumeData.logo.margin.left,
+        currentHeight - 5 + resumeData.logo.margin.top,
+        resumeData.logo.width,
+        resumeData.logo.height
+    );
+
+
+    // header sub area
+    doc.setTextColor(colorGray);
+
+    currentHeight += (docConfig.lineHeight * 1.5);
+    doc.setFontSize(docConfig.fieldFontSize);
+
+    doc.text(
+        resumeData.personalDetails.role, 
+        docWidth - 10, 
+        currentHeight, 
+        { align: "right" }
+    );
+
+    currentHeight += docConfig.subLineHeight;
+    doc.text(resumeData.personalDetails.contact, docWidth - 10, currentHeight, { align: "right" });
+
+    currentHeight += docConfig.subLineHeight;
+    doc.text(resumeData.personalDetails.email, docWidth - 10, currentHeight, { align: "right" });
+
+    currentHeight += docConfig.subLineHeight;
+    doc.text(resumeData.personalDetails.city + " " + resumeData.personalDetails.zipCode, docWidth - 10, currentHeight, { align: "right" });
+
+    currentHeight += docConfig.lineHeight;
+    doc.text(resumeData.personalDetails.portfolio, docWidth - 10, currentHeight, { align: "right" });
+
+
+    // line
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(colorGray);
+    doc.line(10, currentHeight + docConfig.labelFontSize, docWidth - 10, currentHeight + docConfig.labelFontSize);
+
+    // content area
+
+
+    currentHeight += (docConfig.labelFontSize * 1.5);
+
+
+    // content headers
+    doc.setFontSize(docConfig.labelFontSize);
+    doc.setTextColor(colorBlack);
+
+    doc.setFontSize(docConfig.labelFontSize);
+    doc.setTextColor(colorAccent);
+
+    doc.text("Contact", 10, currentHeight + 2);
+    doc.text("About me" ,maincontentStartPoint, currentHeight + 2);
+    // doc.text("Experience",maincontentStartPoint, currentHeight + 2);
+    // doc.text("expertise",maincontentStartPoint, currentHeight + 2);
+
+
+
+    // content fields
+    // font 
+    doc.setTextColor(colorGray);
+    doc.setFontSize(docConfig.fieldFontSize);
+
+    // contact
+    doc.text(resumeData.personalDetails.contact, 12, currentHeight + 10);
+    doc.text(resumeData.personalDetails.email, 12, currentHeight + 18);
+    doc.text(resumeData.personalDetails.city + " " + resumeData.personalDetails.zipCode, 12, currentHeight + 26);
+
+
+    // about me
+    doc.text(resumeData.summary, maincontentStartPoint, currentHeight + 10, { maxWidth: 80, align: "justify" });
+
+
+    // TODO: remove this
+    doc.setTextColor(230);
+    doc.text("10 degrees rotated", maincontentStartPoint, 140, undefined, 10);
+
+
+
+    // ================================clean the garbages==================================================
+    // doc.setFontSize(16);
+    // doc.setTextColor(32, 121, 199);
+
+    // doc.text("Education",100,40);
+    // doc.text("Experience",100,82);
+    // doc.text("Project",100,146);
+    // doc.text("Certificates",100,210);
+    // doc.text("Achivement",100,252);
+
+    // doc.text("Summary",10,40);
+    // doc.text("Contact",10,90);
+    // doc.text("Social link",10,124);
+    // doc.text("Skills",10,158);
+    // doc.setFont('Times New Roman','normal','light');
+
+    // // font 
+    // doc.setTextColor(40,40,40);
+    // doc.setFontSize(12);
+
+  
+    // // summary
+    // doc.text(12,48,resumeData.summary,{maxWidth:80,align:'justify'});
+  
+
+    // // contact
+    // doc.text(12,98,resumeData.personalDetails.contact);
+    // doc.text(12,106,resumeData.personalDetails.email);
+    // doc.text(12,114,resumeData.personalDetails.city + ' ' + resumeData.personalDetails.zipCode);
+
+    // // social link 
+    // doc.text(12,132,resumeData.personalDetails.Linkedin);
+    // doc.text(12,140,resumeData.personalDetails.github);
+    // doc.text(12,148,resumeData.personalDetails.otherLink);
+
+    // // skills
+    // const skills =resumeData.skills;
+    // let y=158;
+    // for (var i in skills){
+    //     y +=8; doc.text(12,y,skills[i]);
+
+    // }
+
+    // // education
+    // doc.text(resumeData.education.InstituteName,102,48);
+    // doc.text(resumeData.education.degree + '-' + resumeData.education.branch,102,56);
+    // doc.text('CGPA/percentage :'+resumeData.education.percentage ,102,64);
+    // doc.text(resumeData.education.completionYear,102,72);
+
+    // // experience 
+    // doc.text(resumeData.experience.companyName , 102,90);
+    // doc.text(resumeData.experience.role, 102,98);
+    //     doc.text(102, 106, resumeData.experience.responsibility, { maxWidth: 100, align: 'justify' })
+
+    // // project
+    // doc.text(resumeData.project.projectName, 102, 154);
+    // doc.text(102,162,resumeData.project.projectDetails,{maxWidth:100,align:'justify'})
+    // doc.text(resumeData.project.projectUrl, 102,200);
+
+    // // certificates
+    // let x=210;
+    // for (var i in resumeData.certificates){
+    //     x +=8;
+    //     doc.text(102,x,resumeData.certificates[i]);
+    // }
+    // // achivement
+    // const achiv = resumeData.achivement;
+    // let z=252;
+    // for (var i in achiv){
+    //     z +=8;
+    //     doc.text(102, z, achiv[i]);
+    // }
+
+    // ===================================================================================================
+
+    return doc;
+}
+
+function generatePdf(){
+    const isResumeDataValid = isDataValid(resumeData);
+
+    if (!isResumeDataValid) {
+        alert('please fill all required field');
+        return;
+    }
+
+    // Default export is a4 paper, portrait, using millimeters for units
+    const doc = new jsPDF({
+        orientation: "p",
+        unit: "mm",
+        format: [220, 298],
+    });
+
+    pdfDocument = configureDocument(doc)    
+}
+
+// add click event to the chip element and download the pdf file when clicked
+document.getElementById('download-button')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    // Save or download the PDF
+    generatePdf();
+    pdfDocument?.save('resume.pdf');;
+});
+
+</script>
+
+<style>
+.cv-article {
+    position: relative;
+    /* margin: 20px auto; */
+    /* width: 80%; */
+    /* max-width: 1000px; */
+    /* height: 200px; */
+    border: 1px solid #ccc;
+    /* display: flex; */
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add transition for smooth effect */
+}
+
+
+.cv-article:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* More prominent shadow */
+  transform: scale(1.005); /* Slightly scale up */
+}
+
+.article-image-container {
+    width: 25%;
+    height: auto;
+    /* margin: 16px; */
+    border-radius: 4px;
+
+    overflow: hidden;
+    box-shadow: 4px 4px 2px 1px var(--clr-accent);
+
+}
+
+.article-image-container img {
+  width: 100%;
+  height: auto;
+  /* border-radius: 4px; */
+  /* object-fit: contain; */
+
+}
+
+.article-header-info {
+    flex: 1 1 auto;
+}
+
+.list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+
+/* .content-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 70%;
+  padding: 0 15px;
+}
+
+.content-container .article-title {
+  text-align: center;
+  padding: 15px 0;
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+}
+
+.content-container .article-content {
+  overflow: hidden;
+  text-align: justify;
+  color: #666;
+} */
+
+.read-more-btn {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    position: absolute;
+    bottom: 12px;
+    right: 48px;
+    padding: 8px 20px;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.read-more-btn:hover {
+  background-color: var(--clr-accent);
+  /* color: black; */
+  border-radius: 30px;
+}
+
+</style>

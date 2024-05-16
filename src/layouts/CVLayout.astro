@@ -1,0 +1,48 @@
+---
+import type { HTMLTag, Polymorphic } from 'astro/types';
+
+type Props<Tag extends HTMLTag> = Polymorphic<{ 
+  as: Tag,
+}>;
+
+const {
+  as: Element='section',
+  class: providerClass,
+  ...props
+} = Astro.props;
+
+---
+
+<Element
+  class:list={[ providerClass, [ 'padding-block-900', '' ] ]} 
+  {...props}
+>
+    <div class='page-container  padding-700'>
+        <slot />
+    </div>
+</Element>
+
+<style>
+  .cv-layout {
+    /* position: relative; */
+    /* margin: 20px auto;
+    width: 80%;
+    max-width: 1000px; */
+    /* height: 200px; */
+    border: 1px solid #ccc;
+    /* display: flex; */
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add transition for smooth effect */
+}
+
+ 
+@media (min-width: 50em) {
+  /* .even-columns {
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  } */
+}
+</style>
