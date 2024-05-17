@@ -40,16 +40,14 @@ export const heroWidget = {
 	description: "3D landing page with minimalistic design",
 	heroContent: {
 		title: "Here’s a clean piece of paper",
-		description: `I guess you are a bit early here. 🤔 I hardly can button it all!
-		<br>
-		By the way, your visit to *this* island 🏝️ is much appreciated.
+		description: `I guess you are a bit early here. 🤔 Yup, I am still working on this page!
 		<br>
 		<br>
-		Here, I have planned to share my GLSL design *playground*.
+		Here, I have planned to share my GLSL design *playground/*.
 
 		<br>
 		<br>
-		Meanwhile, you can check out my social profiles or know *about* me.
+		Meanwhile, you can check out my social profiles or know *about/* me.
 		`,
 	},
 	socialLinks: [

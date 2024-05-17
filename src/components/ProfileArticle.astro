@@ -11,13 +11,17 @@ const {
   description,
 } = Astro.props;
 
----
+// extract base URL
+const baseUrl = new URL(Astro.url.origin);
 
+const resumeRelative = new URL('/resume/', baseUrl)
+
+---
 <div class="flow reversed">
 
   <div class="">
     <div class="margin-bottom-400">
-      <Chip text="Resume" isClickable href='resume'/>
+      <Chip text="Resume" isClickable href={resumeRelative}/>
     </div>
 
     <h1 class="fs-primary-heading fw-bold">
