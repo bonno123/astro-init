@@ -28,6 +28,7 @@
   "devDependencies": {
     "@tweakpane/core": "^2.0.3",
     "@tweakpane/plugin-essentials": "^0.2.1",
+    "@types/sharedworker": "^0.0.115",
     "@types/three": "^0.161.2",
     "sass": "^1.71.0"
   }

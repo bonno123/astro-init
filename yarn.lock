@@ -1118,6 +1118,11 @@
   resolved "https://registry.yarnpkg.com/@types/raf/-/raf-3.4.3.tgz#85f1d1d17569b28b8db45e16e996407a56b0ab04"
   integrity sha512-c4YAvMedbPZ5tEyxzQdMoOhhJ4RD3rngZIdwC2/qDN3d7JpEhB6fiBRKVY1lg5B7Wk+uPBjn5f39j1/2MY1oOw==
 
+"@types/sharedworker@^0.0.115":
+  version "0.0.115"
+  resolved "https://registry.yarnpkg.com/@types/sharedworker/-/sharedworker-0.0.115.tgz#938de488141992d5ecb276c01f35efddca0f8ed9"
+  integrity sha512-istxrCv9mbZQt7kXMVMsc4U+dbxG5y+ae5N+9f6pM9VOJmclF7FBWtTog9SMT16s1pZUTjga7ewaMVgqhDpTOg==
+
 "@types/stats.js@*":
   version "0.17.3"
   resolved "https://registry.yarnpkg.com/@types/stats.js/-/stats.js-0.17.3.tgz#705446e12ce0fad618557dd88236f51148b7a935"

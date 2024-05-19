@@ -1,0 +1,194 @@
+---
+
+---
+
+<!-- 
+  this is solly use of shared web worker
+  inspired by https://medium.com/@not.achraf/sharing-a-state-between-windows-without-a-server-6d5c1716cbc8
+-->
+<div
+  class="flex"
+  style="height: 100vh; width: 100% ; display:flex; justify-content: center; align-items: center;"
+
+>
+  <canvas
+    id="canvas"
+    width="550" height="550"
+  >
+  </canvas>
+</div>
+
+<script>
+
+import { type WorkerMessage, type WindowState, } from "~/workers/worker";
+import {
+  generateId,
+  getCurrentWindowState,
+  getWindowCenter,
+  didWindowChange,
+} from "~/workers/windowState";
+
+let currentWindow = getCurrentWindowState();
+let id = generateId();
+
+const canvas = document.querySelector<HTMLCanvasElement>("#canvas")!;
+
+const sharedWorker = new SharedWorker(new URL("src/workers/worker.ts", import.meta.url));
+
+
+// ================== post message to shared worker ================ //
+
+sharedWorker.port.postMessage({
+  action: "windowStateChanged",
+  payload: {
+    id,
+    newWindow: currentWindow,
+  },
+} satisfies WorkerMessage);
+
+
+// ================== listen to shared worker ================ //
+
+sharedWorker.port.onmessage = (event: MessageEvent<WorkerMessage>) => {
+    const msg = event.data;
+    const ctx = canvas.getContext("2d");
+    setSize();
+    const center = getWindowCenter(currentWindow);
+
+    if (!ctx) {
+      return;
+    }
+    switch (msg.action) {
+      case "sync": {
+        const windows = msg.payload.allWindows;
+        ctx.reset();
+        drawCenterCircle(ctx, center);
+        windows
+          .forEach(({ windowState: targetWindow }) => {
+            drawConnectingLine({
+              ctx,
+              hostWindow: currentWindow,
+              targetWindow,
+            });
+          });
+      }
+    }
+}
+
+// ================== listen to window state change ================ //
+
+setInterval(() => {
+    const newWindow = getCurrentWindowState();
+    if (
+      didWindowChange({
+        newWindow,
+        oldWindow: currentWindow,
+      })
+    ) {
+      sharedWorker.port.postMessage({
+        action: "windowStateChanged",
+        payload: {
+          id,
+          newWindow,
+        },
+      } satisfies WorkerMessage);
+      currentWindow = newWindow;
+    }
+  }, 300);
+
+
+// ============== draw on canvas ================ //
+
+type Coordinates = {
+  x: number;
+  y: number;
+};
+
+function setSize() {
+  canvas.height = innerHeight;
+  canvas.width = innerWidth;
+}
+
+const drawCenterCircle = (ctx: CanvasRenderingContext2D, center: Coordinates) => {
+  const { x, y } = center;
+  ctx.strokeStyle = "#eeeeee";
+  ctx.lineWidth = 10;
+  ctx.beginPath();
+  ctx.arc(x, y, 100, 0, Math.PI * 2, false);
+  ctx.stroke();
+  ctx.closePath();
+};
+
+
+const baseChange = ({
+  currentWindowOffset,
+  targetWindowOffset,
+  targetPosition,
+}: {
+  currentWindowOffset: Coordinates;
+  targetWindowOffset: Coordinates;
+  targetPosition: Coordinates;
+}) => {
+  const monitorCoordinate = {
+    x: targetPosition.x + targetWindowOffset.x,
+    y: targetPosition.y + targetWindowOffset.y,
+  };
+
+  const currentWindowCoordinate = {
+    x: monitorCoordinate.x - currentWindowOffset.x,
+    y: monitorCoordinate.y - currentWindowOffset.y,
+  };
+
+  return currentWindowCoordinate;
+};
+
+const drawConnectingLine = ({
+  ctx,
+  hostWindow,
+  targetWindow,
+}: {
+  ctx: CanvasRenderingContext2D;
+  hostWindow: WindowState;
+  targetWindow: WindowState;
+}) => {
+  ctx.strokeStyle = "#ff0000";
+  ctx.lineCap = "round";
+  const currentWindowOffset: Coordinates = {
+    x: hostWindow.screenX,
+    y: hostWindow.screenY,
+  };
+  const targetWindowOffset: Coordinates = {
+    x: targetWindow.screenX,
+    y: targetWindow.screenY,
+  };
+
+  const origin = getWindowCenter(hostWindow);
+  const target = getWindowCenter(targetWindow);
+
+  const targetWithBaseChange = baseChange({
+    currentWindowOffset,
+    targetWindowOffset,
+    targetPosition: target,
+  });
+
+  ctx.strokeStyle = "#ff0000";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(origin.x, origin.y);
+  ctx.lineTo(targetWithBaseChange.x, targetWithBaseChange.y);
+  ctx.stroke();
+  ctx.closePath();
+};
+
+</script>
+
+
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+}
+  canvas {
+    background-color: rgb(51, 51, 51);
+}
+</style>
