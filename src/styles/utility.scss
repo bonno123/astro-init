@@ -142,7 +142,7 @@
 }
 
 .padding-inline-900 {
-    padding-block: var(--size-900);
+    padding-inline: var(--size-900);
 }
 
 .padding-700 {
@@ -152,8 +152,9 @@
 .padding-400 {
     padding: var(--size-400);
 }
+
 .padding-block-400 {
-    padding-block: var(--size-700);
+    padding-block: var(--size-400);
 }
 
 .padding-block-700 {
@@ -226,16 +227,21 @@
 .bg-primary-400 {
     background-color: var(--clr-primary-400);
 }
+
 .bg-accent-400 {
     background-color: var(--clr-accent-400);
 }
+
 .bg-accent-100 {
     background-color: var(--clr-accent-100);
 }
+
 .bg-neutral-100 {
     background-color: var(--clr-neutral-100);
 }
+
 .bg-neutral-900 {
     background-color: var(--clr-neutral-900);
 }
+
 

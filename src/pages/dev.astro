@@ -1,0 +1,91 @@
+---
+export const prerender = false  // disable static rendering since app is configured as hybrid
+
+import { db, Comment } from 'astro:db';
+import MainLayout from '~/layouts/MainLayout.astro';
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import { heroWidget } from '~/data/site-info';
+import { DELETE } from './api/comments/[id]';
+
+type Metadata = {
+    [key: string]: string;
+}
+
+const comments = await db.select().from(Comment);
+
+// handle form submission
+if (Astro.request.method === 'POST') {
+  // parse form data
+  const formData = await Astro.request.formData();
+  const author = formData.get('author');
+  const content = formData.get('content');
+  console.log({ author, content });
+  
+  if (typeof author === 'string' && typeof content === 'string') {
+    // insert form data into the Comment table
+    await db.insert(Comment).values({
+        authorId: 1, 
+        content, 
+        flagged: false, 
+        likes: 0, 
+        metadata: {}, 
+        published: new Date()
+    });
+
+    
+  }
+}
+
+---
+<MainLayout 
+	title={heroWidget.title}
+	metaDescription={heroWidget.description}
+>
+	<EvenColumnsLayout>
+        <div class="fs-600">
+            {
+                comments.map(({ id, authorId, content,flagged, likes, metadata, published }) => (
+                    <article class="padding-block-400">
+                        <p>Comment Id: {id}</p>
+                        <p>AuthorId: {authorId}</p>
+                        <p>Content: {content}</p>
+
+                        <p>Flagged: {flagged}</p>
+                        <p>Likes: {likes}</p>
+
+                        <div class="">
+                            <p> Metadata: {
+                                Object.keys(metadata as Metadata).map((key) => (
+                                    <p class="padding-inline-900">{key}: {(metadata as Metadata)[key as keyof Metadata]}</p>
+                                ))
+                            }</p>
+                        </div>
+                        <p>Published: {published}</p>
+                    </article>
+                ))
+            }
+        </div>
+
+        <div class="">
+            <form method="POST" style="display: grid">
+                <label for="author">Author</label>
+                <input id="author" name="author" />
+              
+                <label for="content">Content</label>
+                <textarea id="content" name="content"></textarea>
+              
+                <button class="margin-top-400" type="submit">Submit</button>
+              </form>
+        </div>
+	</EvenColumnsLayout>
+</MainLayout>
+
+<script>
+
+
+</script>
+
+
+
+
+
