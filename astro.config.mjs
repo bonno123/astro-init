@@ -18,7 +18,8 @@ export default defineConfig({
     }
   }), db()],
   build: {
-    format: 'directory'
+    format: 'directory',
+    server: './server'
   },
   trailingSlash: 'always',
   output: 'hybrid',
