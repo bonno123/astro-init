@@ -1,44 +1,29 @@
-name: Deploy to GitHub Pages
-
-on:
-  # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch’s name
-  push:
-    branches: [ trunk ]
-  # Allows you to run this workflow manually from the Actions tab on GitHub.
-  workflow_dispatch:
-
-env:
-  PUBLIC_SITE_NAME: ${{ vars.PUBLIC_SITE_NAME }}
-  PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
-  ASTRO_STUDIO_APP_TOKEN: ${{ secrets.ASTRO_STUDIO_APP_TOKEN }}
-
-# Allow this job to clone the repo and create a page deployment
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+name: Deno Deploy
+on: [push]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout your repository using git
-        uses: actions/checkout@v3
-      - name: Install, build, and upload your site
-        uses: withastro/action@v1
-        with:
-          node-version: 20 # Defaults to 18. (optional)
-        #   path: . # The root location of your Astro project inside the repository. (optional)
-        #   package-manager: yarn # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
-
   deploy:
-    needs: build
+    name: Deploy
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      id-token: write # Needed for auth with Deno Deploy
+      contents: read # Needed to clone the repository
+
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      # Not using yarn? Change `yarn install` to `npm ci` or `pnpm i`
+      - name: Install dependencies
+        run: yarn install
+
+      # Not using yarn? Change `npm run build` to `yarn build` or `pnpm run build`
+      - name: Build Astro
+        run: yarn build
+
+      - name: Upload to Deno Deploy
+        uses: denoland/deployctl@v1
+        with:
+          project: my-deno-project # TODO: replace with Deno Deploy project name
+          entrypoint: server/entry.mjs
+          root: dist
