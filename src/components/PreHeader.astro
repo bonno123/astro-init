@@ -1,0 +1,280 @@
+---
+
+---
+
+<!-- TODO: refactor the css for this file -->
+
+<div class="pre-header padding-y-xs js-pre-header">
+    <div class="pre-header__container page-container position-relative">
+      <div class="text-component text-sm padding-right-lg">
+        <p class="">
+            For Full site experience visit our 
+            <a 
+                href="https://dev.avikbanik.com" 
+                class="pj6-color-inherit pj6-text-underline"
+            >
+                main site
+            </a>
+        </p>
+      </div>
+  
+      <button class="pre-header__close-btn js-pre-header__close-btn js-tab-focus">
+        <svg class="pre-header__icon icon" viewBox="0 0 20 20">
+          <title>Close header banner</title>
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+            <line x1="4" y1="4" x2="16" y2="16" />
+            <line x1="16" y1="4" x2="4" y2="16" />
+          </g>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+<script>
+    const preHeader = document.querySelector('.js-pre-header');
+    const preHeaderCloseBtn = document.querySelector('.js-pre-header__close-btn');
+    
+    preHeaderCloseBtn?.addEventListener('click', () => {
+        preHeader?.classList.add('pre-header--is-hidden');
+    });
+</script>
+  
+<style>
+
+button, input, textarea, select {
+background-color: transparent;
+border-radius: 0;
+color: inherit;
+line-height: inherit;
+appearance: none;
+}
+
+:root {
+/* colors */
+--color-contrast-higher-hsl: 230, 13%, 9%;
+---color-bg-hsl: 0, 0%, 100%;
+--pj6-color-contrast-high-hsl: 230, 7%, 23%;
+
+--pj6-color-primary-hsl: 250, 84%, 54%;
+--pj6-color-accent-hsl: 342, 89%, 48%;
+--pj6-color-contrast-lower-hsl: 240, 4%, 85%;
+
+/* spacing */
+--pj6-space-xs: 0.5rem;
+--pj6-space-md: 1.25rem;
+--pj6-space-lg: 2rem;
+--pj6-space-sm: 0.75rem;
+
+/* typography */
+--text-sm: 0.833rem;
+--text-sm: 0.833rem;
+}
+
+@media(min-width: 64rem){
+:root {
+/* spacing */
+--pj6-space-xs: 0.75rem;
+--pj6-space-md: 2rem;
+--pj6-space-lg: 3.125rem;
+--pj6-space-sm: 1.125rem;
+
+/* typography */
+--text-sm: 1rem;
+--text-sm: 1rem;
+}
+}
+
+/* icons */
+.icon {
+height: var(--pj6-size, 1em);
+width: var(--pj6-size, 1em);
+display: inline-block;
+color: inherit;
+fill: currentColor;
+line-height: 1;
+flex-shrink: 0;
+max-width: initial;
+}
+
+/* component */
+.pre-header {
+display: block;
+background-color: hsl(var(--color-contrast-higher-hsl));
+color: hsl(var(---color-bg-hsl));
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+
+.pre-header--is-hidden {
+display: none;
+}
+
+.pre-header__close-btn {
+position: absolute;
+border: none;
+cursor: pointer;
+right: 0;
+top: calc(50% - 0.5em);
+will-change: transform;
+transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.pre-header__close-btn:hover {
+-webkit-transform: scale(1.1);
+        transform: scale(1.1);
+}
+.pre-header__close-btn .pre-header__icon {
+display: block;
+}
+
+a.pre-header {
+text-decoration: none;
+transition: background-color 0.2s;
+}
+a.pre-header:hover {
+text-decoration: underline;
+background-color: hsl(var(--pj6-color-contrast-high-hsl));
+}
+
+/* utility classes */
+
+
+.text-component :where(h1, h2, h3, h4) {
+line-height: var(--pj6-heading-line-height, 1.2);
+margin-top: calc(var(--pj6-space-md) * var(--pj6-space-multiplier, 1));
+margin-bottom: calc(var(--pj6-space-sm) * var(--pj6-space-multiplier, 1));
+}
+
+.text-component :where(p, blockquote, ul li, ol li) {
+line-height: var(--pj6-body-line-height, 1.4);
+}
+
+.text-component :where(ul, ol, p, blockquote, .pj6-text-component__block) {
+margin-bottom: calc(var(--pj6-space-sm) * var(--pj6-space-multiplier, 1));
+}
+
+.text-component :where(ul, ol) {
+padding-left: 1.25em;
+}
+
+.text-component ul :where(ul, ol), .text-component ol :where(ul, ol) {
+padding-left: 1em;
+margin-bottom: 0;
+}
+
+.text-component ul {
+list-style-type: disc;
+}
+
+.text-component ol {
+list-style-type: decimal;
+}
+
+.text-component img {
+display: block;
+margin: 0 auto;
+}
+
+.text-component figcaption {
+margin-top: calc(var(--pj6-space-xs) * var(--pj6-space-multiplier, 1));
+font-size: var(--text-sm);
+text-align: center;}
+
+.text-component em {
+font-style: italic;
+}
+
+.text-component strong {
+font-weight: bold;
+}
+
+.text-component s {
+text-decoration: line-through;
+}
+
+.text-component u {
+text-decoration: underline;
+}
+
+.text-component mark {
+background-color: hsla(var(--pj6-color-accent-hsl), 0.2);
+color: inherit;
+}
+
+.text-component blockquote {
+padding-left: 1em;
+border-left: 4px solid hsl(var(--pj6-color-contrast-lower-hsl));
+font-style: italic;
+}
+
+.text-component hr {
+margin: calc(var(--pj6-space-md) * var(--pj6-space-multiplier, 1)) auto;
+background: hsl(var(--pj6-color-contrast-lower-hsl));
+height: 1px;
+}
+
+.text-component > *:first-child {
+margin-top: 0;
+}
+
+.text-component > *:last-child {
+margin-bottom: 0;
+}
+
+.text-component.pj6-line-height-xs {
+--pj6-heading-line-height: 1;
+--pj6-body-line-height: 1.1;
+}
+
+.text-component.pj6-line-height-sm {
+--pj6-heading-line-height: 1.1;
+--pj6-body-line-height: 1.2;
+}
+
+.text-component.pj6-line-height-md {
+--pj6-heading-line-height: 1.15;
+--pj6-body-line-height: 1.4;
+}
+
+.text-component.pj6-line-height-lg {
+--pj6-heading-line-height: 1.22;
+--pj6-body-line-height: 1.58;
+}
+
+.text-component.pj6-line-height-xl {
+--pj6-heading-line-height: 1.3;
+--pj6-body-line-height: 1.72;
+}
+
+/* .max-width-lg {
+max-width: 80rem;
+} */
+
+.pre-header__container {
+/* width: calc(100% - 2*var(--pj6-space-md)); */
+/* margin-left: auto; */
+/* margin-right: auto; */
+}
+
+.padding-y-xs {
+padding-top: var(--pj6-space-xs);
+padding-bottom: var(--pj6-space-xs);
+}
+
+.pj6-color-inherit {
+color: inherit;
+}
+
+
+
+.position-relative {
+position: relative;
+}
+
+.pj6-text-underline {
+text-decoration: underline;
+}
+
+.padding-right-lg {
+padding-right: var(--pj6-space-lg);
+}
+</style>
