@@ -5,37 +5,12 @@ import { db, Comment } from 'astro:db';
 import MainLayout from '~/layouts/MainLayout.astro';
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
 import { heroWidget } from '~/data/site-info';
-import { DELETE } from './api/comments/[id]';
 
 type Metadata = {
     [key: string]: string;
 }
 
 const comments = await db.select().from(Comment);
-
-// handle form submission
-if (Astro.request.method === 'POST') {
-  // parse form data
-  const formData = await Astro.request.formData();
-  const author = formData.get('author');
-  const content = formData.get('content');
-  console.log({ author, content });
-  
-  if (typeof author === 'string' && typeof content === 'string') {
-    // insert form data into the Comment table
-    await db.insert(Comment).values({
-        authorId: 1, 
-        content, 
-        flagged: false, 
-        likes: 0, 
-        metadata: {}, 
-        published: new Date()
-    });
-
-    
-  }
-}
-
 ---
 <MainLayout 
 	title={heroWidget.title}
@@ -61,15 +36,19 @@ if (Astro.request.method === 'POST') {
                             }</p>
                         </div>
                         <p>Published: {published}</p>
+
+                        <button data-id={id} aria-label="delete comment">
+                            Delete
+                        </button>
                     </article>
                 ))
             }
         </div>
 
         <div class="">
-            <form method="POST" style="display: grid">
-                <label for="author">Author</label>
-                <input id="author" name="author" />
+            <form  style="display: grid" id="add-comment">
+                <label for="author">Author ID</label>
+                <input id="author" name="authorID" type="number"/>
               
                 <label for="content">Content</label>
                 <textarea id="content" name="content"></textarea>
@@ -81,8 +60,40 @@ if (Astro.request.method === 'POST') {
 </MainLayout>
 
 <script>
+const deleteButtons = (document.querySelectorAll("[data-id]")) as NodeListOf<HTMLButtonElement>;
+deleteButtons.forEach((button) => {
+    button.addEventListener("click", async (event) => {
+        const id = button.dataset.id;
+        const response = await fetch(`/api/comments/${id}/`, {
+            method: "DELETE",
+        });
 
+        const json = await response.json();
 
+        console.log({json});            
+    });
+});
+
+const addNewCommentForm = document.getElementById("add-comment") as HTMLFormElement;
+addNewCommentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const formData = new FormData(addNewCommentForm);
+    const values = Object.fromEntries(formData);
+
+    const response = await fetch("/api/comments/", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    // console.log({ res: await response.json() });
+    const json: { id: string } = await response.json();
+
+    // prefetch(window.location.pathname);
+
+});
 </script>
 
 

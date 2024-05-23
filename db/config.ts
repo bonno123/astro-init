@@ -15,19 +15,19 @@ const Comment = defineTable({
     id: column.number({ primaryKey: true, autoIncrement: true}),
 
     // reference to the author table
-    authorId: column.number({ references: () => Author.columns.id }),
+    authorId: column.number({ references: () => Author.columns.id , optional: true}),
 
     // A string of text.
     content: column.text(),
 
     // A whole integer value.
-    likes: column.number(),
+    likes: column.number({ default: 0}),
     // A true or false value.
-    flagged: column.boolean(),
+    flagged: column.boolean({ default: false}),
     // Date/time values queried as JavaScript Date objects.
-    published: column.date(),
+    published: column.date({ default: new Date()}),
     // An untyped JSON object.
-    metadata: column.json(),  
+    metadata: column.json({ default: {}}),  
   }
 })
 
