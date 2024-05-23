@@ -29,6 +29,6 @@ jobs:
       - name: Upload to Deno Deploy
         uses: denoland/deployctl@v1
         with:
-          project: my-deno-project # TODO: replace with Deno Deploy project name
+          project: avikbanik-astro-init-25 # TODO: replace with Deno Deploy project name
           entrypoint: server/entry.mjs
           root: dist
