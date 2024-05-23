@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config';
 import vue from "@astrojs/vue";
 import db from "@astrojs/db";
-import node from "@astrojs/node";
 
 // https://astro.build/config
 export default defineConfig({
@@ -24,7 +23,4 @@ export default defineConfig({
   },
   trailingSlash: 'always',
   output: 'hybrid',
-  adapter: node({
-    mode: "standalone"
-  })
 });

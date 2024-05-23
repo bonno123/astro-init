@@ -13,7 +13,6 @@
   "dependencies": {
     "@astrojs/check": "^0.7.0",
     "@astrojs/db": "^0.11.3",
-    "@astrojs/node": "^8.2.5",
     "@astrojs/vue": "^4.0.8",
     "@tresjs/cientos": "^3.8.0",
     "@tresjs/core": "^3.7.0",
