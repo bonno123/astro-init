@@ -14,23 +14,18 @@ const {
 ---
 
 <Element
-  class:list={[ providerClass, [ 'padding-block-900', '' ] ]} 
+  class:list={[ providerClass]} 
   {...props}
 >
-    <div class='page-container  padding-700'>
+    <article class='cv-article page-container margin-block-700 padding-400'>
         <slot />
-    </div>
+    </article>
 </Element>
 
 <style>
-  .cv-layout {
-    /* position: relative; */
-    /* margin: 20px auto;
-    width: 80%;
-    max-width: 1000px; */
-    /* height: 200px; */
+.cv-article {
+    position: relative;
     border: 1px solid #ccc;
-    /* display: flex; */
     background-color: white;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     border-radius: 8px;
@@ -38,11 +33,9 @@ const {
     transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add transition for smooth effect */
 }
 
- 
-@media (min-width: 50em) {
-  /* .even-columns {
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
-  } */
+
+.cv-article:hover {
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* More prominent shadow */
+  transform: scale(1.005); /* Slightly scale up */
 }
 </style>

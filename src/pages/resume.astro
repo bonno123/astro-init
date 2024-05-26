@@ -6,63 +6,63 @@ import CVLayout from '~/layouts/CVLayout.astro';
 ---
 <MainLayout title={aboutMeWidget.title}>
 	<CVLayout>
-        <article class="cv-article |  padding-700">
-            <div class="cv-article__header | flex">
-                <div class="article-image-container">
-                    <img
-                        src="https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no" 
-                        referrerpolicy="no-referrer" 
-                        alt="Picture of author"
-                    />
-                </div>
-
-                <div class="article-header-info | padding-block-400 text-right">
-                    <h2 class="article-title | fs-secondary-heading">Article Title</h2>
-
-                    <div class="article-meta">
-                        <p class="article-author">Author Name</p>
-                        <p class="article-date">Published on 12th June 2021</p>
-                    </div>
-                </div>
+        <div class="resume-header">
+            <div class="article-image-container">
+                <img
+                    src="https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no" 
+                    referrerpolicy="no-referrer" 
+                    alt="Picture of author"
+                />
             </div>
 
-            <hr class="margin-top-400"/>
+            <div class="resume-header_info | padding-block-400 text-right">
+                <h2 class="article-title | fs-secondary-heading">Article Title</h2>
 
-            <div class="content-container | flex">
-                <div class="container-aside">
-                    <!-- <h3 class="text-accent fs-600">Contact</h3> -->
-
-                    <ul class="list-unstyled padding-400">
-                        <li>
-                            <a>
-                                <!-- <i class="fas fa-mobile-alt fa-fw mr-2" data-fa-transform="grow-6"></i> -->
-                                (+91) 1234567890
-                            </a>
-                        </li>
-
-                        <li class="mb-2">
-                            <a href="mailto:contact@avikbanik.com">
-                                <!-- <i class="far fa-envelope fa-fw mr-2" data-fa-transform="grow-3"></i> -->
-                                contact@avikbanik.com
-                            </a>
-                        </li>
-
-                        <li>
-                            <a href="https://avikbanik.com">
-                                City: 123456
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="container-main | padding-400">
-                    <h3 class="text-accent fs-700 margin-bottom-400">About me</h3>
-                    <p class="article-content">
-                        Here goes some introduction about me. It could be a brief description of my career goals, skills, and achievements. I am a passionate web developer with a strong foundation in front-end technologies. I have experience in building responsive web applications using modern web technologies. I am a quick learner and always eager to learn new technologies.
-                    </p>
+                <div class="article-meta">
+                    <p class="article-author">Author Name</p>
+                    <p class="article-date">Published on 12th June 2021</p>
                 </div>
             </div>
+        </div>
 
+        <hr class=""/>
+
+        <div class="resume-content">
+            <div class="container-aside">
+                <!-- <h3 class="text-accent fs-600">Contact</h3> -->
+
+                <ul class="list-unstyled padding-400">
+                    <li>
+                        <a>
+                            <!-- <i class="fas fa-mobile-alt fa-fw mr-2" data-fa-transform="grow-6"></i> -->
+                            (+91) 1234567890
+                        </a>
+                    </li>
+
+                    <li class="mb-2">
+                        <a href="mailto:contact@avikbanik.com">
+                            <!-- <i class="far fa-envelope fa-fw mr-2" data-fa-transform="grow-3"></i> -->
+                            contact@avikbanik.com
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="https://avikbanik.com">
+                            City: 123456
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="container-main">
+                <h3 class="text-accent fs-700 margin-bottom-400">About me</h3>
+                <p class="article-content">
+                    Here goes some introduction about me. It could be a brief description of my career goals, skills, and achievements. I am a passionate web developer with a strong foundation in front-end technologies. I have experience in building responsive web applications using modern web technologies. I am a quick learner and always eager to learn new technologies.
+                </p>
+            </div>
+        </div>
+
+        <div class="flex horizontal-align-end">
             <button class="read-more-btn" id="download-button">
                 <!-- create a svg icon showing pdf icon -->
                 <svg
@@ -84,13 +84,11 @@ import CVLayout from '~/layouts/CVLayout.astro';
                     <line x1="16" y1="17" x2="8" y2="17"></line>
                     <polyline points="10 9 9 8 9 10"></polyline>
                 </svg>
-
                 <i class="chip__label">
                     Download demo PDF
                 </i>
             </button>
-
-        </article>
+        </div>
     </CVLayout>
 </MainLayout>
 
@@ -404,26 +402,18 @@ document.getElementById('download-button')?.addEventListener('click', (e) => {
 </script>
 
 <style>
-.cv-article {
-    position: relative;
-    /* margin: 20px auto; */
-    /* width: 80%; */
-    /* max-width: 1000px; */
-    /* height: 200px; */
-    border: 1px solid #ccc;
-    /* display: flex; */
-    background-color: white;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: box-shadow 0.3s ease, transform 0.3s ease; /* Add transition for smooth effect */
+
+.resume-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
 }
 
-
-.cv-article:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2); /* More prominent shadow */
-  transform: scale(1.005); /* Slightly scale up */
-}
 
 .article-image-container {
     width: 25%;
@@ -444,7 +434,7 @@ document.getElementById('download-button')?.addEventListener('click', (e) => {
 
 }
 
-.article-header-info {
+.resume-header_info {
     flex: 1 1 auto;
 }
 
@@ -453,36 +443,40 @@ document.getElementById('download-button')?.addEventListener('click', (e) => {
   list-style: none;
 }
 
-/* .content-container {
+
+
+.resume-content {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 70%;
-  padding: 0 15px;
+  padding: 15px;
 }
 
-.content-container .article-title {
-  text-align: center;
+@media screen and (max-width: 768px){
+    .resume-content {
+        flex-direction: column;
+    }
+}
+
+.resume-content .container-aside {
+  /* text-align: center; */
   padding: 15px 0;
   margin: 0;
-  font-size: 24px;
+  /* font-size: 24px; */
   color: #333;
   border-bottom: 2px solid #eee;
 }
 
-.content-container .article-content {
-  overflow: hidden;
+.resume-content .container-main {
+  /* overflow: hidden; */
+  padding: 15px 0 0 15px;
+
   text-align: justify;
   color: #666;
-} */
+  /* min-width: 5rem; */
+}
 
 .read-more-btn {
     display: inline-flex;
     gap: 8px;
-    align-items: center;
-    position: absolute;
-    bottom: 12px;
-    right: 48px;
     padding: 8px 20px;
     background-color: rgba(0, 0, 0, 0.4);
     color: white;
@@ -495,7 +489,6 @@ document.getElementById('download-button')?.addEventListener('click', (e) => {
 
 .read-more-btn:hover {
   background-color: var(--clr-accent);
-  /* color: black; */
   border-radius: 30px;
 }
 

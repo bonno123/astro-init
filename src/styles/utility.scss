@@ -168,8 +168,24 @@
     margin-block-start: var(--size-400);
 }
 
+.margin-top-700 {
+    margin-block-start: var(--size-700);
+}
+
 .margin-bottom-400 {
     margin-block-end: var(--size-400);
+}
+
+.margin-inline-400 {
+    margin-inline: var(--size-400);
+}
+
+.margin-inline-700 {
+    margin-inline: var(--size-700);
+}
+
+.margin-block-700 {
+    margin-block: var(--size-700);
 }
 
 /* ================== */
@@ -191,6 +207,10 @@
 
 .flex.vertical-align-end{
     align-items: end;
+}
+
+.flex.horizontal-align-end{
+    justify-content: end;
 }
 
 .justify-self-end {
