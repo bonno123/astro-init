@@ -1,7 +1,7 @@
 export function decorateTextLinks(
-  str: string, 
+  str?: string, 
 ) {
-  return str.replace(
+  return str?.replace(
     /\*{1,2}(.*?)\*{1,2}/g,
     `<a
       class="fw-bold text-accent"

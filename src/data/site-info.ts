@@ -24,11 +24,7 @@ export type HeroWidget = {
 
 export const siteInfo: SiteInfo = {
 	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
-	description: `3D web design, 
-		built with Astro TypeScript, TresJS, super fast static sites; 
-		loading animations, while loading the client-side JavaScript.
-		examples of webgl, GLSL, and 3D web development in the browser
-	`,
+	description: `A personal app for Avik Banik, a software engineer and web developer based in Kolkata, India.`,
 	image: {
 		src: "/og/social.jpg",
 		alt: "Build the web you want",
@@ -36,55 +32,14 @@ export const siteInfo: SiteInfo = {
 }
 
 export const heroWidget = {
-	title: "Landing",
-	description: "3D landing page with minimalistic design",
+	title: "Home",
+	description: "",
 	heroContent: {
-		title: "Here’s a clean piece of paper",
-		description: `I guess you are a bit early here. 🤔 Yup, I am still working on this page!
-		<br>
-		<br>
-		Here, I have planned to share my GLSL design *playground/*.
-
-		<br>
-		<br>
-		Meanwhile, you can check out my social profiles or know *about/* me.
-		`,
+		title: "Save or Pave...  Stars and Scars",
+		description: "A completely arbitrary things with no purpose at all.",
 	},
-	socialLinks: [
-		{
-			platform: "github",
-			href: "https://github.com/bonno123/astro-init",
-			me: "https://github.com/bonno123",
-			text: "Go to GitHub repo",
-			icon: "social/github",
-		},
-		{
-			platform: "twitter",
-			href: "https://twitter.com/AvikBanik1",
-			me: "https://twitter.com/AvikBanik1",
-			text: "Follow on Twitter",
-			icon: "social/twitter",
-		},
-		{
-			platform: "kaggle",
-			href: "https://www.kaggle.com/avikbanik",
-			me: "https://www.kaggle.com/avikbanik",
-			text: "Follow on kaggle",
-			footerOnly: true,
-			icon: "social/kaggle",
-		},
-        {
-			platform: "codepen",
-			href: "https://codepen.io/Bonno123",
-			me: "https://codepen.io/Bonno123",
-			text: "Follow on kaggle",
-			footerOnly: true,
-			icon: "social/codepen",
-		},
-	],
 }
 
-// currently this one is not using Path: src/data/about-me.ts
 export const aboutMeWidget = {
 	title: "About Me",
 	description: "portfolio of software engineer, web developer.",
