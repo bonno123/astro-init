@@ -25,3 +25,23 @@ const { title, metaDescription } = Astro.props;
 
     />
 </head>
+
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"></script>
+<script>
+declare global {
+    interface Window {
+        dataLayer: any[];
+    }
+}
+
+window.dataLayer = window.dataLayer || [];
+function gtag(...args: any[]){
+    window.dataLayer.push(arguments);
+}
+
+gtag('js', new Date());
+
+gtag('config', 'G-GDKJFDWKW7');
+</script>
