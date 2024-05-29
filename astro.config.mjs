@@ -1,8 +1,9 @@
 import { defineConfig } from 'astro/config';
 import vue from "@astrojs/vue";
 import db from "@astrojs/db";
-
 import netlify from "@astrojs/netlify";
+
+import tailwind from "@astrojs/tailwind";
 
 // https://astro.build/config
 export default defineConfig({
@@ -10,13 +11,17 @@ export default defineConfig({
   redirects: {
     // '/this': '/'
   },
-  integrations: [vue({
-    template: {
-      compilerOptions: {
-        isCustomElement: tag => (tag.startsWith('Tres') || tag === 'primitive') && tag !== 'TresCanvas'
+  integrations: [
+      vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: tag => (tag.startsWith('Tres') || tag === 'primitive') && tag !== 'TresCanvas'
+        }
       }
-    }
-  }), db()],
+    }), 
+    db(),
+    tailwind()
+  ],
   build: {
     format: 'directory'
   },
