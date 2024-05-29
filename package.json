@@ -14,26 +14,34 @@
     "@astrojs/check": "^0.7.0",
     "@astrojs/db": "^0.11.3",
     "@astrojs/netlify": "^5.2.1",
-    "@astrojs/tailwind": "^5.1.0",
     "@astrojs/vue": "^4.0.8",
+    "@astrolib/seo": "^1.0.0-beta.5",
+    "@fontsource-variable/inter": "^5.0.18",
     "@tresjs/cientos": "^3.8.0",
     "@tresjs/core": "^3.7.0",
     "astro": "^4.0.4",
+    "astro-icon": "^1.1.0",
     "astro-seo": "^0.8.0",
     "glslCanvas": "^0.2.6",
     "jspdf": "^2.5.1",
-    "tailwindcss": "^3.4.3",
+    "limax": "^4.1.0",
     "three": "^0.161.0",
     "tweakpane": "^4.0.3",
-    "typescript": "^5.3.3",
+    "unpic": "^3.18.0",
     "vue": "^3.4.19"
   },
   "packageManager": "yarn@1.22.21",
   "devDependencies": {
+    "@astrojs/tailwind": "^5.1.0",
+    "@iconify-json/tabler": "^1.1.113",
+    "@tailwindcss/typography": "^0.5.13",
     "@tweakpane/core": "^2.0.3",
     "@tweakpane/plugin-essentials": "^0.2.1",
     "@types/sharedworker": "^0.0.115",
     "@types/three": "^0.161.2",
-    "sass": "^1.71.0"
+    "sass": "^1.71.0",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "^4.5.4"
   }
 }

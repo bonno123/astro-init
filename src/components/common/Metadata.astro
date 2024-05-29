@@ -1,0 +1,109 @@
+---
+import merge from 'lodash.merge';
+import { AstroSeo } from '@astrolib/seo';
+
+import type { Props as AstroSeoProps } from '@astrolib/seo';
+
+// import { SITE, METADATA, I18N } from 'astrowind:config';
+import type { MetaData } from '~/types';
+import { getCanonical } from '~/utils/permalinks';
+
+import { adaptOpenGraphImages } from '~/utils/images';
+
+export interface Props extends MetaData {
+  dontUseTitleTemplate?: boolean;
+}
+
+const SITE = {
+    name: 'Astro',
+    site: 'https://dev.avikbanik.com',
+}
+
+const METADATA = {
+    title: {
+        default: 'Astro',
+        template: '%s | Astro',
+    },
+    robots: {
+        index: true,
+        follow: true,
+    },
+    description: 'Astro is a modern front-end framework for building faster websites with less client-side JavaScript.',
+    openGraph: {
+        site_name: 'Astro',
+        type: 'website',
+        // locale: 'en_US',
+        url: 'https://astro.build',
+        images: [
+            {
+                url: 'https://astro.build/images/astro-logo.png',
+                width: 800,
+                height: 600,
+                alt: 'Astro Logo',
+            },
+        ],
+    },
+    twitter: {
+        handle: '@_astrobuild',
+        site: '@_astrobuild',
+        cardType: 'summary_large_image',
+    },
+}
+
+const I18N = {
+    language: 'en',
+    textDirection: 'ltr',
+}
+
+const {
+  title,
+  ignoreTitleTemplate = false,
+  canonical = String(getCanonical(String(Astro.url.pathname))),
+  robots = {},
+  description,
+  openGraph = {},
+  twitter = {},
+} = Astro.props;
+
+const seoProps: AstroSeoProps = merge(
+  {
+    title: '',
+    titleTemplate: '%s',
+    canonical: canonical,
+    noindex: true,
+    nofollow: true,
+    description: undefined,
+    openGraph: {
+      url: canonical,
+      site_name: SITE?.name,
+      images: [],
+      locale: I18N?.language || 'en',
+      type: 'website',
+    },
+    twitter: {
+      cardType: openGraph?.images?.length ? 'summary_large_image' : 'summary',
+    },
+  },
+  {
+    title: METADATA?.title?.default,
+    titleTemplate: METADATA?.title?.template,
+    noindex: typeof METADATA?.robots?.index !== 'undefined' ? !METADATA.robots.index : undefined,
+    nofollow: typeof METADATA?.robots?.follow !== 'undefined' ? !METADATA.robots.follow : undefined,
+    description: METADATA?.description,
+    openGraph: METADATA?.openGraph,
+    twitter: METADATA?.twitter,
+  },
+  {
+    title: title,
+    titleTemplate: ignoreTitleTemplate ? '%s' : undefined,
+    canonical: canonical,
+    noindex: typeof robots?.index !== 'undefined' ? !robots.index : undefined,
+    nofollow: typeof robots?.follow !== 'undefined' ? !robots.follow : undefined,
+    description: description,
+    openGraph: { url: canonical, ...openGraph },
+    twitter: twitter,
+  }
+);
+---
+
+<AstroSeo {...{ ...seoProps, openGraph: await adaptOpenGraphImages(seoProps?.openGraph, Astro.site) }} />

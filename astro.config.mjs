@@ -4,6 +4,8 @@ import db from "@astrojs/db";
 import netlify from "@astrojs/netlify";
 
 import tailwind from "@astrojs/tailwind";
+import icon from 'astro-icon';
+
 
 // https://astro.build/config
 export default defineConfig({
@@ -20,7 +22,23 @@ export default defineConfig({
       }
     }), 
     db(),
-    tailwind()
+    tailwind(),
+    icon({
+      include: {
+        tabler: ['*'],
+        'flat-color-icons': [
+          'template',
+          'gallery',
+          'approval',
+          'document',
+          'advertising',
+          'currency-exchange',
+          'voice-presentation',
+          'business-contact',
+          'database',
+        ],
+      },
+    }),
   ],
   build: {
     format: 'directory'

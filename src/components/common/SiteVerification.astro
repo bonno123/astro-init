@@ -1,0 +1,14 @@
+---
+// import { SITE } from 'astrowind:config';
+
+export const SITE = {
+    nane: 'Astrowind',
+    site: 'https://dev.avikbaik.com',
+    base: '/',
+    googleSiteVerificationId: 'google-site-verification-id',
+};6
+
+
+---
+
+{SITE.googleSiteVerificationId && <meta name="google-site-verification" content={SITE.googleSiteVerificationId} />}
