@@ -4,7 +4,7 @@ export function decorateTextLinks(
   return str.replace(
     /\*{1,2}(.*?)\*{1,2}/g,
     `<a
-      class="fw-bold text-accent"
+      class="fw-bold text-accent text-bg-effect text-bg-effect--scale-y"
       href="$1" 
     >
     <span class="sr-only">{$1} link</span>

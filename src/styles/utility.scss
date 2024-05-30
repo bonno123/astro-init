@@ -60,7 +60,7 @@
 }
 
 .text-primary {
-    color: var(--clr-primary-400);
+    color: var(--clr-primary);
 }
 
 .text-accent {
@@ -243,19 +243,19 @@
 /* color classes */
 /* ================== */
 
-.bg-primary-400 {
-    background-color: var(--clr-primary-400);
+.bg-primary {
+    background-color: var(--clr-primary);
 }
 .bg-accent-400 {
     background-color: var(--clr-accent-400);
 }
-.bg-accent-100 {
-    background-color: var(--clr-accent-100);
+.bg-accent {
+    background-color: var(--clr-accent);
 }
-.bg-neutral-100 {
-    background-color: var(--clr-neutral-100);
+.bg-neutral {
+    background-color: var(--clr-neutral);
 }
-.bg-neutral-900 {
-    background-color: var(--clr-neutral-900);
+.bg-neutral {
+    background-color: var(--clr-neutral);
 }
 
