@@ -3,10 +3,10 @@ import { trim } from '~/utils/utils';
 // import { SITE, APP_BLOG } from 'astrowind:config';
 
 const SITE = {
-    name: 'Astro',
-    site: 'https://dev.avikbanik.com',
-    base: '/',
-    trailingSlash: false,
+  name: 'Kaaleen',
+  site: 'https://dev.avikbanik.com',
+  base: '/',
+  trailingSlash: true,
 }
 
 // const APP_BLOG = {
@@ -123,34 +123,44 @@ export const getAsset = (path: string): string =>
 /** */
 const definitivePermalink = (permalink: string): string => createPath(BASE_PATHNAME, permalink);
 
+// type MenuItem = {
+//   href: string;
+//   type: string;
+//   url: string;
+// };
+
+// type Menu = MenuItem | MenuItem[];
+
 /** */
-export const applyGetPermalinks = (menu: object = {}) => {
-  if (Array.isArray(menu)) {
-    return menu.map((item) => applyGetPermalinks(item));
-  } else if (typeof menu === 'object' && menu !== null) {
-    const obj = {};
-    for (const key in menu) {
-      if (key === 'href') {
-        if (typeof menu[key] === 'string') {
-          obj[key] = getPermalink(menu[key]);
-        } else if (typeof menu[key] === 'object') {
-          if (menu[key].type === 'home') {
-            obj[key] = getHomePermalink();
-          } 
-          // else if (menu[key].type === 'blog') {
-          //   obj[key] = getBlogPermalink();
-          // } 
-          else if (menu[key].type === 'asset') {
-            obj[key] = getAsset(menu[key].url);
-          } else if (menu[key].url) {
-            obj[key] = getPermalink(menu[key].url, menu[key].type);
-          }
-        }
-      } else {
-        obj[key] = applyGetPermalinks(menu[key]);
-      }
-    }
-    return obj;
-  }
-  return menu;
-};
+// export const applyGetPermalinks = <T extends Menu>(menu: T) :T => {
+
+//   if (Array.isArray(menu)) {
+//     return menu.map((item) => applyGetPermalinks(item)) as T;
+//   } 
+//   else if (typeof menu === 'object' && menu !== null) {
+//     const obj = {} as MenuItem;
+//     for (const key in menu) {
+//       if (key === 'href') {
+//         if (typeof menu[key] === 'string') {
+//           obj[key] = getPermalink(menu[key]);
+//         } else if (typeof menu[key] === 'object') {
+//           if (menu[key].type === 'home') {
+//             obj[key] = getHomePermalink();
+//           } 
+//           // else if (menu[key].type === 'blog') {
+//           //   obj[key] = getBlogPermalink();
+//           // } 
+//           else if (menu[key].type === 'asset') {
+//             obj[key] = getAsset(menu[key].url);
+//           } else if (menu[key].url) {
+//             obj[key] = getPermalink(menu[key].url, menu[key].type);
+//           }
+//         }
+//       } else {
+//         obj[key ] = applyGetPermalinks(menu[key]);
+//       }
+//     }
+//     return obj;
+//   }
+//   return menu;
+// };
