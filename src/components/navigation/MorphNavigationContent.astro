@@ -1,0 +1,192 @@
+---
+
+// type Props = {
+//   id: string;
+// }
+
+// const { id } = Astro.props ;
+
+---
+
+<!-- <section class="cd-text-center cd-margin-bottom-xl">
+    <p class="demo-morph-bg-paragraph cd-margin-bottom-sm">Hover effect ↓</p>
+  
+    <div class="cd-position-relative js-morph-bg-wrapper">
+      <ul class="demo-morph-bg-list cd-position-relative cd-z-index-2" data-morph-bg-preserve role="menu">
+        <li class="cd-position-relative" data-morph-bg="morph-bg-1" data-morph-bg-active>
+          <a class="demo-morph-bg-link" href="#0">Resources</a>
+  
+          <span class="demo-morph-bg-target" data-morph-bg-target style="height: 2px;" aria-hidden="true"></span>
+        </li>
+  
+        <li class="cd-position-relative" data-morph-bg="morph-bg-1">
+          <a class="demo-morph-bg-link" href="#0">What is CodyFrame</a>
+  
+          <span class="demo-morph-bg-target" data-morph-bg-target style="height: 2px;" aria-hidden="true"></span>
+        </li>
+  
+        <li class="cd-position-relative" data-morph-bg="morph-bg-1">
+          <a class="demo-morph-bg-link" href="#0">Contact us</a>
+  
+          <span class="demo-morph-bg-target" data-morph-bg-target style="height: 2px;" aria-hidden="true"></span>
+        </li>
+      </ul>
+  
+      <span class="morph-bg cd-z-index-1 demo-morph-bg-1 js-morph-bg" id="morph-bg-1" data-morph-bg-event="hover" aria-hidden="true"></span>
+    </div>
+</section> -->
+  
+<section class="cd-text-center">
+    <p class="demo-morph-bg-paragraph cd-margin-bottom-sm">Click effect ↓</p>
+
+    <div class="cd-position-relative js-morph-bg-wrapper">
+    <ul class="demo-morph-bg-list" role="menu">
+        <li class="cd-z-index-2">
+        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2" data-morph-bg-active>Resources</button>
+        </li>
+
+        <li class="cd-z-index-2">
+        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">What is CodyFrame</button>
+        </li>
+
+        <li class="cd-z-index-2">
+        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Contact us</button>
+        </li>
+    </ul>
+
+    <span class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg" id="morph-bg-2" aria-hidden="true"></span>
+    </div>
+</section>
+
+
+<!-- js -->
+<script>
+
+
+
+// init the morph background component
+// morphBackground()
+</script>
+
+<!-- Styles -->
+
+<style>
+
+  /* -------------------------------- 
+  
+  Title: Morphing Background
+  Descr: A morphing background item that transitions from one element's position to another's
+  
+  -------------------------------- */
+  
+  /* --------------------------------
+  
+  Component 
+  
+  -------------------------------- */
+  
+  .morph-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 1px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    transform-origin: left top;
+    -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+  }
+  
+  .morph-bg--visible {
+    opacity: 1;
+  }
+  
+  .morph-bg--has-transition {
+    transition: 0.3s;
+    will-change: transform, border-radius, height, width;
+  }
+  
+  /* -------------------------------- 
+  
+  Demo style 
+  
+  -------------------------------- */
+  
+  .demo-morph-bg-paragraph {
+    font-size: 0.9375rem;
+    color: hsl(240, 4%, 65%);
+  }
+  
+  .demo-morph-bg-list {
+    display: inline-flex;
+    flex-wrap: wrap;
+  }
+  
+  .demo-morph-bg-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: hsl(230, 13%, 9%);
+    text-decoration: none;
+    font-weight: medium;
+  }
+  
+  .demo-morph-bg-target {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+  }
+  
+  .demo-morph-bg-button {
+    border-radius: 50em;
+    font-weight: medium;
+    cursor: pointer;
+    color: hsl(230, 13%, 9%);
+    padding: 0.75rem 1rem;
+  }
+  
+  /* .demo-morph-bg-1 {
+    background-color: hsl(250, 84%, 54%);
+  } */
+  
+  .demo-morph-bg-2 {
+    background-color: hsl(240, 4%, 90%);
+  }
+  
+  /* -------------------------------- 
+  
+  Utilities 
+  
+  -------------------------------- */
+  
+  .cd-block {
+    display: block;
+  }
+  
+  .cd-position-relative {
+    position: relative;
+  }
+  
+  .cd-z-index-1 {
+    z-index: 1;
+  }
+  
+  .cd-z-index-2 {
+    z-index: 2;
+  }
+  
+  .cd-margin-bottom-sm {
+    margin-bottom: 1.5rem;
+  }
+  
+  .cd-margin-bottom-xl {
+    margin-bottom: 4.5rem;
+  }
+  
+  .cd-text-center {
+    text-align: center;
+  }
+  </style>

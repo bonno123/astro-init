@@ -39,7 +39,7 @@ export const heroWidget = {
 	title: "Landing",
 	description: "3D landing page with minimalistic design",
 	heroContent: {
-		title: "Here’s a clean piece of paper",
+		title: "Here’s a piece of responsive paper",
 		description: `I guess you are a bit early here. 🤔 Yup, I am still working on this page!
 		<br>
 		<br>

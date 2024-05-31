@@ -1,6 +1,8 @@
 ---
+// import PreHeader from '~/components/PreHeader.astro';
 import BaseHead from '~/components/common/BaseHead.astro';
-import PreHeader from '~/components/PreHeader.astro';
+import Header from '~/components/navigation/Header.astro';
+import MorphNavigationContent from '~/components/navigation/MorphNavigationContent.astro';
 
 interface Props {
 	title: string;
@@ -21,13 +23,47 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 	/>
 
 	<body>
+		<Header>
+			<button
+				slot="toggle-menu"
+				class="btn btn--primary padding-200" 
+				aria-controls="collappsable-nav"
+			>
+				Menu ↓
+			</button>
+		</Header>
+
 		<main>
+			<nav id="collappsable-nav" class="hide js-collapse" data-collapse-animate="on">
+        <MorphNavigationContent />
+			</nav>
 			<!-- <PreHeader /> -->
 
 			<slot />
 		</main>
 	</body>
 </html>
+
+<script>
+// import collpseContainer from "~/utils/collapseContainer";
+import Collapse from "~/utils/collapseContainerClass";
+
+var collapses = document.getElementsByClassName('js-collapse');
+
+// console.log(collapses);
+
+if( collapses.length > 0 ) {
+  for( var i = 0; i < collapses.length; i++) {
+    new Collapse(
+      collapses[i]
+    );
+  }
+}
+
+
+// collpseContainer()
+
+</script>
 
 <style is:global>
 /* general styling */
@@ -46,3 +82,83 @@ p[data-width="wide"] {
 	max-width: 50ch;
 }
 </style>
+
+
+<!-- button styles -->
+<style>
+
+.hide {
+	display: none;
+  /* visibility: hidden; */
+}
+
+.overflow-hidden {
+	overflow: hidden;
+}
+:root {
+  /* colors */
+  --color-primary-hsl: 250, 84%, 54%;
+  --color-bg-hsl: 0, 0%, 100%;
+  --color-contrast-higher-hsl: 230, 13%, 9%;
+  --color-bg-dark-hsl: 240, 4%, 95%;
+
+
+  --color-white-hsl: 0, 0%, 100%;
+  --color-primary-darker-hsl: 250, 84%, 38%;
+  --color-primary-light-hsl: 250, 84%, 60%;
+}
+
+
+
+/* buttons */
+.btn {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1em;
+  white-space: nowrap;
+  text-decoration: none;
+  background: hsl(var(--color-bg-dark-hsl));
+  color: hsl(var(--color-contrast-higher-hsl));
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: all 0.2s ease;
+  will-change: transform;
+  /* padding: var(--space-2xs) var(--space-sm); */
+  border-radius: 0.25em;
+  border: 1px solid transparent;
+
+}
+
+.btn:focus-visible {
+  box-shadow: 0px 0px 0px 2px hsl(var(--color-bg-hsl)), 0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.15);
+  outline: none;
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+.btn--primary {
+  background: hsl(var(--color-primary-hsl));
+  color: hsl(var(--color-white-hsl));
+  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 3px hsla(var(--color-primary-darker-hsl), 0.25), 0px 2px 6px hsla(var(--color-primary-darker-hsl), 0.1), 0px 6px 10px -2px hsla(var(--color-primary-darker-hsl), 0.25);
+}
+
+.btn--primary:hover {
+  background: hsl(var(--color-primary-light-hsl));
+  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1), 0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25);
+}
+
+.btn--primary:focus {
+  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1), 0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 0px 0px 2px hsl(var(--color-bg-hsl)), 0px 0px 0px 4px hsl(var(--color-primary-hsl));
+}
+
+
+
+</style>
+
