@@ -45,23 +45,55 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 </html>
 
 <script>
-// import collpseContainer from "~/utils/collapseContainer";
 import Collapse from "~/utils/collapseContainerClass";
+import MorphBackground from "~/utils/morphBackgroundClass";
 
 var collapses = document.getElementsByClassName('js-collapse');
-
-// console.log(collapses);
+var morphBg = document.getElementsByClassName('js-morph-bg');
 
 if( collapses.length > 0 ) {
   for( var i = 0; i < collapses.length; i++) {
-    new Collapse(
-      collapses[i]
-    );
+    const collapseInstance = new Collapse(collapses[i] as HTMLElement);
+    collapseInstance.onInitialized(() => {
+      if(morphBg.length > 0) {
+        for( var i = 0; i < morphBg.length; i++) {
+          const morphInstance = new MorphBackground(morphBg[i] as HTMLElement);
+        }
+      }
+    });
   }
 }
 
+  // on window resize - reset morph bg size
+  var resizingId: number | undefined,
+  customEventMorph = new CustomEvent('update-morphbg'),
+  customEventHide = new CustomEvent('hide-morphbg');
 
-// collpseContainer()
+  window.addEventListener('resize', function() {
+    if(!resizingId) doneResizing(customEventHide);
+    clearTimeout(resizingId);
+    resizingId = setTimeout(function(){
+      doneResizing(customEventMorph);
+      resizingId = undefined;
+    }, 100);
+  });
+
+  // wait for font to be loaded
+  if(document.fonts) {
+    document.fonts.onloadingdone = function (fontFaceSetEvent) {
+      doneResizing(customEventMorph);
+    };
+    
+    document.fonts.ready.then(function() {
+      setTimeout(function(){
+        doneResizing(customEventMorph);
+      }, 300);
+    });
+  }
+
+  function doneResizing(customEvent: CustomEvent<unknown>) {
+    window.dispatchEvent(customEvent);
+  };
 
 </script>
 

@@ -1,4 +1,4 @@
-import morphBackground from "~/utils/morphBackground";
+// import morphBackground from "~/utils/morphBackground";
 
 export default class Collapse {
     element: HTMLElement;
@@ -7,6 +7,7 @@ export default class Collapse {
     isAnimating = false;
 
     private isItemExpandedAtLeastOnce = false;
+    callback?: Function;
    
     constructor(element: HTMLElement) {
         this.element! = element;
@@ -14,6 +15,7 @@ export default class Collapse {
         this.shouldAnimate = this.element.getAttribute('data-collapse-animate') == 'on';
         this.isAnimating = false;
         this.initCollapse();
+        // this.onInitialized;
     }
 
     initCollapse() {
@@ -44,7 +46,9 @@ export default class Collapse {
         this.updateTriggers(isContainerCollapsed);
 
         if (!this.isItemExpandedAtLeastOnce){
-            morphBackground()
+            if(this.callback){
+                this.callback();    // Call the first time the item is expanded
+            }
             this.isItemExpandedAtLeastOnce = true
         }
     }
@@ -119,5 +123,10 @@ export default class Collapse {
         //set the height of the element before starting animation -> fix bug on Safari
         this.element.style.height = start+"px";
         window.requestAnimationFrame(animateHeight);
+    }
+
+    onInitialized(callback: Function) {
+        this.callback = callback;
+        this.callback();
     }
 }
