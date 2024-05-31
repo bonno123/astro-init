@@ -2,23 +2,23 @@
 import LOGO from '~/assets/Logo.astro'
 ---
 
-<header class="margin-block-500" style="display: flex; align-items: center;">
+<header class="page-container margin-block-500" style="display: flex; align-items: center;">
     <div class="" style="display: flex; flex: 1 1 0%">
         <a 
             href="/" 
             class="" 
-            style=" padding: 0.375rem"
+            style=" display: flex; align-items: center; gap: 0.5rem;"
         >
           <span class="sr-only">avik banik logo</span>
-          <LOGO height={65} width={65}>
+          <LOGO height={50} width={50}>
         </a>
     </div>
     
-    <div class="hidden lg:flex lg:gap-x-12">
+    <div class="">
         <slot />
     </div>
 
-    <div class="padding-400" >
+    <div class="" >
         <slot name="toggle-menu"></slot>
     </div>
 </header>
