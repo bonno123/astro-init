@@ -2,12 +2,17 @@
 
 export default class Collapse {
     element: HTMLElement;
+    canvasContainer: HTMLElement | null = null;
     triggers: NodeListOf<Element> | null = null;
     shouldAnimate= false;
     isAnimating = false;
 
+    // Canvas height and width before collapsing
+    originalCanvasHeight: number | null = null;
+    originalCanvasWidth: number | null = null;
+
     private isItemExpandedAtLeastOnce = false;
-    callback?: Function;
+    initCallback?: Function;
    
     constructor(element: HTMLElement) {
         this.element! = element;
@@ -16,6 +21,15 @@ export default class Collapse {
         this.isAnimating = false;
         this.initCollapse();
         // this.onInitialized;
+
+        // If the element contains a canvas, store its original dimensions
+        this.canvasContainer = this.element?.querySelector('.canvas-container');
+
+        const canvas = this.canvasContainer?.querySelector('canvas');
+        if (canvas instanceof HTMLCanvasElement) {
+            this.originalCanvasHeight = canvas.height;
+            this.originalCanvasWidth = window.innerWidth;
+        }
     }
 
     initCollapse() {
@@ -46,11 +60,20 @@ export default class Collapse {
         this.updateTriggers(isContainerCollapsed);
 
         if (!this.isItemExpandedAtLeastOnce){
-            if(this.callback){
-                this.callback();    // Call the first time the item is expanded
+            if(this.initCallback){
+                this.initCallback();    // Call the first time the item is expanded
             }
             this.isItemExpandedAtLeastOnce = true
         }
+
+        // // If the element contains a canvas, store its original height before collapsing
+        // const canvas = this.canvasContainer?.querySelector('canvas');
+        // if (canvas instanceof HTMLCanvasElement && !isContainerCollapsed) {
+        //     console.log('canvas', canvas.height, canvas.width);
+            
+        //     this.originalCanvasHeight = canvas.height;
+        //     this.originalCanvasWidth = canvas.width;
+        // }
     }
 
     animateElement(shouldShowContent: boolean) {
@@ -78,10 +101,39 @@ export default class Collapse {
                 this.element.removeAttribute("style");
                 this.element.classList.remove('overflow-hidden');
                 this.isAnimating = false;
+
+                // If the element contains a canvas and it's being expanded, animate its dimensions
+                const canvasElement = this.canvasContainer?.querySelector('canvas');
+                canvasElement?.setAttribute('width', window.innerWidth.toString());
+
+                if (this.canvasContainer && shouldShowContent) {
+                    this.canvasContainer.classList.remove('collapsed'); // Remove the collapsed class to expand the container
+                    this.canvasContainer.style.height = this.originalCanvasHeight + 'px';
+                    // canvasContainer.style.width = this.originalCanvasWidth + 'px';
+                    canvasElement?.setAttribute('width', window.innerWidth.toString());
+                  
+                } else {
+                    // Add the collapsed class to collapse the container
+                    this.canvasContainer?.classList.add('collapsed');
+
+                     // Animate the canvas dimensions
+                    this.setHeight(
+                        this.originalCanvasHeight ?? 0, 
+                        this.originalCanvasHeight ?? 0 - 200,  
+                        200, 
+                        () => {
+                            canvasElement?.setAttribute('height', (this.originalCanvasHeight ?? 0).toString());
+                            // canvasElement?.setAttribute('width', (this.originalCanvasWidth).toString());
+                            canvasElement?.setAttribute('width', window.innerWidth.toString());
+
+                        },
+                        'easeInOutQuad'
+                        
+                    );
+                }
             }, 
             'easeInOutQuad'
         );
-
 
     }
 
@@ -125,8 +177,16 @@ export default class Collapse {
         window.requestAnimationFrame(animateHeight);
     }
 
+    // TODO: use this for window resize
+    updateCanvasWidth() {
+        const canvas = this.element?.querySelector('canvas');
+        if (canvas instanceof HTMLCanvasElement) {
+            canvas.setAttribute('width', window.innerWidth.toString());
+        }
+    }
+
     onInitialized(callback: Function) {
-        this.callback = callback;
-        this.callback();
+        this.initCallback = callback;
+        this.initCallback();
     }
 }

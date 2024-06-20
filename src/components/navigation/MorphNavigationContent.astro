@@ -1,4 +1,5 @@
 ---
+import NavigationBackground2 from '~/components/glsl/NavigationBackground2.astro';
 
 // type Props = {
 //   id: string;
@@ -36,7 +37,9 @@
     </div>
 </section> -->
   
-<section class="cd-text-center">
+<section class="cd-text-center cd-position-relative">
+    <NavigationBackground2 class='cd-margin-bottom-sm'/>
+
     <p class="demo-morph-bg-paragraph cd-margin-bottom-sm">Click effect ↓</p>
 
     <div class="cd-position-relative js-morph-bg-wrapper">
@@ -46,7 +49,7 @@
         </li>
 
         <li class="cd-z-index-2">
-        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">What is CodyFrame</button>
+        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Play ground</button>
         </li>
 
         <li class="cd-z-index-2">
@@ -179,7 +182,7 @@
   }
   
   .cd-margin-bottom-sm {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2.5rem;
   }
   
   .cd-margin-bottom-xl {
@@ -189,4 +192,4 @@
   .cd-text-center {
     text-align: center;
   }
-  </style>
+</style>

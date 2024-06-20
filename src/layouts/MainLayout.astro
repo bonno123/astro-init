@@ -34,7 +34,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 		</Header>
 
 		<main>
-			<nav id="collappsable-nav" class="hide js-collapse" data-collapse-animate="on">
+			<nav id="collappsable-nav" class="js-collapse hide" data-collapse-animate="on">
         <MorphNavigationContent />
 			</nav>
 			<!-- <PreHeader /> -->
@@ -50,16 +50,18 @@ import MorphBackground from "~/utils/morphBackgroundClass";
 
 var collapses = document.getElementsByClassName('js-collapse');
 var morphBg = document.getElementsByClassName('js-morph-bg');
+// var canvas = document.querySelector('.navigation-canvas');
 
 if( collapses.length > 0 ) {
   for( var i = 0; i < collapses.length; i++) {
     const collapseInstance = new Collapse(collapses[i] as HTMLElement);
+
     collapseInstance.onInitialized(() => {
-      if(morphBg.length > 0) {
-        for( var i = 0; i < morphBg.length; i++) {
-          const morphInstance = new MorphBackground(morphBg[i] as HTMLElement);
-        }
-      }
+      initMorph()
+
+      // canvas?.setAttribute('width', window.innerWidth.toString());
+      // canvas?.setAttribute('height', window.innerHeight.toString());
+
     });
   }
 }
@@ -69,6 +71,7 @@ if( collapses.length > 0 ) {
   customEventMorph = new CustomEvent('update-morphbg'),
   customEventHide = new CustomEvent('hide-morphbg');
 
+  // on window resize - reset morph bg size
   window.addEventListener('resize', function() {
     if(!resizingId) doneResizing(customEventHide);
     clearTimeout(resizingId);
@@ -89,6 +92,14 @@ if( collapses.length > 0 ) {
         doneResizing(customEventMorph);
       }, 300);
     });
+  }
+
+  function initMorph(){
+    if(morphBg.length > 0) {
+      for( var i = 0; i < morphBg.length; i++) {
+        const morphInstance = new MorphBackground(morphBg[i] as HTMLElement);
+      }
+    }
   }
 
   function doneResizing(customEvent: CustomEvent<unknown>) {
