@@ -28,7 +28,7 @@ export default class Collapse {
         const canvas = this.canvasContainer?.querySelector('canvas');
         if (canvas instanceof HTMLCanvasElement) {
             this.originalCanvasHeight = canvas.height;
-            this.originalCanvasWidth = window.innerWidth;
+            // this.originalCanvasWidth = window.innerWidth;
         }
     }
 
@@ -104,13 +104,17 @@ export default class Collapse {
 
                 // If the element contains a canvas and it's being expanded, animate its dimensions
                 const canvasElement = this.canvasContainer?.querySelector('canvas');
-                canvasElement?.setAttribute('width', window.innerWidth.toString());
+                // canvasElement?.setAttribute('width', window.innerWidth.toString());
 
                 if (this.canvasContainer && shouldShowContent) {
                     this.canvasContainer.classList.remove('collapsed'); // Remove the collapsed class to expand the container
                     this.canvasContainer.style.height = this.originalCanvasHeight + 'px';
-                    // canvasContainer.style.width = this.originalCanvasWidth + 'px';
-                    canvasElement?.setAttribute('width', window.innerWidth.toString());
+                        // Adjust the canvas width according to the window's innerWidth and DPR
+                    if (canvasElement) {
+                        const targetWidth = window.innerWidth;
+                        const targetHeight = this.originalCanvasHeight ?? 0; // Fallback to 0 if undefined
+                        this.adjustCanvasSizeForDPR(canvasElement, targetWidth, targetHeight);
+                    }
                   
                 } else {
                     // Add the collapsed class to collapse the container
@@ -122,9 +126,12 @@ export default class Collapse {
                         this.originalCanvasHeight ?? 0 - 200,  
                         200, 
                         () => {
-                            canvasElement?.setAttribute('height', (this.originalCanvasHeight ?? 0).toString());
-                            // canvasElement?.setAttribute('width', (this.originalCanvasWidth).toString());
-                            canvasElement?.setAttribute('width', window.innerWidth.toString());
+                                // Adjust the canvas width according to the window's innerWidth and DPR
+                                if (canvasElement) {
+                                    const targetWidth = window.innerWidth;
+                                    const targetHeight = this.originalCanvasHeight ?? 0; // Fallback to 0 if undefined
+                                    this.adjustCanvasSizeForDPR(canvasElement, targetWidth, targetHeight);
+                                }
 
                         },
                         'easeInOutQuad'
@@ -183,6 +190,18 @@ export default class Collapse {
         if (canvas instanceof HTMLCanvasElement) {
             canvas.setAttribute('width', window.innerWidth.toString());
         }
+    }
+
+    // Function to adjust the canvas size according to the device's DPR
+    private adjustCanvasSizeForDPR(canvasElement: HTMLCanvasElement, width: number, height: number) {
+        const dpr = window.devicePixelRatio || 1; // Get the device pixel ratio, defaulting to 1
+        // Adjust the canvas drawing buffer size
+        canvasElement.width = width * dpr;
+        canvasElement.height = height * dpr;
+        // Adjust the canvas display size (via CSS) to match the logical size
+        canvasElement.style.width = `${width}px`;
+        canvasElement.style.height = `${height}px`;
+        // If additional adjustments are needed (e.g., for WebGL), they can be done here
     }
 
     onInitialized(callback: Function) {
