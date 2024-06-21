@@ -1,5 +1,15 @@
 ---
 
+type Props = {
+    height?: number,
+    width?: number,
+}
+
+const {
+    height = 100,
+    width = 100,
+} = Astro.props
+
 const viewboxHeight = 10
 const viewboxWidth = 10
 
@@ -11,9 +21,12 @@ const viewboxWidth = 10
     y="0"
     class="icon-toggle"
     aria-expanded="false"
+    height={`${height}`}
+    width={`${width}`}
 >
 
-    <g>
+    <!-- bg-grid: visual helper -->
+    <!-- <g>
         {[...Array(viewboxWidth+1).keys()].map((i) =>
             <line 
                 x1={i} x2={i}
@@ -29,7 +42,7 @@ const viewboxWidth = 10
                 style="stroke: var(--clr-primary-transparent); stroke-width: 0.02;"
             />
         )}
-    </g>
+    </g> -->
 
 
 
@@ -106,7 +119,7 @@ const viewboxWidth = 10
     svg {
       /* width: 30%; */
       height: 70%;
-      background: #eeeeeeb4;
+      /* background: #eeeeeeb4; */
       /* margin-bottom: 5%; */
     }
     

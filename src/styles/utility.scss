@@ -41,6 +41,10 @@
     text-align: center;
 }
 
+.text-right {
+    text-align: right;
+}
+
 .text-center  p {
     margin-inline: auto;
 }
@@ -56,7 +60,7 @@
 }
 
 .text-primary {
-    color: var(--clr-primary-400);
+    color: var(--clr-primary);
 }
 
 .text-accent {
@@ -73,6 +77,10 @@
 
 .text-neutral-dark {
     color: var(--clr-neutral-900);
+}
+
+.text-white {
+    color: rgba(232, 232, 232, 0.765);
 }
 
 .fw-bold {
@@ -106,9 +114,13 @@
 // .fs-500 {
 //     font-size: var(--fs-500);
 // }
-// .fs-600 {
-//     font-size: var(--fs-600);
-// }
+.fs-600 {
+    font-size: var(--fs-600);
+}
+
+.fs-700 {
+    font-size: 1.25rem;
+}
 
 
 
@@ -133,8 +145,39 @@
     padding-block: var(--size-900);
 }
 
+.padding-inline-900 {
+    padding-block: var(--size-900);
+}
+
+.padding-700 {
+    padding: var(--size-700);
+}
+
+.padding-200 {
+    padding: var(--size-200);
+}
+
+.padding-300 {
+    padding: var(--size-300);
+}
+
+.padding-400 {
+    padding: var(--size-400);
+}
+
+.padding-block-400 {
+    padding-block: var(--size-400);
+}
+.padding-block-500 {
+    padding-block: var(--size-500);
+}
+
 .padding-block-700 {
     padding-block: var(--size-700);
+}
+
+.padding-bottom-700 {
+    padding-bottom: var(--size-700);
 }
 
 .margin-bottom-700 {
@@ -143,6 +186,34 @@
 
 .margin-top-400 {
     margin-block-start: var(--size-400);
+}
+
+.margin-top-700 {
+    margin-block-start: var(--size-700);
+}
+
+.margin-bottom-400 {
+    margin-block-end: var(--size-400);
+}
+
+.margin-inline-400 {
+    margin-inline: var(--size-400);
+}
+
+.margin-inline-700 {
+    margin-inline: var(--size-700);
+}
+
+.margin-block-500 {
+    margin-block: var(--size-500);
+}
+
+.margin-block-700 {
+    margin-block: var(--size-700);
+}
+
+.margin-block-900 {
+    margin-block: var(--size-900);
 }
 
 /* ================== */
@@ -164,6 +235,10 @@
 
 .flex.vertical-align-end{
     align-items: end;
+}
+
+.flex.horizontal-align-end{
+    justify-content: end;
 }
 
 .justify-self-end {
@@ -196,19 +271,19 @@
 /* color classes */
 /* ================== */
 
-.bg-primary-400 {
-    background-color: var(--clr-primary-400);
+.bg-primary {
+    background-color: var(--clr-primary);
 }
 .bg-accent-400 {
     background-color: var(--clr-accent-400);
 }
-.bg-accent-100 {
-    background-color: var(--clr-accent-100);
+.bg-accent {
+    background-color: var(--clr-accent);
 }
-.bg-neutral-100 {
-    background-color: var(--clr-neutral-100);
+.bg-neutral {
+    background-color: var(--clr-neutral);
 }
-.bg-neutral-900 {
-    background-color: var(--clr-neutral-900);
+.bg-neutral {
+    background-color: var(--clr-neutral);
 }
 

@@ -39,18 +39,15 @@ export const heroWidget = {
 	title: "Landing",
 	description: "3D landing page with minimalistic design",
 	heroContent: {
-		title: "Here’s a clean piece of paper",
-		description: `I guess you are a bit early here. 🤔 I hardly can button it all!
-		<br>
-		By the way, your visit to *this* island 🏝️ is much appreciated.
+		title: "Here’s a piece of responsive paper",
+		description: `I guess you are a bit early here. 🤔 Yup, I am still working on this page!
 		<br>
 		<br>
-		Here, I have planned to share my GLSL design *playground*.
-		If you are interested, 💀 you can *subscribe* to my newsletter to get updates on what I am doing.
+		Here, I have planned to share my GLSL design *playground/*.
 
 		<br>
 		<br>
-		Meanwhile, you can check out my social profiles or know *about* me.
+		Meanwhile, you can check out my social profiles or know *about/* me.
 		`,
 	},
 	socialLinks: [
@@ -87,28 +84,23 @@ export const heroWidget = {
 	],
 }
 
+// currently this one is not using Path: src/data/about-me.ts
 export const aboutMeWidget = {
 	title: "About Me",
 	description: "portfolio of software engineer, web developer.",
 	aboutMe: {
 		title: "Hello, I’m Avik",
 		description: `
-			I am a software engineer veteran of 3+ years with the passion for web development.
-			<br>
-			<br>
-			My expertise lies in building web applications front-end part. Worked mostly 
-			with Vue.js and its ecosystem like Quasar.
-			<br>
-			I also have worked for backend a bit with Node.js and FastAPI, and databases like Oracle, postgreSQL with Prisma ORM.
-			<br>
-			<br>
-			I am currently working as a software engineer at a startup called RentApp.
-			And also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
-			I am always open to new opportunities.
-			<br>
-			<br>
-			Feel free to contact me at <strong class="fw-bold">${import.meta.env.PUBLIC_CONTACT_EMAIL}</strong>
-			or reach out to me on any of the following options!
+		I am a software engineer and web developer based in Kolkata, India.
+		<br/>
+		It's been 3 years since I started my tech journey.
+		Worked with various technologies and frameworks like Vue.js, Quasar, Node.js, FastAPI, and databases like Oracle, postgreSQL with Prisma ORM.
+		<br/><br/>
+		I am currently working as a software engineer at a startup called RentApp.
+		And also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
+		I am always open to new opportunities.
+		<br/><br/>
+		Feel free to email me or connect with me on any of the following options! 
     	`,
 		mail: import.meta.env.PUBLIC_CONTACT_EMAIL,
 	},

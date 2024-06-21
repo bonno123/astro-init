@@ -15,7 +15,8 @@ const { title, description } = Astro.props;
     {title}
   </h1>
 
-  <p data-width="wide"
+  <p 
+    data-width="wide"
     set:html={decorateTextLinks(description)}
   />
 
@@ -27,5 +28,30 @@ const { title, description } = Astro.props;
   .reversed {
       grid-row-start: 2;
     }
+}
+</style>
+
+<style is:global>
+/* component */
+.text-bg-effect {
+  background-repeat: no-repeat;
+  will-change: background-size;
+  transition: background-size 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+.text-bg-effect:hover {
+  background-size: 100% 100%;
+}
+
+/* .text-bg-effect--scale-x {
+  padding: var(--tm7-space-4xs) 0;
+  background-image: linear-gradient(hsla(var(--clr-accent), 0.2), hsla(var(--clr-accent), 0.2));
+  background-size: 0% 100%;
+} */
+
+.text-bg-effect--scale-y {
+  text-decoration: none;
+  background-image: linear-gradient(var(--clr-accent-transparent) 60% , var(--clr-accent-transparent) 60%);
+  background-size: 100% 2px;
+  background-position: center bottom;
 }
 </style>

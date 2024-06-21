@@ -1,0 +1,109 @@
+---
+interface Props  {
+  id?: string;
+  text: string;
+  isClickable?: boolean;
+  href?: URL | string;
+};
+
+const {
+    id,
+    text,
+    isClickable = false,
+    href = '#',
+} = Astro.props;
+---
+
+{isClickable ? (
+  // TODO: Fix the href and suppor for the dynamic href
+    <a id={id} class="chip chip--interactive" href={href} rel="noreferrer">
+        <img
+            class="chip__img" 
+            src="https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no" 
+            referrerpolicy="no-referrer" 
+            alt="Picture of author"
+        />
+        <i class="chip__label">{text}</i>
+        
+    </a>
+) : (
+    <span id={id} class="chip">
+        <img 
+            class="chip__img" 
+            src="https://lh3.googleusercontent.com/a/ACg8ocLBzZJ8J-WzyRl4UYkirOwSbTpka5Lc3-DkWK8PlzP7apD5I78n=s288-c-no" 
+            referrerpolicy="no-referrer" 
+            alt="Picture of author"
+        />
+        <i class="chip__label">{text}</i>
+    </span>
+)}
+
+
+
+<style>
+
+.chip {
+    /* font-weight: 500; */
+    /* line-height: 1.5; */
+    /* white-space: nowrap; */
+    /* overflow: hidden; */
+    /* text-overflow: ellipsis; */
+
+
+    border: 0;
+    color: inherit;
+    line-height: 1;
+    -webkit-appearance: none;
+          appearance: none;
+
+    display: inline-flex;
+    align-items: center;
+    border-radius: 50em;
+    padding: 0.25rem;
+    background-color: hsla(230, 13%, 9%, 0.1);
+
+    font-size: 1rem;
+}
+
+.chip__img {
+    /* width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    margin-right: 0.5rem; */
+    display: block;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 50%;
+    -o-object-fit: cover;
+        object-fit: cover;
+}
+
+.chip__label {
+    padding: 0 0.5rem;
+    /* font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; */
+}
+
+.chip--interactive {
+  cursor: pointer;
+  transition: background, box-shadow, transform;
+  transition-duration: 0.2s;
+}
+
+.chip--interactive:hover {
+  background-color: hsla(230, 13%, 9%, 0.2);
+}
+
+.chip--interactive:active {
+  transform: translateY(1px);
+}
+
+.chip--interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(0, 0%, 100%), 0 0 0 4px hsla(230, 13%, 9%, 0.95);
+}
+</style>

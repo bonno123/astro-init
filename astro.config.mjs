@@ -3,7 +3,7 @@ import vue from "@astrojs/vue";
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://avikbanik.com',
+  site: 'https://www.avikbanik.com',
   redirects: {
     '/this': '/',
   },
@@ -16,4 +16,8 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    format: 'directory',
+  },
+  trailingSlash:'always'
 });

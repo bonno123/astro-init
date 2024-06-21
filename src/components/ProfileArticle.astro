@@ -1,9 +1,9 @@
 ---
-import { decorateTextLinks } from '~/utils/decorateTextLinks'
-
+import { decorateTextLinks } from '~/utils/decorateTextLinks';
+import Chip from '~/components/Chip.astro';
 interface Props  {
   title: string,
-  description: string,
+  description?: string,
 };
 
 const {
@@ -11,20 +11,40 @@ const {
   description,
 } = Astro.props;
 
+// extract base URL
+const baseUrl = new URL(Astro.url.origin);
+
+const resumeRelative = new URL('/resume/', baseUrl)
+
 ---
-
 <div class="flow reversed">
-  <h1 class="fs-primary-heading fw-bold">
-    {title}
-  </h1>
-
-  <p data-width="wide"
-    set:html={decorateTextLinks(description)}
-  />
 
   <div class="">
+    <div class="margin-bottom-400">
+      <Chip text="Resume" isClickable href={resumeRelative}/>
+    </div>
+
+    <h1 class="fs-primary-heading fw-bold">
+      {title}
+    </h1>
   </div>
+
+
+
+  {!!description && (
+    <p data-width="wide"
+      set:html={decorateTextLinks(description)}
+    /> )
+  } 
+ 
+    <div class="">
+      <slot />
+    </div>
+
+  <div class=""> </div>
 </div>
+
+
 
 <style>
 @media (max-width: 55em) {
