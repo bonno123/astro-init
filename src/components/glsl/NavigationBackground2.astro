@@ -1,21 +1,23 @@
 ---
-import bosHelloWorld from "~/glsl/bos-hello-world/hello.frag?raw";
+import background from "~/glsl/navigation-bg/background.frag?raw";
 
 type Props = {
   class?: string;
+  containerClass?: string;
 };
 
 const {
   class: providerClass,
+  containerClass,
 } = Astro.props;
 
 ---
 
 <!-- Wrap the component elements in our custom element “astro-heart”. -->
-<div class="canvas-container">
+<div class:list={[containerClass, 'canvas-container']}>
   <canvas
     class:list={[providerClass, 'glslCanvas']}
-    data-fragment={bosHelloWorld}
+    data-fragment={background}
   >
     Your browser does not support the HTML5 canvas element.
   </canvas>
@@ -35,7 +37,7 @@ const {
 
 <style>
   .canvas-container {
-    position: absolute;
+    /* position: absolute; */
     width: 100%;
 
     z-index: -1;

@@ -38,26 +38,24 @@ import NavigationBackground2 from '~/components/glsl/NavigationBackground2.astro
 </section> -->
   
 <section class="cd-text-center cd-position-relative">
-    <NavigationBackground2 class='cd-margin-bottom-sm'/>
+    <NavigationBackground2 class='cd-margin-bottom-sm'/>  
 
-    <p class="demo-morph-bg-paragraph cd-margin-bottom-sm">Click effect ↓</p>
-
-    <div class="cd-position-relative js-morph-bg-wrapper">
-    <ul class="demo-morph-bg-list" role="menu">
-        <li class="cd-z-index-2">
-        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2" data-morph-bg-active>Resources</button>
-        </li>
-
-        <li class="cd-z-index-2">
-        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Play ground</button>
-        </li>
-
-        <li class="cd-z-index-2">
-        <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Contact us</button>
-        </li>
-    </ul>
-
-    <span class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg" id="morph-bg-2" aria-hidden="true"></span>
+    <div class="navigation-content">
+      <p class="demo-morph-bg-paragraph ">Click effect ↓</p>
+      <div class="cd-position-relative js-morph-bg-wrapper">
+      <ul class="demo-morph-bg-list" role="menu">
+          <li class="cd-z-index-2">
+          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2" data-morph-bg-active>Resources</button>
+          </li>
+          <li class="cd-z-index-2">
+          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Play ground</button>
+          </li>
+          <li class="cd-z-index-2">
+          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Contact us</button>
+          </li>
+      </ul>
+      <span class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg" id="morph-bg-2" aria-hidden="true"></span>
+      </div>
     </div>
 </section>
 
@@ -74,6 +72,16 @@ import NavigationBackground2 from '~/components/glsl/NavigationBackground2.astro
 <!-- Styles -->
 
 <style>
+
+.navigation-content {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  padding: 1rem;
+}
 
   /* -------------------------------- 
   
@@ -118,6 +126,7 @@ import NavigationBackground2 from '~/components/glsl/NavigationBackground2.astro
   -------------------------------- */
   
   .demo-morph-bg-paragraph {
+    padding: 1rem;
     font-size: 0.9375rem;
     color: hsl(240, 4%, 65%);
   }
@@ -179,6 +188,10 @@ import NavigationBackground2 from '~/components/glsl/NavigationBackground2.astro
   
   .cd-z-index-2 {
     z-index: 2;
+  }
+
+  .cd-margin-y-xs {
+    margin-block: 1.675rem;
   }
   
   .cd-margin-bottom-sm {
