@@ -1,5 +1,8 @@
-// Author: @patriciogv
-// Title: CellularNoise
+// Original Author: Patricio Gonzalez Vivo (@patriciogv)
+// Mofiied by: @avik-banik
+// Description: A simple distance field shader with 4 cells
+// Date: 2021-07-02
+
 
 #ifdef GL_ES
 precision mediump float;
@@ -9,73 +12,54 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
-vec2 random2( vec2 p ) {
-    return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
-}
-
-
-
 void main() {
     vec2 st = gl_FragCoord.xy/u_resolution.xy;
     st.x *= u_resolution.x/u_resolution.y;
 
-    // Normalize mouse coordinates
-    vec2 mouse = u_mouse / u_resolution.xy;
-
-    // Apply mouse position to st
-    st += mouse*0.05; // This line shifts the pattern based on the mouse position
+    st.x *= 0.6;
+    st.y *= 0.9;
 
     vec3 color = vec3(.0);
 
-    // Scale
-    st *= 3.;
+    const int CELLS = 5;
 
-    // Tile the space
-    vec2 i_st = floor(st);
-    vec2 f_st = fract(st);
+    // Cell positions
+    vec2 point[CELLS];
+
+    point[0] = vec2(0.83,0.75);
+    point[1] = vec2(0.60,0.07);
+    point[2] = vec2(0.28,0.64);
+    point[3] =  vec2(0.31,sin(u_time)*0.5+0.5);
+    point[4] = u_mouse/u_resolution;
+
+    // new cells
+    // point[5] = vec2(0.10, 0.80); // New cell
+    // point[6] = vec2(0.90, 0.20); // New cell
+
 
     float m_dist = 1.;  // minimum distance
 
-    for (int y= -1; y <= 1; y++) {
-        for (int x= -1; x <= 1; x++) {
-            // Neighbor place in the grid
-            vec2 neighbor = vec2(float(x),float(y));
+    // Iterate through the points positions
+    for (int i = 0; i < CELLS; i++) {
+        float dist = distance(st, point[i]);
 
-            // Random position from current + neighbor place in the grid
-            vec2 point = random2(i_st + neighbor);
-
-			// Animate the point
-            point = 0.5 + 0.5*sin(u_time*0.1 + 6.2831*point) + 0.5*sin(6.2831*point + u_mouse.xy*0.005); // This line animates the point based on the mouse position
-            // point = 0.5 + 0.5*sin(6.2831*point + u_mouse.xy*0.005); // This line animates the point based on the mouse position
-
-			// Vector between the pixel and the point
-            vec2 diff = neighbor + point - f_st;
-
-            // Distance to the point
-            float dist = length(diff);
-
-            // Keep the closer distance
-            m_dist = min(m_dist, dist);
-        }
+        // Keep the closer distance
+        m_dist = min(m_dist, dist);
     }
 
     // Draw the min distance (distance field)
-    color += m_dist;
-
-    color = vec3(color.r * 0.1, color.g * 0.01, color.b + 0.004);
-
-    // Ensure color components are within the [0, 1] range
-    // color = clamp(color, 0., 1.);
-
-
-    // Draw cell center
-    // color += 1.-step(.02, m_dist);
-
-    // Draw grid
-    // color.r += step(.98, f_st.x) + step(.98, f_st.y);
+    color += m_dist
+        // Adjust color to be light gray
+        * vec3(0.5);
+        
+    // Adjust color to be purplish
+    // float baseColorIntensity = m_dist + sin(u_time) * 0.5;
+    // produce a blue purple color
+    // color = vec3(0.5, 0.0, 0.5) * baseColorIntensity;
 
     // Show isolines
-    // color -= step(.7,abs(sin(27.0*m_dist)))*.5;
+    // color -= step(.7,abs(sin(50.0*m_dist)))*.3;
+
 
     gl_FragColor = vec4(color,1.0);
 }

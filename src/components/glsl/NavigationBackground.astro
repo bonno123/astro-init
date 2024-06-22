@@ -1,43 +1,59 @@
+---
+import background from "~/glsl/navigation-bg/background.frag?raw";
+
+type Props = {
+  class?: string;
+  containerClass?: string;
+};
+
+const {
+  class: providerClass,
+  containerClass,
+} = Astro.props;
+
+---
+
 <!-- Wrap the component elements in our custom element “astro-heart”. -->
-<glsl-canvas-background>
-  <button aria-label="Heart">💜</button> × <span>0</span>
-</glsl-canvas-background>
+<div class:list={[containerClass, 'canvas-container']}>
+  <canvas
+    class:list={[providerClass, 'glslCanvas']}
+    data-fragment={background}
+  >
+    Your browser does not support the HTML5 canvas element.
+  </canvas>
+</div>
 
 <script>
-import GlslCanvas from 'glslCanvas'; // Import the necessary library or module
+  import GlslCanvas from 'glslCanvas';
 
-class GlslCanvasBackground extends HTMLElement {
-  private glslCanvas: any;
-  private canvas: HTMLCanvasElement | null = null;
-
-  connectedCallback() {
-    this.canvas = document.createElement('canvas');
-    this.appendChild(this.canvas);
-
-    this.glslCanvas = new GlslCanvas(this.canvas);
-    this.glslCanvas.load(`
-      void main() {
-        gl_FragColor = vec4(0.2, 0.4, 0.0, 1.0);
-      }
-    `);
-  }
-
-  disconnectedCallback() {
-    this.glslCanvas.destroy();
-  }
-}
-
-customElements.define('glsl-canvas-background', GlslCanvasBackground);
 </script>
+      
+      
+<style>
+  @import url('src/styles/glsl-canvas.scss');
+</style>
+
+
 
 <style>
-  glsl-canvas-background {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .canvas-container {
+    /* position: absolute; */
     width: 100%;
-    height: 100%;
+    background-color: #7b7b7b;
+
+    z-index: -1;
   }
 
+
+</style>
+
+<style is:global>
+
+.canvas-container.collapsed {
+  height: 0;
+  width: 0;
+  transition: height 0.5s, width 0.5s;
+  overflow: hidden;
+}
 
 </style>
