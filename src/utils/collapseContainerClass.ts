@@ -176,12 +176,24 @@ export default class Collapse {
                 window.requestAnimationFrame(animateHeight);
             } else {
                 if(callback) callback();
+                this.adjustCanvasAfterExpansion();
             }
         };
   
         //set the height of the element before starting animation -> fix bug on Safari
         this.element.style.height = start+"px";
         window.requestAnimationFrame(animateHeight);
+    }
+
+    // New method to adjust the canvas size after expansion
+    adjustCanvasAfterExpansion() {
+        const canvas = this.element?.querySelector('canvas');
+        if (canvas instanceof HTMLCanvasElement) {
+            // Delay the adjustment slightly to ensure it happens after the container has resized
+            setTimeout(() => {
+                this.adjustCanvasSizeForDPR(canvas, this.element.offsetWidth, canvas.offsetHeight);
+            }, 0); // Adjust the timeout as needed based on your application's behavior
+        }
     }
 
     // TODO: use this for window resize
@@ -202,6 +214,7 @@ export default class Collapse {
         canvasElement.style.width = `${width}px`;
         canvasElement.style.height = `${height}px`;
         // If additional adjustments are needed (e.g., for WebGL), they can be done here
+        
     }
 
     onInitialized(callback: Function) {

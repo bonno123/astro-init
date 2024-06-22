@@ -49,8 +49,8 @@ void main() {
 
     // Draw the min distance (distance field)
     color += m_dist
-        // Adjust color to be light gray
-        * vec3(0.5);
+        // Adjust color to be a even a more lighter blue
+        * vec3(0.5, 0.5, 3.0);
         
     // Adjust color to be purplish
     // float baseColorIntensity = m_dist + sin(u_time) * 0.5;
