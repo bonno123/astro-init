@@ -3,7 +3,7 @@
 export default class Collapse {
     element: HTMLElement;
     canvasContainer: HTMLElement | null = null;
-    triggers: NodeListOf<Element> | null = null;
+    triggers: NodeListOf<Element> | null = null; // trigger elements that control the visibility of the container
     shouldAnimate= false;
     isAnimating = false;
 

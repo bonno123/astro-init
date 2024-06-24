@@ -39,7 +39,7 @@ const {pathname} = Astro.url;
     </div>
 </section> -->
   
-<section class="cd-text-center cd-position-relative">
+<section class="cd-text-center cd-position-relative" transition:persist="">
   <!-- {pathname} -->
     <NavigationBackground class='cd-margin-bottom-sm'/>  
 
@@ -97,7 +97,7 @@ const {pathname} = Astro.url;
 
 
 <script>
-  import { navigate } from 'astro:transitions/client';
+import { navigate } from 'astro:transitions/client';
 
 // Navigate to the selected route when clicking on the button
 document.addEventListener('click', (event) => {
