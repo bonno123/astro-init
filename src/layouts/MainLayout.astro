@@ -34,8 +34,8 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 		</Header>
 
 		<main>
-			<nav id="collappsable-nav" class="js-collapse hide" data-collapse-animate="on">
-        <MorphNavigationContent />
+			<nav id="collappsable-nav" class="js-collapse " data-collapse-animate="on" >
+        <MorphNavigationContent  />
 			</nav>
 			<!-- <PreHeader /> -->
 
@@ -56,12 +56,12 @@ if( collapses.length > 0 ) {
   for( var i = 0; i < collapses.length; i++) {
     const collapseInstance = new Collapse(collapses[i] as HTMLElement);
 
+
     collapseInstance.onInitialized(() => {
       initMorph()
 
       // canvas?.setAttribute('width', window.innerWidth.toString());
       // canvas?.setAttribute('height', window.innerHeight.toString());
-
     });
   }
 }

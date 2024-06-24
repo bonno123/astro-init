@@ -57,8 +57,22 @@ void main() {
     }
 
     // Draw the min distance (distance field)
-    color += m_dist
-        * vec3(0.9);    // Adjust color to be a very lighter gray
+    color += m_dist;
+        // * vec3(0.9);    // Adjust color to be a very lighter gray
+
+    // Interpolation towards white
+    // This will lighten the color towards white while maintaining the original pattern
+
+    vec3 baseColor = color; // Original color from the pattern
+    vec3 targetColor = vec3(0.9); // White
+
+    // Define a fixed factor for interpolation towards white
+    // This factor determines how much the original color is blended towards white
+    // 0.0 means no change (fully the original color), 1.0 means fully white
+    float blendTowardsWhiteFactor = 0.35; // Adjust this value to control the effect
+
+    // Interpolate between the original color and white
+    color = mix(baseColor, targetColor, blendTowardsWhiteFactor);
 
 
     // Show isolines

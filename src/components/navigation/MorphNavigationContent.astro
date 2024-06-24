@@ -7,6 +7,8 @@ import NavigationBackground from '~/components/glsl/NavigationBackground.astro';
 
 // const { id } = Astro.props ;
 
+const {pathname} = Astro.url;
+
 ---
 
 <!-- <section class="cd-text-center cd-margin-bottom-xl">
@@ -38,35 +40,74 @@ import NavigationBackground from '~/components/glsl/NavigationBackground.astro';
 </section> -->
   
 <section class="cd-text-center cd-position-relative">
+  <!-- {pathname} -->
     <NavigationBackground class='cd-margin-bottom-sm'/>  
 
     <div class="navigation-content">
-      <p class="demo-morph-bg-paragraph ">Click effect ↓</p>
+      <!-- <p class="demo-morph-bg-paragraph ">Click effect ↓</p> -->
       <div class="cd-position-relative js-morph-bg-wrapper">
-      <ul class="demo-morph-bg-list" role="menu">
-          <li class="cd-z-index-2">
-          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2" data-morph-bg-active>Resources</button>
-          </li>
-          <li class="cd-z-index-2">
-          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Playground</button>
-          </li>
-          <li class="cd-z-index-2">
-          <button class="demo-morph-bg-button" data-morph-bg="morph-bg-2">Contact us</button>
-          </li>
-      </ul>
-      <span class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg" id="morph-bg-2" aria-hidden="true"></span>
+        <ul class="demo-morph-bg-list" role="menu">
+            <li class="cd-z-index-2 " >
+              <a >
+                <button
+                  data-route-to="/"
+                  class="demo-morph-bg-button" 
+                  data-morph-bg="morph-bg-2"
+                  data-morph-bg-active={pathname === '/'}
+                >
+                  Home
+                </button>
+              </a>
+            </li>
+
+            <li class="cd-z-index-2">
+                <button 
+                  data-route-to="/playground/"
+                  class="demo-morph-bg-button" 
+                  data-morph-bg="morph-bg-2"
+                  data-morph-bg-active={pathname === '/playground/'}
+                > Playground
+                </button>
+            </li>
+
+            <li class="cd-z-index-2">
+                <button 
+                data-route-to="/about/"
+                class="demo-morph-bg-button" 
+                data-morph-bg="morph-bg-2"
+                data-morph-bg-active={ pathname === '/about/' }
+                >About</button>
+            </li>
+
+            <li class="cd-z-index-2">
+                <button
+                  data-route-to="/contact/"
+                  class="demo-morph-bg-button" 
+                  data-morph-bg="morph-bg-2" 
+                  data-morph-bg-active={ pathname === '/contact/' }
+                >Contact us
+                </button>
+            </li>
+        </ul>
+
+        <span class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg" id="morph-bg-2" aria-hidden="true"></span>
       </div>
     </div>
 </section>
 
 
-<!-- js -->
 <script>
+  import { navigate } from 'astro:transitions/client';
 
+// Navigate to the selected route when clicking on the button
+document.addEventListener('click', (event) => {
+  const button = (event.target as Element)?.closest('[data-route-to]');
+  if (!button) return;
 
+  const route = button.getAttribute('data-route-to');
+  navigate(String(route));
+});
 
-// init the morph background component
-// morphBackground()
 </script>
 
 <!-- Styles -->

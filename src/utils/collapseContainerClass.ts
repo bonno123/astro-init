@@ -28,7 +28,16 @@ export default class Collapse {
         const canvas = this.canvasContainer?.querySelector('canvas');
         if (canvas instanceof HTMLCanvasElement) {
             this.originalCanvasHeight = canvas.height;
-            // this.originalCanvasWidth = window.innerWidth;
+            this.originalCanvasWidth = canvas.width;
+        }
+
+        // Immediately adjust the canvas size if the container is initially expanded
+        if (this.canvasContainer && !this.canvasContainer.classList.contains('collapsed')) {
+            if (canvas) {
+                const targetWidth = window.innerWidth;
+                const targetHeight = this.originalCanvasHeight ?? 0; // Use your logic to determine the initial height
+                this.adjustCanvasSizeForDPR(canvas, targetWidth, targetHeight);
+            }
         }
     }
 
@@ -38,7 +47,7 @@ export default class Collapse {
             this.updateTriggers(!this.element?.classList.contains('hide'));
 
             // detect click on trigger elements
-            for(var i = 0; i < this.triggers.length; i++) {
+            for(let i = 0; i < this.triggers.length; i++) {
                 this.triggers[i].addEventListener('click', (event: Event) => {
                     event.preventDefault();
                     this.toggleVisibility();
@@ -104,7 +113,6 @@ export default class Collapse {
 
                 // If the element contains a canvas and it's being expanded, animate its dimensions
                 const canvasElement = this.canvasContainer?.querySelector('canvas');
-                // canvasElement?.setAttribute('width', window.innerWidth.toString());
 
                 if (this.canvasContainer && shouldShowContent) {
                     this.canvasContainer.classList.remove('collapsed'); // Remove the collapsed class to expand the container
@@ -144,7 +152,7 @@ export default class Collapse {
 
     }
 
-    updateTriggers( isCollapsed: boolean) {
+    updateTriggers( isCollapsed: boolean) {       
         if(!this.triggers) return;
         for(var i = 0; i < this.triggers.length; i++) {
             this.triggers[i].setAttribute('aria-expanded', !isCollapsed ? 'true' : 'false');
@@ -171,6 +179,7 @@ export default class Collapse {
             //     val = Math[easing](progress, start, end - start, duration);
             // }
 
+            
             this.element.style.height = val+"px";
             if(progress < duration) {
                 window.requestAnimationFrame(animateHeight);

@@ -1,5 +1,5 @@
 ---
-
+import { ViewTransitions } from 'astro:transitions';
 import BaseHeadSeo from '~/components/BaseHeadSeo.astro'
 import '~/styles/reset.scss';
 import '~/styles/utility.scss';
@@ -24,6 +24,8 @@ const { title, metaDescription } = Astro.props;
         metaDescription={metaDescription}
 
     />
+
+    <!-- <ViewTransitions /> -->
 </head>
 
 

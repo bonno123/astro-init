@@ -26,11 +26,29 @@ const {
 <script>
   import GlslCanvas from 'glslCanvas';
 
+  // While canvas is loading, hide it with opacity and show it once the shader is loaded
+    const canvasElement = document.querySelector('.glslCanvas') as HTMLCanvasElement;
+    if (canvasElement) {
+      // Initialize GlslCanvas
+      const sandbox = new GlslCanvas(canvasElement);
+  
+      // Check if the shader is loaded
+      sandbox.on('render', () => {
+        // Once the shader is loaded, make the canvas visible
+        canvasElement.style.opacity = '1';
+      });
+    }
+
 </script>
       
       
 <style>
   @import url('src/styles/glsl-canvas.scss');
+
+  .glslCanvas {
+    opacity: 0; /* Initially hide the canvas */
+    transition: opacity 0.5s ease-out; /* Smooth transition to visible */
+  }
 </style>
 
 
