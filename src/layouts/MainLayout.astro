@@ -28,13 +28,19 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 				slot="toggle-menu"
 				class="btn btn--primary padding-200" 
 				aria-controls="collappsable-nav"
+        transition:persist=""
 			>
 				Menu ↓
 			</button>
 		</Header>
 
 		<main>
-			<nav id="collappsable-nav" class="js-collapse " data-collapse-animate="on" >
+			<nav 
+        id="collappsable-nav" 
+        class="js-collapse hide" 
+        data-collapse-animate="on" 
+        transition:persist=""
+      >
         <MorphNavigationContent  />
 			</nav>
 			<!-- <PreHeader /> -->
