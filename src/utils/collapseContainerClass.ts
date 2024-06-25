@@ -26,18 +26,29 @@ export default class Collapse {
         this.canvasContainer = this.element?.querySelector('.canvas-container');
 
         const canvas = this.canvasContainer?.querySelector('canvas');
+        if (!canvas) {
+            console.warn('No canvas element found in the container');
+
+            return;
+        }
+
         if (canvas instanceof HTMLCanvasElement) {
-            this.originalCanvasHeight = canvas.height;
-            this.originalCanvasWidth = canvas.width;
+            // console.log('canvas', canvas.height, canvas.width);
+            
+            this.originalCanvasHeight = canvas.height ;
+            this.originalCanvasWidth = canvas.width ;
         }
 
         // Immediately adjust the canvas size if the container is initially expanded
         if (this.canvasContainer && !this.canvasContainer.classList.contains('collapsed')) {
-            if (canvas) {
-                const targetWidth = window.innerWidth;
-                const targetHeight = this.originalCanvasHeight ?? 0; // Use your logic to determine the initial height
-                this.adjustCanvasSizeForDPR(canvas, targetWidth, targetHeight);
-            }
+            // console.log('canvas expanded');
+            
+            
+            const targetWidth = window.innerWidth;
+            const targetHeight = this.originalCanvasHeight ? this.originalCanvasHeight : 0; // Use your logic to determine the initial height
+            console.log({targetHeight, targetWidth});
+
+            this.adjustCanvasSizeForDPR(canvas, targetWidth, targetHeight);
         }
     }
 
@@ -56,13 +67,13 @@ export default class Collapse {
         }
 
         // custom event
-        this.element?.addEventListener('collapseToggle', (event: Event) =>{
-            this.toggleVisibility();
-        });
+        // this.element?.addEventListener('collapseToggle', (event: Event) =>{
+        //     this.toggleVisibility();
+        // });
     }
 
     toggleVisibility() {
-        var isContainerCollapsed = this.element?.classList.contains('hide');
+        let isContainerCollapsed = this.element?.classList.contains('hide');
         if(this.isAnimating) return;
         this.isAnimating = true;
         this.animateElement(isContainerCollapsed);
@@ -87,9 +98,11 @@ export default class Collapse {
 
     animateElement(shouldShowContent: boolean) {
         // shouldShowContent === true -> show content
-        if(!this.shouldAnimate || !window.requestAnimationFrame) {
+        if((!this.shouldAnimate || !window.requestAnimationFrame)) {
             this.element?.classList.toggle('hide', !shouldShowContent);
             this.isAnimating = false;
+            console.log('no animation');
+            
             return;
         }
 
@@ -113,14 +126,19 @@ export default class Collapse {
 
                 // If the element contains a canvas and it's being expanded, animate its dimensions
                 const canvasElement = this.canvasContainer?.querySelector('canvas');
+                const dpr = window.devicePixelRatio || 1;
 
                 if (this.canvasContainer && shouldShowContent) {
                     this.canvasContainer.classList.remove('collapsed'); // Remove the collapsed class to expand the container
-                    this.canvasContainer.style.height = this.originalCanvasHeight + 'px';
+                    
+                    // TODO: investigate why the canvas is getting cut off if it is expanded initially ==========>>>>>>
+
+                    // Add 5px to the original height to ensure the container is a little larger than the canvas
+                    this.canvasContainer.style.height = ((this.originalCanvasHeight ?? 0) /*+5 */) + 'px';  
                         // Adjust the canvas width according to the window's innerWidth and DPR
                     if (canvasElement) {
                         const targetWidth = window.innerWidth;
-                        const targetHeight = this.originalCanvasHeight ?? 0; // Fallback to 0 if undefined
+                        const targetHeight = (this.originalCanvasHeight ?? 0); // Fallback to 0 if undefined
                         this.adjustCanvasSizeForDPR(canvasElement, targetWidth, targetHeight);
                     }
                   
@@ -128,19 +146,18 @@ export default class Collapse {
                     // Add the collapsed class to collapse the container
                     this.canvasContainer?.classList.add('collapsed');
 
-                     // Animate the canvas dimensions
+                    // Animate the canvas dimensions
                     this.setHeight(
-                        this.originalCanvasHeight ?? 0, 
-                        this.originalCanvasHeight ?? 0 - 200,  
+                        (this.originalCanvasHeight  ?? 0), 
+                        (this.originalCanvasHeight ?? 0)  - 200,  
                         200, 
                         () => {
                                 // Adjust the canvas width according to the window's innerWidth and DPR
                                 if (canvasElement) {
-                                    const targetWidth = window.innerWidth;
-                                    const targetHeight = this.originalCanvasHeight ?? 0; // Fallback to 0 if undefined
+                                    const targetWidth = window.innerWidth ;
+                                    const targetHeight = (this.originalCanvasHeight ?? 0) ; // Fallback to 0 if undefined
                                     this.adjustCanvasSizeForDPR(canvasElement, targetWidth, targetHeight);
                                 }
-
                         },
                         'easeInOutQuad'
                         

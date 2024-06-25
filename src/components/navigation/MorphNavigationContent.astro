@@ -40,10 +40,10 @@ const {pathname} = Astro.url;
 </section> -->
   
 <section class="cd-text-center cd-position-relative">
-    <NavigationBackground class='cd-margin-bottom-sm'/>  
+    <NavigationBackground class=''/>  
 
     <div class="navigation-content">
-      <!-- <p class="demo-morph-bg-paragraph ">Click effect ↓</p> -->
+      <p class="demo-morph-bg-paragraph ">Click effect ↓</p>
       <div class="cd-position-relative js-morph-bg-wrapper">
         <ul class="demo-morph-bg-list" role="menu">
             <li class="cd-z-index-2 " >
@@ -111,7 +111,7 @@ document.addEventListener('click', (event) => {
 document.addEventListener('astro:page-load', (event) => {
   // This runs once the page is loaded. 
   setupStuff(event.target as Element);
-}, { once: true });
+}, { passive: true });
 
 function setupStuff(target: Element | null) {
   //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to
@@ -146,7 +146,7 @@ function doneRouteChange(customEvent: CustomEvent<unknown>) {
   left: 50%;
   transform: translate(-50%, -50%);
 
-  padding: 1rem;
+  /* padding: 1rem; */
 }
 
   /* -------------------------------- 
@@ -256,17 +256,17 @@ function doneRouteChange(customEvent: CustomEvent<unknown>) {
     z-index: 2;
   }
 
-  .cd-margin-y-xs {
+  /* .cd-margin-y-xs {
     margin-block: 1.675rem;
-  }
+  } */
   
-  .cd-margin-bottom-sm {
+  /* .cd-margin-bottom-sm {
     margin-bottom: 2.5rem;
-  }
+  } */
   
-  .cd-margin-bottom-xl {
+  /* .cd-margin-bottom-xl {
     margin-bottom: 4.5rem;
-  }
+  } */
   
   .cd-text-center {
     text-align: center;
