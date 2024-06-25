@@ -95,9 +95,8 @@ const {pathname} = Astro.url;
     </div>
 </section>
 
-
 <script>
-  import { navigate } from 'astro:transitions/client';
+import { navigate } from 'astro:transitions/client';
 
 // Navigate to the selected route when clicking on the button
 document.addEventListener('click', (event) => {
@@ -107,6 +106,33 @@ document.addEventListener('click', (event) => {
   const route = button.getAttribute('data-route-to');
   navigate(String(route));
 });
+  var customEventRouteChanged = new CustomEvent('route-changed');
+
+// since the state is set to persist, we need to update the morph-bg-active attribute when the route changes
+document.addEventListener('astro:page-load', (event) => {
+  // This runs once the page is loaded. 
+  setupStuff(event.target as Element);
+}, { passive: true });
+
+function setupStuff(target: Element | null) {
+  //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to
+  // Assuming `pathname` is reactive and part of your component's state
+  let routePath = window.location.pathname; // Initialize pathname with the current path
+  const buttons = target?.querySelectorAll('[data-route-to]');
+
+  if (!buttons) return;
+
+  buttons.forEach((button) => {
+    const routeTo = button.getAttribute('data-route-to');
+    button.setAttribute('data-morph-bg-active', String(routeTo === routePath));
+  });
+
+  doneRouteChange(customEventRouteChanged);
+}
+function doneRouteChange(customEvent: CustomEvent<unknown>) {
+    window.dispatchEvent(customEvent);
+  };
+
 
 </script>
 

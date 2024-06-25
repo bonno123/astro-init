@@ -1,19 +1,12 @@
 ---
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
-import LineFragment from "~/glsl/shaping-functions/line.frag?raw";
 import Link from '~/components/common/Link.astro';
+import BOSShapingFunctions from '~/canvases/BOSShapingFunctions.astro'
 ---
 
 <EvenColumnsLayout>
     <div class="">
-        <canvas
-            class="glslCanvas"
-            data-fragment={LineFragment}
-            width="500" 
-            height="300"
-        >
-            Your browser does not support the HTML5 canvas element.
-        </canvas>    
+        <BOSShapingFunctions />
     </div>
 
     <div class="flow">
@@ -37,14 +30,3 @@ import Link from '~/components/common/Link.astro';
     </div>
 
 </EvenColumnsLayout>
-
-<script>
-// @ts-nocheck
-import GlslCanvas from 'glslCanvas';
-
-</script>
-    
-    
-<style>
-    @import url('src/styles/glsl-canvas.scss');
-</style>

@@ -1,0 +1,35 @@
+---
+import vertexShader from "~/glsl/mdn-hello-glsl/hello.vert?raw";
+import fragmentShader from "~/glsl/mdn-hello-glsl/hello.frag?raw";
+
+const vertScript = `<script type="x-shader/x-vertex" id="vertex-shader">${vertexShader} </script>`;
+const fragScript = `<script type="x-shader/x-fragment" id="fragment-shader"> ${fragmentShader} </script>`;
+
+---
+<div class="" >
+    <canvas id="mdn-hello-glsl" >Your browser does not seem to support HTML5 canvas.</canvas>
+</div>
+
+<Fragment set:html={ vertScript } />
+<Fragment set:html={ fragScript } />
+
+
+<script>
+import  createHelloOnClient  from "~/glsl/mdn-hello-glsl/createHelloOnClient";
+
+const { reinitializeGLSL } = createHelloOnClient();
+
+reinitializeGLSL();
+
+// Listen for Astro client-side navigation events and reinitialize
+document.addEventListener('astro:page-load', () => {
+    console.log('Astro navigation event detected. Attempting to reinitialize Shader');
+    reinitializeGLSL();
+});
+
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>

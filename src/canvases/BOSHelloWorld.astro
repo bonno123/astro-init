@@ -1,0 +1,56 @@
+---
+import fragmentShader from "~/glsl/bos-hello-world/hello.frag?raw";
+
+---
+<!-- <div class=""> -->
+    <canvas
+        class="glslCanvas"
+        id="BOSHelloWorldCanvas"
+        data-fragment={fragmentShader}
+
+    >
+        Your browser does not support the HTML5 canvas element.
+    </canvas>    
+<!-- </div> -->
+
+
+<script>
+import GlslCanvas from 'glslCanvas';
+
+function reInitializeCanvas(ev: Event) {
+    // console.log('reInitializeing Canvas...');
+    const canvas = document.getElementById('BOSHelloWorldCanvas') as HTMLCanvasElement;
+
+    if (!canvas) return;
+
+    var sandbox = new GlslCanvas(canvas);
+    // sandbox.load(fragmentShader);
+
+    adjustCanvasForDPR(canvas);
+}
+
+// Assuming 'canvas' is your GLSL canvas element
+function adjustCanvasForDPR(canvas: HTMLCanvasElement){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+        // Adjust the viewport of the GL context to match the new size
+        (gl as WebGLRenderingContext).viewport(0, 0, canvas.width, canvas.height);
+    }
+};
+
+document.addEventListener('astro:page-load', reInitializeCanvas);
+
+
+
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>

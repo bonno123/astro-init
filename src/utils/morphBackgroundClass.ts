@@ -29,7 +29,7 @@ export default class MorphBackgroundClass {
         this.setInitialState();
         // add listeners
         if(this.action == 'click') {
-            this.initClickEvent();
+            this.initClickEvent();     // this is now become optional - on route change the bg will be reset
         } else {
             this.initHoverEvent();
         }
@@ -37,8 +37,15 @@ export default class MorphBackgroundClass {
         window.addEventListener('update-morphbg', () => {
             this.morphBgResize();
         });
+
+        // on window resize/fonts loaded - reset background element size
         window.addEventListener('hide-morphbg', () => {
             this.morphBgHide();
+        });
+
+        // on change route - reset background element position
+        window.addEventListener('route-changed', () => {
+            this.setInitialState()
         });
     }
     
@@ -51,15 +58,16 @@ export default class MorphBackgroundClass {
     
     setInitialState() {
         for(var i = 0; i < this.targets.length; i++) {
-            if(this.targets[i].hasAttribute('data-morph-bg-active')) {
-
-                this.setPosition(i);
+            // if there's a target with data-morph-bg-active equal to true - set the initial state 
+            if(this.targets[i].getAttribute('data-morph-bg-active') == 'true') {
                 this.defaultIndex = i;
-                break;
+                this.setPosition(i);
+                return;
             }
         }
     }
     
+    // this is now become optional - on route change the bg will be reset
     initClickEvent() {
         for(let i = 0; i < this.targets.length; i++) {           
             this.targets[i].addEventListener('click', (event) => {

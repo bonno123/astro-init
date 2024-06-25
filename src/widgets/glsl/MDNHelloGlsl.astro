@@ -1,18 +1,12 @@
 ---
 import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
-import vertexShader from "~/glsl/mdn-hello-glsl/hello.vert?raw";
-import fragmentShader from "~/glsl/mdn-hello-glsl/hello.frag?raw";
 import Link from '~/components/common/Link.astro';
-
-const vertScript = `<script type="x-shader/x-vertex" id="vertex-shader">${vertexShader} </script>`;
-const fragScript = `<script type="x-shader/x-fragment" id="fragment-shader"> ${fragmentShader} </script>`;
+import MdnHello from '~/canvases/MdnHello.astro';
 
 ---
 
 <EvenColumnsLayout>
-    <div class="">
-        <canvas id="mdn-hello-glsl">Your browser does not seem to support HTML5 canvas.</canvas>
-    </div>
+    <MdnHello></MdnHello>
 
     <div class="flow">
         <div class="">
@@ -32,17 +26,3 @@ const fragScript = `<script type="x-shader/x-fragment" id="fragment-shader"> ${f
 
 </EvenColumnsLayout>
 
-<Fragment set:html={ vertScript } />
-<Fragment set:html={ fragScript } />
-
-
-<script>
-    import  createHelloOnClient  from "~/glsl/mdn-hello-glsl/createHelloOnClient";
-    
-    createHelloOnClient()
-</script>
-    
-    
-<style>
-    @import url('src/styles/glsl-canvas.scss');
-</style>
