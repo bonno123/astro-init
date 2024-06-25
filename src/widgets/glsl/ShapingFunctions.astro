@@ -7,10 +7,9 @@ import Link from '~/components/common/Link.astro';
 <EvenColumnsLayout>
     <div class="">
         <canvas
+            id="BOSHelloWorldDrawLine"
             class="glslCanvas"
             data-fragment={LineFragment}
-            width="500" 
-            height="300"
         >
             Your browser does not support the HTML5 canvas element.
         </canvas>    
@@ -41,6 +40,38 @@ import Link from '~/components/common/Link.astro';
 <script>
 // @ts-nocheck
 import GlslCanvas from 'glslCanvas';
+
+// Assuming 'canvas' is your GLSL canvas element
+const adjustCanvasForDPR = (canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return;
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+        // Adjust the viewport of the GL context to match the new size
+        (gl as WebGLRenderingContext).viewport(0, 0, canvas.width, canvas.height);
+    }
+};
+
+// // Call this function when the page loads and when it resizes
+// window.addEventListener('load', () => adjustCanvasForDPR(document.querySelector('.glslCanvas')));
+// window.addEventListener('resize', () => adjustCanvasForDPR(document.getElementById('BOSHelloWorldDrawLine') as HTMLCanvasElement));
+
+// document.addEventListener('DOMContentLoaded', reInitializeCanvas);
+document.addEventListener('astro:page-load', reInitializeCanvas);
+
+function reInitializeCanvas(ev: Event) {
+    const canvas = document.getElementById('BOSHelloWorldDrawLine') as HTMLCanvasElement;
+    var sandbox = new GlslCanvas(canvas);
+    // sandbox.load(fragmentShader);
+
+    adjustCanvasForDPR(canvas);
+}
 
 </script>
     
