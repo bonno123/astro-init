@@ -1,0 +1,67 @@
+---
+import LineFragment from "~/glsl/shaping-functions/line.frag?raw";
+---
+
+<!-- <div class=""> -->
+    <canvas
+        id="BOSHelloWorldDrawLine"
+        class="glslCanvas"
+        data-fragment={LineFragment}
+    >
+        Your browser does not support the HTML5 canvas element.
+    </canvas>    
+<!-- </div> -->
+
+
+
+
+<script>
+// @ts-nocheck
+import GlslCanvas from 'glslCanvas';
+
+function reInitializeCanvas(ev: Event) {
+
+    // console.log('reInitializeCanvas');
+    const canvas = document.getElementById('BOSHelloWorldDrawLine') as HTMLCanvasElement;
+    if (!canvas)  return;
+
+    var sandbox = new GlslCanvas(canvas);
+    // sandbox.load(fragmentShader);
+
+    adjustCanvasForDPR(canvas);
+}
+
+// Assuming 'canvas' is your GLSL canvas element
+function adjustCanvasForDPR(canvas: HTMLCanvasElement){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+        // Adjust the viewport of the GL context to match the new size
+        (gl as WebGLRenderingContext).viewport(0, 0, canvas.width, canvas.height);
+    }
+};
+
+// function cleanup() {
+//     document.removeEventListener('astro:page-load', reInitializeCanvas);
+// }
+
+// Initialize the canvas when the page is loaded
+document.addEventListener('astro:page-load', reInitializeCanvas);
+
+// Cleanup when the component is removed
+// document.addEventListener('astro:before-swap', cleanup);
+
+
+
+
+</script>
+    
+    
+<style>
+    @import url('src/styles/glsl-canvas.scss');
+</style>
