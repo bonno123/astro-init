@@ -25,7 +25,7 @@ reinitializeGLSL();
 document.addEventListener('astro:page-load', () => {
     console.log('Astro navigation event detected. Attempting to reinitialize Shader');
     reinitializeGLSL();
-});
+}, { passive: true});
 
 </script>
     

@@ -40,7 +40,6 @@ const {pathname} = Astro.url;
 </section> -->
   
 <section class="cd-text-center cd-position-relative">
-  <!-- {pathname} -->
     <NavigationBackground class='cd-margin-bottom-sm'/>  
 
     <div class="navigation-content">
@@ -112,7 +111,7 @@ document.addEventListener('click', (event) => {
 document.addEventListener('astro:page-load', (event) => {
   // This runs once the page is loaded. 
   setupStuff(event.target as Element);
-}, { passive: true });
+}, { once: true });
 
 function setupStuff(target: Element | null) {
   //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to

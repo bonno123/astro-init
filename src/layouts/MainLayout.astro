@@ -26,7 +26,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 		<Header>
 			<button
 				slot="toggle-menu"
-				class="btn btn--primary padding-200" 
+				class="btn btn--primary padding-200"
 				aria-controls="collappsable-nav"
         transition:persist=""
 			>
@@ -43,6 +43,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
       >
         <MorphNavigationContent  />
 			</nav>
+
 			<!-- <PreHeader /> -->
 
 			<div transition:animate="fade" id="main-content">

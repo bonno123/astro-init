@@ -31,7 +31,7 @@ const {
     if (canvasElement) {
       // Initialize GlslCanvas
       const sandbox = new GlslCanvas(canvasElement);
-  
+      sandbox.load(canvasElement.dataset.fragment);
       // Check if the shader is loaded
       sandbox.on('render', () => {
         // Once the shader is loaded, make the canvas visible
@@ -43,7 +43,7 @@ const {
       
       
 <style>
-  @import url('src/styles/glsl-canvas.scss');
+  /* @import url('src/styles/glsl-canvas.scss'); */
 
   .glslCanvas {
     opacity: 0; /* Initially hide the canvas */

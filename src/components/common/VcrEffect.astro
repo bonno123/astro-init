@@ -21,8 +21,8 @@ const main = function() {
   }
 
   const onTV = function() {
-    (document.querySelector('#wrapper') as HTMLElement).classList.remove('closed');
-    (document.querySelector('#white-board') as HTMLElement).classList.remove('showed')
+    (document.querySelector('#wrapper') as HTMLElement)?.classList.remove('closed');
+    (document.querySelector('#white-board') as HTMLElement)?.classList.remove('showed')
   }
 
   onTV()

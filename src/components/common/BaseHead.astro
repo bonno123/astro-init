@@ -5,6 +5,8 @@ import '~/styles/reset.scss';
 import '~/styles/utility.scss';
 import '~/styles/index.scss';
 
+import '~/styles/spinner.css'; // Import the spinner styles
+
 
 interface Props {
 	title: string;
@@ -24,8 +26,6 @@ const { title, metaDescription } = Astro.props;
         metaDescription={metaDescription}
 
     />
-
-    <!-- <link rel="stylesheet" href="/public/spinner/spinner.css"> -->
 
     <ViewTransitions />
 </head>
