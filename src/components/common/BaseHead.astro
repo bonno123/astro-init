@@ -25,6 +25,8 @@ const { title, metaDescription } = Astro.props;
 
     />
 
+    <!-- <link rel="stylesheet" href="/public/spinner/spinner.css"> -->
+
     <ViewTransitions />
 </head>
 
@@ -48,3 +50,16 @@ gtag('js', new Date());
 
 gtag('config', 'G-GDKJFDWKW7');
 </script>
+
+
+<script is:inline>
+    document.addEventListener('astro:before-preparation', ev => {
+      const originalLoader = ev.loader;
+      ev.loader = async function() {
+        const { startSpinner } = await import('/spinner/spinner.js');
+        const stopSpinner = startSpinner('#main-content');
+        await originalLoader();
+        stopSpinner();
+      };
+    });
+  </script>

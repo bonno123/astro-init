@@ -1,0 +1,52 @@
+/* Spinner overlay styles */
+.spinner-overlay {
+    position: absolute; /* Cover the target element */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's above other content */
+    transition: opacity 0.45s ease; /* Smooth transition for the opacity */
+
+    /* want a background gradient at the middle */
+    background: hsla(0, 0%, 100%, 1);
+
+    /* create var for colors and angle */
+    --angle: 0deg;
+    --color1: rgba(255, 255, 255, 0.055);
+    --color2: rgba(97, 97, 97, 0.39);
+
+    background: linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
+
+    background: -moz-linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
+
+    background: -webkit-linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
+
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#FFFFFF", endColorstr="#0a1647", GradientType=1 );
+
+    /* display: none;  */
+}
+
+/* Spinner icon styles */
+.spinner_icon {
+    border: 4px solid rgba(0, 0, 0, 0.1); /* Light grey border for the spinner */
+    border-top: 4px solid #3498db; /* Blue border for the spinning part */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite; /* Spin animation */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* check if this css works or not */
+/* *{
+    outline: 2px solid red !important;
+} */

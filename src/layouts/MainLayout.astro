@@ -34,7 +34,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 			</button>
 		</Header>
 
-		<main >
+		<main transition:animate="none">
 			<nav 
         id="collappsable-nav" 
         class="js-collapse hide" 
@@ -45,7 +45,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 			</nav>
 			<!-- <PreHeader /> -->
 
-			<div transition:animate="fade">
+			<div transition:animate="fade" id="main-content">
         <slot />
       </div>
 		</main>
