@@ -85,15 +85,6 @@ export default class Collapse {
             }
             this.isItemExpandedAtLeastOnce = true
         }
-
-        // // If the element contains a canvas, store its original height before collapsing
-        // const canvas = this.canvasContainer?.querySelector('canvas');
-        // if (canvas instanceof HTMLCanvasElement && !isContainerCollapsed) {
-        //     console.log('canvas', canvas.height, canvas.width);
-            
-        //     this.originalCanvasHeight = canvas.height;
-        //     this.originalCanvasWidth = canvas.width;
-        // }
     }
 
     animateElement(shouldShowContent: boolean) {
@@ -134,7 +125,7 @@ export default class Collapse {
                     // TODO: investigate why the canvas is getting cut off if it is expanded initially ==========>>>>>>
 
                     // Add 5px to the original height to ensure the container is a little larger than the canvas
-                    this.canvasContainer.style.height = ((this.originalCanvasHeight ?? 0) /*+5 */) + 'px';  
+                    // this.canvasContainer.style.height = ((this.originalCanvasHeight ?? 0) /*+5 */) + 'px';  
                         // Adjust the canvas width according to the window's innerWidth and DPR
                     if (canvasElement) {
                         const targetWidth = window.innerWidth;
@@ -149,7 +140,7 @@ export default class Collapse {
                     // Animate the canvas dimensions
                     this.setHeight(
                         (this.originalCanvasHeight  ?? 0), 
-                        (this.originalCanvasHeight ?? 0)  - 200,  
+                        (this.originalCanvasHeight ?? 0),  
                         200, 
                         () => {
                                 // Adjust the canvas width according to the window's innerWidth and DPR

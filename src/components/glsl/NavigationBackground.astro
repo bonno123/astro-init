@@ -2,26 +2,30 @@
 import background from "~/glsl/navigation-bg/background.frag?raw";
 
 type Props = {
+  id: string;
   class?: string;
+  style?: string;
   containerClass?: string;
 };
 
 const {
+  id,
   class: providerClass,
+  style,
   containerClass,
 } = Astro.props;
 
 ---
 
-<!-- Wrap the component elements in our custom element “astro-heart”. -->
-<div class:list={[containerClass, 'canvas-container']}>
+<!-- <div class:list={[containerClass, '']} style={style}> -->
   <canvas
-    class:list={[providerClass, 'glslCanvas']}
+    id={id}
+    class:list={[providerClass, 'glslCanvas navigation-canvas']}
     data-fragment={background}
   >
     Your browser does not support the HTML5 canvas element.
   </canvas>
-</div>
+<!-- </div> -->
 
 <script>
   import GlslCanvas from 'glslCanvas';
@@ -29,6 +33,14 @@ const {
   // While canvas is loading, hide it with opacity and show it once the shader is loaded
     const canvasElement = document.querySelector('.glslCanvas') as HTMLCanvasElement;
     if (canvasElement) {
+      // Get the parent element's dimensions
+      const parentElement = canvasElement.parentElement;
+      if (parentElement) {
+        // Set the canvas dimensions to match the parent's
+        canvasElement.width = parentElement.clientWidth;
+        canvasElement.height = parentElement.clientHeight;
+      }
+
       // Initialize GlslCanvas
       const sandbox = new GlslCanvas(canvasElement);
       sandbox.load(canvasElement.dataset.fragment);
@@ -54,12 +66,16 @@ const {
 
 
 <style>
-  .canvas-container {
+  .navigation-canvas {
     /* position: absolute; */
-    width: 100%;
-    background-color: #e5e5e5;
+    /* width: 100%; */
+    /* background-color: #e5e5e5; */
 
-    z-index: -1;
+    z-index: 1;
+    /* overflow: hidden; */
+
+    position: absolute; 
+    /* top: 0; left: 0; */
   }
 
 
