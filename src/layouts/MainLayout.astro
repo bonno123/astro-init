@@ -41,7 +41,6 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 			<nav
         id="collappsable-nav" 
         class="js-collapse"
-        class:list={[{hide: true}]} 
         data-collapse-animate="on" 
         transition:persist=""
       >
@@ -59,9 +58,15 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 </html>
 
 <script>
-// import Collapse from "~/utils/collapseContainerClass";
 import Collapse from "~/utils/collapse";
 
+// Assuming the key we're using in local storage is 'navCollapsed'
+const NAV_COLLAPSED_KEY = 'navCollapsed';
+// Apply the initial state when the page loads
+applyInitialStateFromLocalStorage();
+
+// Get all collapsible elements on the page and the canvas element
+// to be resized based on the collapsible element's dimensions
 var collapses = document.getElementsByClassName('js-collapse');
 var canvas = document.querySelector('#navigation-canvas') as HTMLCanvasElement;
 
@@ -83,6 +88,8 @@ if( collapses.length > 0 ) {
 
     // Assuming Collapse class has been modified to include onExpanded and onCollapsed methods
     collapseInstance.setOnExpanded(() => {
+      updateNavState(false); // false because the nav is now expanded
+
       if (!canvas) return;
 
       // Set canvas dimensions to match the collapsible element after expansion
@@ -92,14 +99,37 @@ if( collapses.length > 0 ) {
       });
     });
 
-    // collapseInstance.setOnCollapsed(() => {
-    //   // Reset canvas dimensions or set to specific values on collapse
-    //   canvas.style.height = 'initial'; // or any specific value
-    //   canvas.style.width = 'initial'; // or any specific value
+    collapseInstance.setOnCollapsed(() => {
+      updateNavState(true); // true because the nav is now collapsed
+    });
+  }
+}
 
-    //   // Optional: animate height change
-    //   canvas.style.transition = 'all 0.5s ease, width 0.5s ease';
-    // });
+
+
+// Function to check and apply the initial state from local storage
+function applyInitialStateFromLocalStorage() {
+  const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === 'true';
+  const navElement = document.getElementById('collappsable-nav');
+  if (navElement) {
+    if (isNavCollapsed) {
+      navElement.classList.add('hide'); // Assuming 'hide' is the class that controls visibility
+    } else {
+      navElement.classList.remove('hide');
+    }
+  }
+}
+
+// Function to update local storage and class list on collapse/expand
+function updateNavState(isCollapsed: boolean) {
+  localStorage.setItem(NAV_COLLAPSED_KEY, isCollapsed.toString());
+  const navElement = document.getElementById('collappsable-nav');
+  if (navElement) {
+    if (isCollapsed) {
+      navElement.classList.add('hide');
+    } else {
+      navElement.classList.remove('hide');
+    }
   }
 }
 
