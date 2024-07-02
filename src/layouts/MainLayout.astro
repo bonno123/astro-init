@@ -14,6 +14,7 @@ interface Props {
 }
 
 const { title: layoutTitle, metaDescription } = Astro.props;
+
 ---
 
 <!doctype html>
@@ -60,10 +61,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 <script>
 import Collapse from "~/utils/collapse";
 
-// Assuming the key we're using in local storage is 'navCollapsed'
-const NAV_COLLAPSED_KEY = 'navCollapsed';
-// Apply the initial state when the page loads
-applyInitialStateFromLocalStorage();
+const NAV_COLLAPSED_KEY = 'nav-collapsed'; // Use the same key as inlined script
 
 // Get all collapsible elements on the page and the canvas element
 // to be resized based on the collapsible element's dimensions
@@ -86,37 +84,21 @@ if( collapses.length > 0 ) {
     var collapseElement = collapses[i] as HTMLElement;
     const collapseInstance = new Collapse(collapseElement);
 
-    // Assuming Collapse class has been modified to include onExpanded and onCollapsed methods
     collapseInstance.setOnExpanded(() => {
-      updateNavState(false); // false because the nav is now expanded
+      updateNavState(false); // isCollapsed -> false
 
       if (!canvas) return;
 
-      // Set canvas dimensions to match the collapsible element after expansion
       requestAnimationFrame(() => {
+        // Set canvas dimensions to match the collapsible element after expansion
         canvas.style.height = `${collapseElement.scrollHeight}px`;
         canvas.style.width = `${collapseElement.scrollWidth}px`;
       });
     });
 
     collapseInstance.setOnCollapsed(() => {
-      updateNavState(true); // true because the nav is now collapsed
+      updateNavState(true); // isCollapsed -> true
     });
-  }
-}
-
-
-
-// Function to check and apply the initial state from local storage
-function applyInitialStateFromLocalStorage() {
-  const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === 'true';
-  const navElement = document.getElementById('collappsable-nav');
-  if (navElement) {
-    if (isNavCollapsed) {
-      navElement.classList.add('hide'); // Assuming 'hide' is the class that controls visibility
-    } else {
-      navElement.classList.remove('hide');
-    }
   }
 }
 
@@ -133,6 +115,21 @@ function updateNavState(isCollapsed: boolean) {
   }
 }
 
+</script>
+
+<script is:inline>
+  const NAV_COLLAPSED_KEY = 'nav-collapsed'; // Use the same key as previous script
+
+  function applyInitialStateFromLocalStorage() {
+    const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === 'true';
+    const navElement = document.getElementById('collappsable-nav');
+    
+    if (navElement) {
+      navElement.classList.toggle('hide', isNavCollapsed);
+    }
+  }
+
+  applyInitialStateFromLocalStorage();
 </script>
 
 <style is:global>
