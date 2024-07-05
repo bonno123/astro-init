@@ -8,7 +8,10 @@ import SocialArea from '~/components/SocialArea.astro';
 import ScratchEmailReveal from '~/components/common/ScratchEmailReveal.vue';
 ---
 
-<MainLayout title={aboutMeWidget.title}>
+<MainLayout 
+	title={aboutMeWidget.title}
+	metaDescription={aboutMeWidget.description}	
+>
 	<EvenColumnsLayout>
 		<div class="">
 			<ProfileArticle

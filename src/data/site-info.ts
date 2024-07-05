@@ -24,10 +24,10 @@ export type HeroWidget = {
 
 export const siteInfo: SiteInfo = {
 	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
-	description: `3D web design, 
-		built with Astro TypeScript, TresJS, super fast static sites; 
-		loading animations, while loading the client-side JavaScript.
-		examples of webgl, GLSL, and 3D web development in the browser
+	description: `
+		Explore the intersection of art and technology with my 3D web design portfolio. 
+		Featuring cutting-edge Astro TypeScript project, WebGL and GLSL examples, and immersive 3D web development. 
+		Dive into a world where static sites come alive."
 	`,
 	image: {
 		src: "/og/social.jpg",
@@ -37,17 +37,19 @@ export const siteInfo: SiteInfo = {
 
 export const heroWidget = {
 	title: "Landing",
-	description: "3D landing page with minimalistic design",
+	description: "Welcome to my 3D web design portfolio. Dive into a world where static sites come alive.",
 	heroContent: {
 		title: "Here’s a piece of responsive paper",
-		description: `I guess you are a bit early here. 🤔 Yup, I am still working on this page!
-		<br>
-		<br>
-		Here, I have planned to share my GLSL design *playground/*.
-
-		<br>
-		<br>
-		Meanwhile, you can check out my social profiles or know *about/* me.
+		description: `
+			Welcome to the space of my imagination! 🚀
+			<br>
+			<br>
+			While I'm currently enhancing this space with a plan to showcase my latest WebGL and GLSL creations,
+			<br>
+			feel free to explore the different sections of the site and discover the intersection of art and technology.
+			<br>
+			<br>
+			Stay tuned for what's next! 🤔
 		`,
 	},
 	socialLinks: [
@@ -87,20 +89,21 @@ export const heroWidget = {
 // currently this one is not using Path: src/data/about-me.ts
 export const aboutMeWidget = {
 	title: "About Me",
-	description: "portfolio of software engineer, web developer.",
+	description: "I'm a Software Engineer and Web Developer from Kolkata, India. With a passion for blending art and technology, I've worked on exciting projects.",
 	aboutMe: {
 		title: "Hello, I’m Avik",
 		description: `
-		I am a software engineer and web developer based in Kolkata, India.
-		<br/>
-		It's been 3 years since I started my tech journey.
-		Worked with various technologies and frameworks like Vue.js, Quasar, Node.js, FastAPI, and databases like Oracle, postgreSQL with Prisma ORM.
-		<br/><br/>
-		I am currently working as a software engineer at a startup called RentApp.
-		And also a part-time freelancer and have worked with clients from the UK(Slovakia), and India.
-		I am always open to new opportunities.
-		<br/><br/>
-		Feel free to email me or connect with me on any of the following options! 
+			I'm a Software Engineer and Web Developer from Kolkata, India. 
+			<br/> <br/>
+			With a passion for blending art and technology,
+			I've worked on exiting projects. 
+			My toolkit includes advanced proficiency in Vue.js, Quasar, Node.js, FastAPI, 
+			and leveraging databases like Oracle and PostgreSQL with Prisma ORM 
+			to bring dynamic projects to life.
+			<br/>
+			Currently at RentApp and freelancing, I'm always looking for new opportunities to collaborate on exciting projects.
+			<br/><br/>
+			Let's connect!
     	`,
 		mail: import.meta.env.PUBLIC_CONTACT_EMAIL,
 	},
