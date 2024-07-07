@@ -5,6 +5,8 @@ interface ImportMetaEnv {
     readonly PUBLIC_SITE_NAME: string;
     readonly PUBLIC_CONTACT_EMAIL: string;
     // more env variables...
+
+    readonly PUBLIC_BACKEND_SERVER_URL: string;
   }
   
   interface ImportMeta {

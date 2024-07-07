@@ -91,3 +91,9 @@ a.active {
     font-weight: bolder;
     text-decoration: underline;
 }
+
+textarea {
+  resize: vertical;
+  overflow: auto;
+  vertical-align: top;
+}

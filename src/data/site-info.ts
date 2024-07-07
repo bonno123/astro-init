@@ -134,3 +134,15 @@ export const aboutMeWidget = {
 		},
 	],
 }
+
+export const contactWidget = {
+	title: "Contact",
+	description: "Let's connect! Feel free to reach out to me for any queries or collaborations.",
+	contactForm: {
+		title: "Get in touch",
+		description: `
+			Have a question or want to collaborate on a project? 
+			Feel free to reach out to me using the form below.
+		`,
+	},
+}
