@@ -1,0 +1,23 @@
+---
+import MainLayout from '~/layouts/MainLayout.astro';
+import Hero from '~/components/Hero.astro';
+import { contactWidget } from '~/data/site-info';
+import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
+import ContactForm from '~/components/vue-components/ContactForm.vue';
+
+---
+<MainLayout 
+	title={contactWidget.title}
+	metaDescription={contactWidget.description}
+>
+	<EvenColumnsLayout>
+		<Hero
+			title={`...`} 
+			description={`
+                Have questions or just want to say hi?
+            `}
+		/>
+
+        <ContactForm client:load/>
+	</EvenColumnsLayout>
+</MainLayout>

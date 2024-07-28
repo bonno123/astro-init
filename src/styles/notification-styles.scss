@@ -1,0 +1,32 @@
+.notification {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+
+    color: white;
+    font-size: var(--fs-600);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+
+    z-index: var(--z-index-fixed-element, 10);
+    transition: .2s;
+    transform: translateY(1rem);
+    opacity: 0;
+
+    background-color: hsla(240, 4%, 95%, 1);
+    border: 1px solid hsla(240, 4%, 80%, 0.7);
+    box-shadow: inset 0px 0px 0px 1px hsla(240, 4%, 95%, 1);
+    // visibility: visible;
+}
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+.notification.success {
+    color: #3ec757;
+}
+.notification.error {
+    color: #fe3834;
+
+
+}

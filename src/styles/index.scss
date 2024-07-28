@@ -2,7 +2,7 @@
 :root {
     /* basic color variables */
     --clr-primary: hsl(228 39% 5% / 1);
-    --clr-primary-transparent: hsl(228 39% 5% / .2);
+    --clr-primary-transparent: hsla(226, 30%, 11%, 0.1);
 
     --clr-accent: hsl(281, 97%, 27%);
     --clr-accent-light: hsl(281, 100%, 64%);
