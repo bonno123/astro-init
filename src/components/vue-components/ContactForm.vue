@@ -71,7 +71,7 @@
                 </div>
             </fieldset>
 
-            <div class="fw3-margin-top-sm">
+            <div class="fw3-margin-top-md">
                 <button
                     :disabled="connectionHealthStatus === 'checking' || shouldShowSpinner" 
                     class="btn btn--primary"
@@ -89,9 +89,9 @@ import useNotification from '~/utils/useNotification.ts';
 
 const { notify } = useNotification();
 
-const email = ref('asd@dfg.gfh');
-const name = ref('bonno');
-const message = ref('dfgdfgdfg asdfsd');
+const email = ref('');
+const name = ref('');
+const message = ref('');
 
 const shouldShowSpinner = ref(false);
 const connectionHealthStatus= ref<'online' | 'offline' | 'checking'>('checking');
@@ -317,8 +317,8 @@ button:disabled,
   margin-top: var(--fw3-space-2xs);
 }
 
-.fw3-margin-top-sm {
-  margin-top: var(--fw3-space-sm);
+.fw3-margin-top-md {
+  margin-top: var(--fw3-space-md);
 }
 
 .fw3-color-contrast-medium {
