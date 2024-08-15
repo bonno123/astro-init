@@ -1,23 +1,18 @@
 ---
-import type { HTMLTag, Polymorphic } from 'astro/types';
+import type { HTMLTag, Polymorphic } from "astro/types";
 
-type Props<Tag extends HTMLTag> = Polymorphic<{ 
-  as: Tag,
+type Props<Tag extends HTMLTag> = Polymorphic<{
+  as: Tag;
 }>;
 
-const {
-  as: Element='section',
-  class: providerClass,
-  ...props
-} = Astro.props;
-
+const { as: Element = "section", class: providerClass, ...props } = Astro.props;
 ---
 
 <Element
-  class:list={[ providerClass, [ 'margin-block-500', 'padding-block-700' ] ]} 
+  class:list={[providerClass, ["margin-block-500", "padding-block-700"]]}
   {...props}
 >
-  <div class='page-container'>
+  <div class="page-container">
     <div class="even-columns">
       <slot />
     </div>
@@ -30,11 +25,12 @@ const {
     gap: 1rem;
   }
 
- 
-@media (min-width: 50em) {
-  .even-columns {
-    grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+  @media (min-width: 50em) {
+    .even-columns {
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+
+      align-items: center;
+    }
   }
-}
 </style>

@@ -1,0 +1,65 @@
+---
+// import fragmentShader from "~/glsl/shader-toy-example/index.frag?raw";
+// import vertexShader from "~/glsl/shader-toy-example/index.vert?raw";
+
+// data-vertex={vertexShader}
+---
+
+<!-- <div class=""> -->
+<canvas
+    class="glslCanvas"
+    id="indexShaderCanvas"
+    data-fragment={`
+        #ifdef GL_ES
+        precision mediump float;
+        #endif
+
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        void main() {
+            vec2 st = gl_FragCoord.xy/u_resolution.xy;
+            vec3 color = vec3(st.x,st.y,abs(sin(u_time)));
+            gl_FragColor = vec4(color,1.0);
+        }
+    `}
+>
+    Your browser does not support the HTML5 canvas element.
+</canvas>
+<!-- </div> -->
+
+<script>
+    import GlslCanvas from "glslCanvas";
+
+    let canvas: HTMLCanvasElement | null = null;
+    let sandbox: typeof GlslCanvas | null = null;
+
+    function initializeShader() {
+        canvas = document.getElementById(
+            "indexShaderCanvas",
+        ) as HTMLCanvasElement;
+        if (canvas) {
+            sandbox = new GlslCanvas(canvas);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            // Load your shader code here, for example:
+            // if (query && query?.log) {
+            //     load("https://thebookofshaders.com/log/" + query.log + ".frag");
+            // }
+        }
+    }
+
+    // Event listener for Astro SPA navigation
+    document.addEventListener("astro:after-swap", () => {
+        initializeShader();
+    });
+
+    // Initial shader initialization
+    window.addEventListener("DOMContentLoaded", () => {
+        initializeShader();
+    });
+</script>
+
+<!-- <style>
+    @import url("src/styles/glsl-canvas.scss");
+</style> -->

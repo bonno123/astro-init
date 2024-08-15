@@ -1,0 +1,51 @@
+---
+import fragmentShader from "~/glsl/patricio-globe/index.frag?raw";
+import vertexShader from "~/glsl/patricio-globe/index.vert?raw";
+
+// data-vertex={vertexShader}
+---
+
+<!-- <div class=""> -->
+<canvas
+    class="glslCanvas"
+    id="indexShaderCanvas"
+    data-fragment={fragmentShader}
+    data-textures="/data/mars.png"
+>
+    Your browser does not support the HTML5 canvas element.
+</canvas>
+<!-- </div> -->
+
+<script>
+    import GlslCanvas from "glslCanvas";
+
+    let canvas: HTMLCanvasElement | null = null;
+    let sandbox: typeof GlslCanvas | null = null;
+
+    function initializeShader() {
+        canvas = document.getElementById(
+            "indexShaderCanvas",
+        ) as HTMLCanvasElement;
+        if (canvas) {
+            sandbox = new GlslCanvas(canvas);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+        }
+    }
+
+    // Event listener for Astro SPA navigation
+    document.addEventListener("astro:after-swap", () => {
+        initializeShader();
+    });
+
+    // Initial shader initialization
+    // window.addEventListener("DOMContentLoaded", () => {
+    //     initializeShader();
+    // });
+
+    initializeShader();
+</script>
+
+<style>
+    @import url("src/styles/glsl-canvas.scss");
+</style>
