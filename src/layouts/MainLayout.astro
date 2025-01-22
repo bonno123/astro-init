@@ -1,131 +1,132 @@
 ---
 // import PreHeader from '~/components/PreHeader.astro';
-import BaseHead from '~/components/common/BaseHead.astro';
-import Header from '~/components/navigation/Header.astro';
-import CollapseableNavigationContent from '~/components/navigation/CollapseableNavigationContent.astro';
-import NavigationBackground from '~/components/glsl/NavigationBackground.astro';
+import BaseHead from "~/components/common/BaseHead.astro";
+// import Header from "~/components/navigation/Header.astro";
+import CollapseableNavigationContent from "~/components/navigation/CollapseableNavigationContent.astro";
+import NavigationBackground from "~/components/glsl/NavigationBackground.astro";
+import LOGO from "~/assets/Logo.astro";
 
 interface Props {
-	title: string;
-	/**
-	 * to be concantinated with the default meta description
-	 */
-	metaDescription?: string;
+  title: string;
+  /**
+   * to be concantinated with the default meta description
+   */
+  metaDescription?: string;
 }
 
 const { title: layoutTitle, metaDescription } = Astro.props;
-
 ---
 
 <!doctype html>
 <html lang="en">
-	<BaseHead
-		title={layoutTitle}
-		metaDescription={metaDescription}
-	/>
+  <BaseHead title={layoutTitle} metaDescription={metaDescription} />
 
-	<body>
+  <body>
     <!-- <PreHeader /> -->
 
-		<Header>
-			<button
-				slot="toggle-menu"
-				class="btn btn--primary padding-200"
-				aria-controls="collappsable-nav"
-        transition:persist=""
-			>
-				Menu ↓
-			</button>
-		</Header>
-
-		<main transition:animate="none">
-			<nav
-        id="collappsable-nav" 
-        class="js-collapse"
-        data-collapse-animate="on" 
-        transition:persist=""
+    <main transition:animate="none">
+      <header
+        class="page-container margin-block-500 flex vertical-align-center horizontal-align-between"
       >
-        <section class="position-relative">
-          <NavigationBackground id="navigation-canvas"/>
-          <CollapseableNavigationContent  />
-        </section>
-			</nav>
+        <a
+          href="/"
+          class=""
+          style=" display: flex; align-items: center; gap: 0.5rem;"
+        >
+          <span class="sr-only">avik banik logo</span>
+          <LOGO height={50} width={50} />
+        </a>
 
-			<div transition:animate="fade" id="main-content">
+        <nav
+          id="collappsable-nav"
+          class="js-collapse"
+          style=""
+          data-collapse-animate="on"
+          transition:persist=""
+        >
+          <section class="position-relative">
+            <!-- <NavigationBackground id="navigation-canvas" /> -->
+            <CollapseableNavigationContent />
+          </section>
+        </nav>
+      </header>
+
+      <div transition:animate="fade" id="main-content">
         <slot />
       </div>
-		</main>
-	</body>
+    </main>
+  </body>
 </html>
 
 <script>
-import Collapse from "~/utils/collapse";
+  import Collapse from "~/utils/collapse";
 
-const NAV_COLLAPSED_KEY = 'nav-collapsed'; // Use the same key as inlined script
+  const NAV_COLLAPSED_KEY = "nav-collapsed"; // Use the same key as inlined script
 
-// Get all collapsible elements on the page and the canvas element
-// to be resized based on the collapsible element's dimensions
-var collapses = document.getElementsByClassName('js-collapse');
-var canvas = document.querySelector('#navigation-canvas') as HTMLCanvasElement;
+  // Get all collapsible elements on the page and the canvas element
+  // to be resized based on the collapsible element's dimensions
+  var collapses = document.getElementsByClassName("js-collapse");
+  var canvas = document.querySelector(
+    "#navigation-canvas",
+  ) as HTMLCanvasElement;
 
-if (canvas) {
-  // Set initial dimensions based on its parent or a default value
-  canvas.style.height = '100%'; // Adjust as needed
-  canvas.style.width = '100%'; // Adjust as needed
+  if (canvas) {
+    // Set initial dimensions based on its parent or a default value
+    canvas.style.height = "100%"; // Adjust as needed
+    canvas.style.width = "100%"; // Adjust as needed
 
-  // Apply transition styles after ensuring initial dimensions are set
-  requestAnimationFrame(() => {
-    canvas.style.transition = 'all 0.3s ease, width 0.5s ease';
-  });
-}
-
-if( collapses.length > 0 ) {
-  for( var i = 0; i < collapses.length; i++) {
-    var collapseElement = collapses[i] as HTMLElement;
-    const collapseInstance = new Collapse(collapseElement);
-
-    collapseInstance.setOnExpanded(() => {
-      updateNavState(false); // isCollapsed -> false
-
-      if (!canvas) return;
-
-      requestAnimationFrame(() => {
-        // Set canvas dimensions to match the collapsible element after expansion
-        canvas.style.height = `${collapseElement.scrollHeight}px`;
-        canvas.style.width = `${collapseElement.scrollWidth}px`;
-      });
-    });
-
-    collapseInstance.setOnCollapsed(() => {
-      updateNavState(true); // isCollapsed -> true
+    // Apply transition styles after ensuring initial dimensions are set
+    requestAnimationFrame(() => {
+      canvas.style.transition = "all 0.3s ease, width 0.5s ease";
     });
   }
-}
 
-// Function to update local storage and class list on collapse/expand
-function updateNavState(isCollapsed: boolean) {
-  localStorage.setItem(NAV_COLLAPSED_KEY, isCollapsed.toString());
-  const navElement = document.getElementById('collappsable-nav');
-  if (navElement) {
-    if (isCollapsed) {
-      navElement.classList.add('hide');
-    } else {
-      navElement.classList.remove('hide');
+  if (collapses.length > 0) {
+    for (var i = 0; i < collapses.length; i++) {
+      var collapseElement = collapses[i] as HTMLElement;
+      const collapseInstance = new Collapse(collapseElement);
+
+      collapseInstance.setOnExpanded(() => {
+        updateNavState(false); // isCollapsed -> false
+
+        if (!canvas) return;
+
+        requestAnimationFrame(() => {
+          // Set canvas dimensions to match the collapsible element after expansion
+          canvas.style.height = `${collapseElement.scrollHeight}px`;
+          canvas.style.width = `${collapseElement.scrollWidth}px`;
+        });
+      });
+
+      collapseInstance.setOnCollapsed(() => {
+        updateNavState(true); // isCollapsed -> true
+      });
     }
   }
-}
 
+  // Function to update local storage and class list on collapse/expand
+  function updateNavState(isCollapsed: boolean) {
+    localStorage.setItem(NAV_COLLAPSED_KEY, isCollapsed.toString());
+    const navElement = document.getElementById("collappsable-nav");
+    if (navElement) {
+      if (isCollapsed) {
+        navElement.classList.add("hide");
+      } else {
+        navElement.classList.remove("hide");
+      }
+    }
+  }
 </script>
 
 <script is:inline>
-  const NAV_COLLAPSED_KEY = 'nav-collapsed'; // Use the same key as previous script
+  const NAV_COLLAPSED_KEY = "nav-collapsed"; // Use the same key as previous script
 
   function applyInitialStateFromLocalStorage() {
-    const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === 'true';
-    const navElement = document.getElementById('collappsable-nav');
-    
+    const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === "true";
+    const navElement = document.getElementById("collappsable-nav");
+
     if (navElement) {
-      navElement.classList.toggle('hide', isNavCollapsed);
+      navElement.classList.toggle("hide", isNavCollapsed);
     }
   }
 
@@ -133,99 +134,105 @@ function updateNavState(isCollapsed: boolean) {
 </script>
 
 <style is:global>
-/* general styling */
-body {
-	font-size: var(--fs-body);
-	font-family: var(--ff-body);
-	color: var(--clr-neutral);
-}
+  /* general styling */
+  body {
+    font-size: var(--fs-body);
+    font-family: var(--ff-body);
+    color: var(--clr-neutral);
+  }
 
-p:not([class]) {
-	opacity: 0.7;
-	max-width: 32ch;
-}
+  p:not([class]) {
+    opacity: 0.7;
+    max-width: 32ch;
+  }
 
-p[data-width="wide"] {
-	max-width: 50ch;
-}
+  p[data-width="wide"] {
+    max-width: 50ch;
+  }
 </style>
-
 
 <!-- TODO: refactor button styles -->
 <style>
+  .hide {
+    display: none;
+    /* visibility: hidden; */
+  }
 
-.hide {
-	display: none;
-  /* visibility: hidden; */
-}
+  .overflow-hidden {
+    overflow: hidden;
+  }
+  :root {
+    /* colors */
+    --color-primary-hsl: 250, 84%, 54%;
+    --color-bg-hsl: 0, 0%, 100%;
+    --color-contrast-higher-hsl: 230, 13%, 9%;
+    --color-bg-dark-hsl: 240, 4%, 95%;
 
-.overflow-hidden {
-	overflow: hidden;
-}
-:root {
-  /* colors */
-  --color-primary-hsl: 250, 84%, 54%;
-  --color-bg-hsl: 0, 0%, 100%;
-  --color-contrast-higher-hsl: 230, 13%, 9%;
-  --color-bg-dark-hsl: 240, 4%, 95%;
+    --color-white-hsl: 0, 0%, 100%;
+    --color-primary-darker-hsl: 250, 84%, 38%;
+    --color-primary-light-hsl: 250, 84%, 60%;
+  }
 
+  /* buttons */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1em;
+    white-space: nowrap;
+    text-decoration: none;
+    background: hsl(var(--color-bg-dark-hsl));
+    color: hsl(var(--color-contrast-higher-hsl));
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.2;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: all 0.2s ease;
+    will-change: transform;
+    /* padding: var(--space-2xs) var(--space-sm); */
+    border-radius: 0.25em;
+    border: 1px solid transparent;
+  }
 
-  --color-white-hsl: 0, 0%, 100%;
-  --color-primary-darker-hsl: 250, 84%, 38%;
-  --color-primary-light-hsl: 250, 84%, 60%;
-}
+  .btn:focus-visible {
+    box-shadow:
+      0px 0px 0px 2px hsl(var(--color-bg-hsl)),
+      0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.15);
+    outline: none;
+  }
 
+  .btn:active {
+    transform: translateY(2px);
+  }
 
+  .btn--primary {
+    background: hsl(var(--color-primary-hsl));
+    color: hsl(var(--color-white-hsl));
+    box-shadow:
+      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
+      0px 1px 3px hsla(var(--color-primary-darker-hsl), 0.25),
+      0px 2px 6px hsla(var(--color-primary-darker-hsl), 0.1),
+      0px 6px 10px -2px hsla(var(--color-primary-darker-hsl), 0.25);
+  }
 
-/* buttons */
-.btn {
-  position: relative;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1em;
-  white-space: nowrap;
-  text-decoration: none;
-  background: hsl(var(--color-bg-dark-hsl));
-  color: hsl(var(--color-contrast-higher-hsl));
-  cursor: pointer;
-  text-decoration: none;
-  line-height: 1.2;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: all 0.2s ease;
-  will-change: transform;
-  /* padding: var(--space-2xs) var(--space-sm); */
-  border-radius: 0.25em;
-  border: 1px solid transparent;
+  .btn--primary:hover {
+    background: hsl(var(--color-primary-light-hsl));
+    box-shadow:
+      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
+      0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25),
+      0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1),
+      0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25);
+  }
 
-}
-
-.btn:focus-visible {
-  box-shadow: 0px 0px 0px 2px hsl(var(--color-bg-hsl)), 0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.15);
-  outline: none;
-}
-
-.btn:active {
-  transform: translateY(2px);
-}
-
-.btn--primary {
-  background: hsl(var(--color-primary-hsl));
-  color: hsl(var(--color-white-hsl));
-  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 3px hsla(var(--color-primary-darker-hsl), 0.25), 0px 2px 6px hsla(var(--color-primary-darker-hsl), 0.1), 0px 6px 10px -2px hsla(var(--color-primary-darker-hsl), 0.25);
-}
-
-.btn--primary:hover {
-  background: hsl(var(--color-primary-light-hsl));
-  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1), 0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25);
-}
-
-.btn--primary:focus {
-  box-shadow: inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15), 0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1), 0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25), 0px 0px 0px 2px hsl(var(--color-bg-hsl)), 0px 0px 0px 4px hsl(var(--color-primary-hsl));
-}
-
-
-
+  .btn--primary:focus {
+    box-shadow:
+      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
+      0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25),
+      0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1),
+      0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25),
+      0px 0px 0px 2px hsl(var(--color-bg-hsl)),
+      0px 0px 0px 4px hsl(var(--color-primary-hsl));
+  }
 </style>
-

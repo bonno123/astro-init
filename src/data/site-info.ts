@@ -25,9 +25,7 @@ export type HeroWidget = {
 export const siteInfo: SiteInfo = {
 	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
 	description: `
-		Explore the intersection of art and technology with my 3D web design portfolio. 
-		Featuring cutting-edge Astro TypeScript project, WebGL and GLSL examples, and immersive 3D web development. 
-		Dive into a world where static sites come alive."
+		Landing page for Avik Banik, a Software Engineer and Web Developer from Kolkata, India.
 	`,
 	image: {
 		src: "/og/social.jpg",
@@ -75,7 +73,7 @@ export const heroWidget = {
 			footerOnly: true,
 			icon: "social/kaggle",
 		},
-        {
+		{
 			platform: "codepen",
 			href: "https://codepen.io/Bonno123",
 			me: "https://codepen.io/Bonno123",

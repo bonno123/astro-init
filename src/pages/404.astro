@@ -1,22 +1,20 @@
 ---
-import MainLayout from '~/layouts/MainLayout.astro';
-import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
-import MdnHello from '~/canvases/MdnHello.astro';
-
+import MainLayout from "~/layouts/MainLayout.astro";
+import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
+import MdnHello from "~/canvases/MdnHello.astro";
 ---
+
 <MainLayout
-	title={`playground`}
-	metaDescription={`show case of glsl canvas and how to use it in astro`}
+	title="playground"
+	metaDescription="show case of glsl canvas and how to use it in astro"
 >
 	<EvenColumnsLayout>
 		<div class="flow">
 			<div class="">
-				<h1 class="fs-secondary-heading fw-bold">
-					ERROR CODE 404
-				</h1>
+				<h1 class="fs-secondary-heading fw-bold">ERROR CODE 404</h1>
 				<p data-width="wide" class="margin-top-400">
-					No file is served at this location currently. Please
-					go back to <a href="/" class="fw-medium">home</a>
+					No file is served at this location currently. Please go back
+					to <a href="/" class="fw-medium">home</a>
 				</p>
 			</div>
 		</div>
@@ -24,4 +22,3 @@ import MdnHello from '~/canvases/MdnHello.astro';
 		<MdnHello />
 	</EvenColumnsLayout>
 </MainLayout>
-

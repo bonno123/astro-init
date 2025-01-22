@@ -4,9 +4,9 @@
 *,
 *::before,
 *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
-  
+
 /* Remove default margin */
 * {
   margin: 0;
@@ -24,18 +24,18 @@ html {
 html:focus-within {
   scroll-behavior: smooth;
 }
-    
-html,
-body {
-  height: 100%;
-}
-    
+
+// html,
+// body {
+//   height: 100%;
+// }
+
 /* Set core body defaults */
 body {
   text-rendering: optimizeSpeed;
   line-height: 1.5;
 }
-  
+
 /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
 ul[role="list"],
 ul[role="menu"],
@@ -48,7 +48,7 @@ ol[role="menu"] {
 a:not([class]) {
   text-decoration-skip-ink: auto;
 }
-  
+
 /* Make images easier to work with */
 img,
 picture,
@@ -57,13 +57,16 @@ svg {
   display: block;
 }
 
-button, input, textarea, select {
+button,
+input,
+textarea,
+select {
   background-color: transparent;
   border-radius: 0;
   color: inherit;
   line-height: inherit;
   -webkit-appearance: none;
-          appearance: none;
+  appearance: none;
 }
 
 /* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
@@ -83,13 +86,13 @@ button, input, textarea, select {
 }
 
 a {
-    display: inline-block;
-    text-decoration: none;
+  display: inline-block;
+  text-decoration: none;
 }
 
 a.active {
-    font-weight: bolder;
-    text-decoration: underline;
+  font-weight: bolder;
+  text-decoration: underline;
 }
 
 textarea {

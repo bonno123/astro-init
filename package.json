@@ -11,17 +11,17 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/check": "^0.7.0",
-    "@astrojs/vue": "4.5.0",
+    "@astrojs/check": "0.9.4",
+    "@astrojs/vue": "5.0.6",
     "@tresjs/cientos": "^3.8.0",
     "@tresjs/core": "^3.7.0",
-    "astro": "4.10.3",
+    "astro": "5.1.8",
     "astro-seo": "^0.8.0",
     "glslCanvas": "^0.2.6",
     "jspdf": "^2.5.1",
     "three": "^0.161.0",
     "tweakpane": "^4.0.3",
-    "typescript": "^5.3.3",
+    "typescript": "^5.7.3",
     "vue": "^3.4.19"
   },
   "packageManager": "yarn@4.3.0",

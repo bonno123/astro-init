@@ -1,25 +1,30 @@
 ---
-import LOGO from '~/assets/Logo.astro'
+import LOGO from "~/assets/Logo.astro";
+import MorphedNavigationItems from "~/components/navigation/MorphedNavigationItems.astro";
+import CollapseableNavigationContent from "./CollapseableNavigationContent.astro";
 ---
 
-<header class="page-container margin-block-500" style="display: flex; align-items: center;">
-    <div class="" style="display: flex; flex: 1 1 0%">
-        <a 
-            href="/" 
-            class="" 
-            style=" display: flex; align-items: center; gap: 0.5rem;"
-            data-astro-reload
-        >
-          <span class="sr-only">avik banik logo</span>
-          <LOGO height={50} width={50}>
-        </a>
-    </div>
-    
-    <div class="">
-        <slot />
+<header
+    class="page-container margin-block-500"
+    style="display: flex; align-items: center; justify-content: center;"
+>
+    <!-- <a
+        href="/"
+        class=""
+        style=" display: flex; align-items: center; gap: 0.5rem;"
+        data-astro-reload
+    >
+        <span class="sr-only">avik banik logo</span>
+        <LOGO height={50} width={50} />
+    </a> -->
+
+    <div class="position-relative">
+        <!-- <slot> -->
+        <!-- <CollapseableNavigationContent /> -->
+        <!-- </slot> -->
     </div>
 
-    <div class="" >
-        <slot name="toggle-menu"></slot>
+    <div class="">
+        <slot name="toggle-menu" />
     </div>
 </header>
