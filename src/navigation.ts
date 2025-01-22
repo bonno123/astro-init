@@ -1,7 +1,7 @@
 import {
-    getPermalink, 
-    // getBlogPermalink, 
-    getAsset 
+  getPermalink,
+  // getBlogPermalink, 
+  getAsset
 } from './utils/permalinks';
 
 export const headerData = {
@@ -9,25 +9,26 @@ export const headerData = {
     {
       text: 'Landing',
       links: [
-        // {
-        //   text: 'Features (Anchor Link)',
-        //   href: getPermalink('/#features'),
-        // },
+        {
+          text: 'worker',
+          href: getPermalink('/worker'),
+        },
         {
           text: 'Services',
           href: getPermalink('/services'),
         },
+        {
+          text: 'dev',
+          href: getPermalink('/dev'),
+        },
+        {
+          text: 'About us',
+          href: getPermalink('/about'),
+        },
+
         // {
-        //   text: 'Pricing',
-        //   href: getPermalink('/pricing'),
-        // },
-        // {
-        //   text: 'About us',
-        //   href: getPermalink('/about'),
-        // },
-        // {
-        //   text: 'Contact',
-        //   href: getPermalink('/contact'),
+        //   text: 'worker',
+        //   href: getPermalink('/worker'),
         // },
       ],
     },

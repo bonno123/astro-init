@@ -1,0 +1,21 @@
+---
+export const prerender = false; // disable static rendering since app is configured as hybrid
+
+import { db, Comment } from "astro:db";
+import MainLayout from "~/layouts/MainLayout.astro";
+import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
+import { heroWidget } from "~/data/site-info";
+import FilterItems from "~/modules/filter-items/FilterItems.vue";
+
+type Metadata = {
+    [key: string]: string;
+};
+
+const comments = await db.select().from(Comment);
+---
+
+<MainLayout title={heroWidget.title} metaDescription={heroWidget.description}>
+    <FilterItems client:load />
+</MainLayout>
+
+<script></script>

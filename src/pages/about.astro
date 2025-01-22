@@ -1,11 +1,11 @@
 ---
-import MainLayout from '~/layouts/MainLayout.astro';
+import MainLayout from "~/layouts/MainLayout.astro";
 
-import { aboutMeWidget } from '~/data/site-info';
-import EvenColumnsLayout from '~/layouts/EvenColumnsLayout.astro';
-import ProfileArticle from '~/components/ProfileArticle.astro';
-import SocialArea from '~/components/SocialArea.astro';
-import ScratchEmailReveal from '~/components/common/ScratchEmailReveal.vue';
+import { aboutMeWidget } from "~/data/site-info";
+import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
+import ProfileArticle from "~/components/ProfileArticle.astro";
+import SocialArea from "~/components/SocialArea.astro";
+import ScratchEmailReveal from "~/components/common/ScratchEmailReveal.vue";
 ---
 
 <MainLayout title={aboutMeWidget.title}>
@@ -17,41 +17,37 @@ import ScratchEmailReveal from '~/components/common/ScratchEmailReveal.vue';
 			/>
 
 			<div class="margin-top-400 flex vertical-align-center">
-				<span class="fw-bold" >Email: </span>
-				<ScratchEmailReveal client:only />  
+				<span class="fw-bold">Email: </span>
+				<ScratchEmailReveal client:only />
 			</div>
-			
 
 			<div class="margin-top-400">
 				<SocialArea socials={aboutMeWidget.socialLinks} />
-			  </div>
+			</div>
 		</div>
-		
+
 		<!-- <ScratchEmailReveal client:only /> -->
 	</EvenColumnsLayout>
 </MainLayout>
 
 <script>
+	const descriptionWrapper = document.querySelector(".description-wrapper");
 
-	const descriptionWrapper = document.querySelector('.description-wrapper');
-	
 	// description wrapper child p tags
 	const descriptionWrapperChildren = descriptionWrapper?.children;
-	
-	
+
 	// if description wrapper has children
 	if (descriptionWrapperChildren) {
-	  // loop through each child
-	  for (let i = 0; i < descriptionWrapperChildren.length; i++) {
-		// get the child
-		const child = descriptionWrapperChildren[i];
-		// if the child is a p tag
-		if (child.tagName === 'P') {
-		  // add a class to the p tag
-		  child.setAttribute('data-width', 'wide')
-		  child.setAttribute('style', 'display: inline-block;')
+		// loop through each child
+		for (let i = 0; i < descriptionWrapperChildren.length; i++) {
+			// get the child
+			const child = descriptionWrapperChildren[i];
+			// if the child is a p tag
+			if (child.tagName === "P") {
+				// add a class to the p tag
+				child.setAttribute("data-width", "wide");
+				child.setAttribute("style", "display: inline-block;");
+			}
 		}
-	  }
 	}
-	
-	</script>
+</script>

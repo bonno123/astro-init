@@ -1,5 +1,5 @@
 ---
-import BaseHead from '~/components/common/BaseHead.astro';
+import BaseHead from "~/components/common/BaseHead.astro";
 
 interface Props {
 	title: string;
@@ -14,10 +14,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 
 <!doctype html>
 <html lang="en">
-	<BaseHead
-		title={layoutTitle}
-		metaDescription={metaDescription}
-	/>
+	<BaseHead title={layoutTitle} metaDescription={metaDescription} />
 
 	<body>
 		<main>
@@ -27,8 +24,8 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 </html>
 
 <style is:global>
-/* general styling */
-body {
+	/* general styling */
+	/* body {
 	font-size: var(--fs-body);
 	font-family: var(--ff-body);
 	color: var(--clr-primary-400);
@@ -41,5 +38,5 @@ p:not([class]) {
 
 p[data-width="wide"] {
 	max-width: 50ch;
-}
+} */
 </style>
