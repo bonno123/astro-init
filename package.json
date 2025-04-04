@@ -12,17 +12,16 @@
   },
   "dependencies": {
     "@astrojs/check": "0.9.4",
-    "@astrojs/vue": "5.0.6",
+    "@astrojs/vue": "5.0.9",
     "@tresjs/cientos": "^3.8.0",
     "@tresjs/core": "^3.7.0",
-    "astro": "5.1.8",
+    "astro": "5.6.1",
     "astro-seo": "^0.8.0",
     "glslCanvas": "^0.2.6",
     "jspdf": "^2.5.1",
     "three": "^0.161.0",
     "tweakpane": "^4.0.3",
-    "typescript": "^5.7.3",
-    "vue": "^3.4.19"
+    "vue": "^3.4.0"
   },
   "packageManager": "yarn@4.3.0",
   "devDependencies": {
@@ -30,6 +29,8 @@
     "@tweakpane/plugin-essentials": "^0.2.1",
     "@types/sharedworker": "^0.0.115",
     "@types/three": "^0.161.2",
-    "sass": "^1.71.0"
+    "sass": "^1.71.0",
+    "typescript": "5.7.3",
+    "vite": "^6.0.0"
   }
 }
