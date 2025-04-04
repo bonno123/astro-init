@@ -819,12 +819,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.0":
+"@babel/runtime@npm:^7.12.5":
   version: 7.24.7
   resolution: "@babel/runtime@npm:7.24.7"
   dependencies:
     regenerator-runtime: "npm:^0.14.0"
   checksum: 10c0/b6fa3ec61a53402f3c1d75f4d808f48b35e0dfae0ec8e2bb5c6fc79fb95935da75766e0ca534d0f1c84871f6ae0d2ebdd950727cfadb745a2cdbef13faef5513
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.26.7":
+  version: 7.26.10
+  resolution: "@babel/runtime@npm:7.26.10"
+  dependencies:
+    regenerator-runtime: "npm:^0.14.0"
+  checksum: 10c0/6dc6d88c7908f505c4f7770fb4677dfa61f68f659b943c2be1f2a99cb6680343462867abf2d49822adc435932919b36c77ac60125793e719ea8745f2073d3745
   languageName: node
   linkType: hard
 
@@ -2050,6 +2059,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/trusted-types@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/trusted-types@npm:2.0.7"
+  checksum: 10c0/4c4855f10de7c6c135e0d32ce462419d8abbbc33713b31d294596c0cc34ae1fa6112a2f9da729c8f7a20707782b0d69da3b1f8df6645b0366d08825ca1522e0c
+  languageName: node
+  linkType: hard
+
 "@types/unist@npm:*, @types/unist@npm:^3.0.0":
   version: 3.0.2
   resolution: "@types/unist@npm:3.0.2"
@@ -2642,7 +2658,7 @@ __metadata:
     astro: "npm:5.1.8"
     astro-seo: "npm:^0.8.0"
     glslCanvas: "npm:^0.2.6"
-    jspdf: "npm:^2.5.1"
+    jspdf: "npm:^3.0.1"
     sass: "npm:^1.71.0"
     three: "npm:^0.161.0"
     tweakpane: "npm:^4.0.3"
@@ -3056,9 +3072,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvg@npm:^3.0.6":
-  version: 3.0.10
-  resolution: "canvg@npm:3.0.10"
+"canvg@npm:^3.0.11":
+  version: 3.0.11
+  resolution: "canvg@npm:3.0.11"
   dependencies:
     "@babel/runtime": "npm:^7.12.5"
     "@types/raf": "npm:^3.4.0"
@@ -3068,7 +3084,7 @@ __metadata:
     rgbcolor: "npm:^1.0.1"
     stackblur-canvas: "npm:^2.0.0"
     svg-pathdata: "npm:^6.0.3"
-  checksum: 10c0/b6bcd95d60c923c6a4e2be49e1fc1d395790577913a5a68439a2bb5a784ee75533ed7720bef69f2d9d0404203b4d61e89fdf1346f829e5da71e54cc57614153f
+  checksum: 10c0/03ea5b69e97a4a476ef5fc8455d0da2718bd68cd8ace3e42718176bf4b7dfd80eb1d0eba47dcd04b34ed9a0c5c8ed849ead0f364dad0e35369254a45d5e098c4
   languageName: node
   linkType: hard
 
@@ -3485,10 +3501,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^2.2.0":
-  version: 2.5.5
-  resolution: "dompurify@npm:2.5.5"
-  checksum: 10c0/2e280e88c632bcee232b9be07fbe4f910f0d28278c79bfdb93c873e9c3418008123cb28b4ca6ada1d25efac7f632f85c3c59ba6b3cff3b89410aedf58dc16173
+"dompurify@npm:^3.2.4":
+  version: 3.2.4
+  resolution: "dompurify@npm:3.2.4"
+  dependencies:
+    "@types/trusted-types": "npm:^2.0.7"
+  dependenciesMeta:
+    "@types/trusted-types":
+      optional: true
+  checksum: 10c0/6be56810fb7ad2776155c8fc2967af5056783c030094362c7d0cf1ad13f2129cf922d8eefab528a34bdebfb98e2f44b306a983ab93aefb9d6f24c18a3d027a05
   languageName: node
   linkType: hard
 
@@ -3925,13 +3946,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:^0.4.8":
-  version: 0.4.8
-  resolution: "fflate@npm:0.4.8"
-  checksum: 10c0/29d1eddaaa5deab61b1c6b0d21282adacadbc4d2c01e94d8b1ee784398151673b9c563e53f97a801bc410a1ae55e8de5378114a743430e643e7a0644ba8e5a42
-  languageName: node
-  linkType: hard
-
 "fflate@npm:^0.6.9, fflate@npm:~0.6.10":
   version: 0.6.10
   resolution: "fflate@npm:0.6.10"
@@ -3939,7 +3953,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:~0.8.2":
+"fflate@npm:^0.8.1, fflate@npm:~0.8.2":
   version: 0.8.2
   resolution: "fflate@npm:0.8.2"
   checksum: 10c0/03448d630c0a583abea594835a9fdb2aaf7d67787055a761515bf4ed862913cfd693b4c4ffd5c3f3b355a70cf1e19033e9ae5aedcca103188aaff91b8bd6e293
@@ -4753,17 +4767,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jspdf@npm:^2.5.1":
-  version: 2.5.1
-  resolution: "jspdf@npm:2.5.1"
+"jspdf@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "jspdf@npm:3.0.1"
   dependencies:
-    "@babel/runtime": "npm:^7.14.0"
+    "@babel/runtime": "npm:^7.26.7"
     atob: "npm:^2.1.2"
     btoa: "npm:^1.2.1"
-    canvg: "npm:^3.0.6"
+    canvg: "npm:^3.0.11"
     core-js: "npm:^3.6.0"
-    dompurify: "npm:^2.2.0"
-    fflate: "npm:^0.4.8"
+    dompurify: "npm:^3.2.4"
+    fflate: "npm:^0.8.1"
     html2canvas: "npm:^1.0.0-rc.5"
   dependenciesMeta:
     canvg:
@@ -4774,7 +4788,7 @@ __metadata:
       optional: true
     html2canvas:
       optional: true
-  checksum: 10c0/dad15d4f53ead1d2e9d5f6fd9b6e72c7233ba5cbc30d98461eb0ef609aa908b28fd5eaaf2b763b55df945c7ecca2323097d9331f09fee1d6c23c06785520ab5f
+  checksum: 10c0/db900f44d9cdf2c51bd5a7ffe9c55711aff68e7751a61291cc2451f06cfa1e268ecd5947c37e0f9097c999d751e3cdd1560f5a4a242376530100654c70970eda
   languageName: node
   linkType: hard
 
