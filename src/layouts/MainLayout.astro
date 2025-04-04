@@ -5,6 +5,7 @@ import BaseHead from "~/components/common/BaseHead.astro";
 import CollapseableNavigationContent from "~/components/navigation/CollapseableNavigationContent.astro";
 import NavigationBackground from "~/components/glsl/NavigationBackground.astro";
 import LOGO from "~/assets/Logo.astro";
+import WhatsAppButton from "~/components/WhatsAppButton.astro";
 
 interface Props {
   title: string;
@@ -55,6 +56,8 @@ const { title: layoutTitle, metaDescription } = Astro.props;
         <slot />
       </div>
     </main>
+
+    <WhatsAppButton />
   </body>
 </html>
 
