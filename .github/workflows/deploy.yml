@@ -13,6 +13,7 @@ env:
   PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
   PUBLIC_CONTACT_PHONE: ${{ vars.PUBLIC_CONTACT_PHONE }}
   PUBLIC_BACKEND_SERVER_URL: ${{ vars.PUBLIC_BACKEND_SERVER_URL }}
+  PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID: ${{ vars.PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID }}
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
