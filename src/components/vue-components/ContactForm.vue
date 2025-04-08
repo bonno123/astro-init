@@ -22,7 +22,6 @@
                         class="badge badge--warning-light badge--icon">
                         <i>Checking...</i>
                     </span>
-
                 </div>
 
                 <div class="grid gap-sm">
@@ -53,7 +52,7 @@
                             placeholder="email@myemail.com"
                         >
                     </div>
-                   
+
                     <div>
                         <label class="form-label margin-bottom-2xs" for="textarea">Message</label>
                         <textarea 
@@ -61,8 +60,7 @@
                             name="textarea" 
                             id="textarea" 
                             v-model="message" 
-                        >
-                        </textarea>
+                        ></textarea>
 
                         <p class="fw3-text-xs fw3-color-contrast-medium fw3-margin-top-2xs" v-if="0">
                             Use helper text to provide additional information.
@@ -102,54 +100,94 @@ function clearForm() {
     message.value = '';
 }
 
-const submitForm = async () => {
-    shouldShowSpinner.value = true;
+async function getUserLocation() {
     try {
-        const backendUrl = import.meta.env.PUBLIC_BACKEND_SERVER_URL;
-        const url = `${backendUrl}/contact`;
-
-        console.log(url);
-        const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            name: name.value,
-            email: email.value,
-            message: message.value,
-        }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-
-        const data = await response.json();
-        console.log(data); // Handle success
-
-        clearForm();
-
-        notify({
-            type: 'success',
-            message: 'Message sent successfully.',
-        });
-
+        const response = await fetch('https://ipapi.co/json/');
+        const locationData = await response.json();
+        return locationData; // Contains city, region, country, etc.
     } catch (error) {
-        console.error('Error:', error); // Handle error
-
-        notify({
-            type: 'error',
-            message: 'An error occurred. Please try again later.',
-        });
-    } finally {
-        shouldShowSpinner.value = false;
+        console.error('Error fetching location:', error);
+        return null;
     }
-};
+}
+
+// submit the form and save into google sheet
+async function submitForm() {
+    const deploymentId = import.meta.env.PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID;
+    const scriptUrl = `https://script.google.com/macros/s/${deploymentId}/exec`;
+
+  const location = await getUserLocation();
+
+  const formData = {
+    name: name.value,
+    email: email.value,
+    message: message.value,
+    location: {
+      city: location?.city || '',
+      region: location?.region || '',
+      country: location?.country || '',
+    }
+  };
+
+  shouldShowSpinner.value = true;
+  
+  try {
+    const response = await fetch(scriptUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=UTF-8',
+      },
+      mode: 'no-cors',
+      // credentials: 'include',
+      // redirect: 'follow',
+      // referrerPolicy: 'no-referrer',
+      // body: JSON.stringify(formData),
+      body: JSON.stringify({
+        data: formData,
+      }),
+    });
+
+    console.log(response);
+    
+
+    // if (!response.ok) {
+    //   throw new Error('Network response was not ok');
+    // }
+
+    // const data = response.json();
+    // console.log(data); // Handle success
+
+    clearForm();
+
+    notify({
+      type: 'success',
+      message: 'Message sent successfully.',
+    });
+  } catch (error) {
+    console.error('Error:', error); // Handle error
+
+    notify({
+      type: 'error',
+      message: 'An error occurred. Please try again later.',
+    });
+  } finally {
+    shouldShowSpinner.value = false;
+  }
+}
 
 function checkConnectionHealth() {
   connectionHealthStatus.value = 'checking';
-    fetch(import.meta.env.PUBLIC_BACKEND_SERVER_URL)
+
+    // Check if the backend server is reachable
+    const deploymentId = import.meta.env.PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID;
+    const scriptUrl = `https://script.google.com/macros/s/${deploymentId}/exec`;
+
+    fetch(
+        scriptUrl,
+        {
+            method: 'GET',
+        }
+    )
       .then(() => {
         connectionHealthStatus.value = 'online';
       })
