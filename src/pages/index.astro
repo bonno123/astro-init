@@ -1,140 +1,20 @@
 ---
 import MainLayout from "~/layouts/MainLayout.astro";
 import Hero from "~/components/Hero.astro";
-import Experience from "~/components/vue-components/3DExperience.vue";
+import RadarAnimation from "~/canvases/radarAnimation.astro";
 import { heroWidget } from "~/data/site-info";
 import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
-
-import VcrEffect from "~/components/common/VcrEffect.astro";
 ---
 
 <MainLayout title={heroWidget.title} metaDescription={heroWidget.description}>
-	<EvenColumnsLayout>
-		<Hero
-			title={heroWidget.heroContent.title}
-			description={heroWidget.heroContent.description}
-		/>
+  <EvenColumnsLayout>
+    <Hero
+      title={heroWidget.heroContent.title}
+      description={heroWidget.heroContent.description}
+    />
 
-		<astro-heart style="position: relative; height: 20rem;">
-			<Experience
-				client:load
-				canvasClass="canvas-model"
-				containerClass="absolute-position"
-			/>
-
-			<div class="loader">
-				<VcrEffect class="vcr-screen" />
-				<div class="shadow"></div>
-			</div>
-		</astro-heart>
-	</EvenColumnsLayout>
+    <div style="aspect-ratio: 1;">
+      <RadarAnimation />
+    </div>
+  </EvenColumnsLayout>
 </MainLayout>
-
-<script>
-	let currenttime = new Date().getTime();
-
-	// Define the behaviour for our new type of HTML element.
-	class AstroHeart extends HTMLElement {
-		constructor() {
-			super();
-
-			void import("~/components/vue-components/3DExperience.vue")
-				.then(() => {
-					const canvasModel: HTMLElement | null =
-						document.querySelector(".canvas-model");
-					const loaderAnimation: HTMLElement | null =
-						document.querySelector(".screen");
-
-					if (canvasModel !== null) {
-						canvasModel.style.display = "block";
-						// canvasModel.style.visibility = "visible"
-					}
-					if (loaderAnimation !== null) {
-						// loaderAnimation.style.visibility = "hidden"
-						loaderAnimation.style.opacity = "0.1";
-					}
-				})
-				.finally(() => {
-					console.info(
-						"time to render glsl: ",
-						new Date().getTime() - currenttime,
-						"ms",
-					);
-				});
-		}
-	}
-
-	// Tell the browser to use our AstroHeart class for <astro-heart> elements.
-	customElements.define("astro-heart", AstroHeart);
-</script>
-
-<style lang="scss">
-	.loader {
-		visibility: visible;
-		opacity: 1;
-		pointer-events: none;
-	}
-
-	.canvas-model {
-		display: none;
-	}
-
-	/* decorative properties  */
-	.loader {
-		height: 20rem;
-		outline: 1px solid black;
-		border-radius: 55% / 5%;
-
-		background-color: #000000;
-	}
-
-	.shadow {
-		height: 20rem;
-		/* background-color: hsl(271, 76%, 53%); */
-		position: relative;
-		border-radius: 55% / 5%;
-
-		box-shadow:
-			0px 0px 35px 5px rgba(black, 0.597) inset,
-			0px 2px 1px 1px rgba(50, 1, 100, 0.3) inset,
-			0px -2px 1px 0px rgba(11, 5, 90, 0.414) inset;
-
-		// box-shadow: -20px 0 10px -20px rgba(0,0,0,0.5) inset, 20px 0 10px -20px rgba(0,0,0,0.5) inset;
-		// box-shadow: 0 0.25em 2em -2em black, inset 0 0 0 0.5em #0496FF, inset 0 0 0 1em #D81159, inset 0 0 0 1.5em #FFBC42;
-	}
-
-	.shadow::before,
-	.shadow::after {
-		content: "";
-		position: absolute;
-		top: 80%;
-		bottom: 0.7em;
-		z-index: -1;
-		box-shadow: 0 0.5em 0.5em 0em rgba(#000000, 0.6);
-	}
-
-	.shadow::before {
-		left: 0.25em;
-		right: 50%;
-		background: rgb(110, 6, 247);
-		transform: rotate(2deg);
-	}
-
-	.shadow::after {
-		right: 0.25em;
-		left: 50%;
-		background: lightblue;
-		transform: rotate(-2deg);
-	}
-</style>
-
-<style is:global>
-	.canvas-model {
-		border-radius: 55% / 5%;
-	}
-
-	.absolute-position {
-		position: absolute;
-		width: 100%;
-	}
-</style>

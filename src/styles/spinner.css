@@ -13,7 +13,7 @@
     transition: opacity 0.45s ease; /* Smooth transition for the opacity */
 
     /* want a background gradient at the middle */
-    background: rgba(253, 253, 253, 0.027);
+    /* background: rgba(253, 253, 253, 0.027); */
 
     cursor: wait; /* Show the wait cursor */
 
@@ -25,13 +25,13 @@
     background: hsla(0, 0%, 100%, 1);
     --angle: 45deg;
     --color1: rgba(255, 255, 255, 0.055);
-    --color2: rgba(97, 97, 97, 0.39);
-
+    --color2: rgba(97, 97, 97, 0.117);
+/* 
     background: linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
 
     background: -moz-linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
     background: -webkit-linear-gradient(var(--angle), var(--color1) 15%, var(--color2) 100%);
-    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#FFFFFF", endColorstr="#0a1647", GradientType=1 );
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr="#FFFFFF", endColorstr="#0a1647", GradientType=1 ); */
 
     /* border: 1px solid red; */
 }
@@ -39,7 +39,7 @@
 /* Spinner icon styles */
 .spinner_icon {
     border: 4px solid rgba(0, 0, 0, 0.1); /* Light grey border for the spinner */
-    border-top: 4px solid #6e34db; /* Blue border for the spinning part */
+    border-top: 4px solid #34b1db; /* Blue border for the spinning part */
     border-radius: 50%;
     width: 40px;
     height: 40px;

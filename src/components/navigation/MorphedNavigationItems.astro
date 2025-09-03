@@ -1,24 +1,28 @@
 ---
+import { heroWidget } from "~/data/site-info";
+
+const githubLink = heroWidget.socialLinks[0].href;
+
 const { pathname } = Astro.url;
 ---
 
 <!-- ========Click Effect====== -->
 <div class="position-relative js-morph-bg-wrapper">
-    <ul class="demo-morph-bg-list" role="menu">
-        <li class="cd-z-index-2">
-            <a>
-                <button
-                    data-route-to="/"
-                    class="demo-morph-bg-button"
-                    data-morph-bg="morph-bg-2"
-                    data-morph-bg-active={pathname === "/"}
-                >
-                    Home
-                </button>
-            </a>
-        </li>
+  <ul class="demo-morph-bg-list" role="menu">
+    <li class="cd-z-index-2">
+      <a>
+        <button
+          data-route-to="/"
+          class="demo-morph-bg-button"
+          data-morph-bg="morph-bg-2"
+          data-morph-bg-active={pathname === "/"}
+        >
+          Home
+        </button>
+      </a>
+    </li>
 
-        <li class="cd-z-index-2">
+    <!-- <li class="cd-z-index-2">
             <button
                 data-route-to="/playground/"
                 class="demo-morph-bg-button"
@@ -27,20 +31,20 @@ const { pathname } = Astro.url;
             >
                 Playground
             </button>
-        </li>
+        </li> -->
 
-        <li class="cd-z-index-2">
-            <button
-                data-route-to="/about/"
-                class="demo-morph-bg-button"
-                data-morph-bg="morph-bg-2"
-                data-morph-bg-active={pathname === "/about/"}
-            >
-                About
-            </button>
-        </li>
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/about/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/about/"}
+      >
+        About
+      </button>
+    </li>
 
-        <li class="cd-z-index-2">
+    <!-- <li class="cd-z-index-2">
             <button
                 data-route-to="/contact/"
                 class="demo-morph-bg-button"
@@ -49,9 +53,9 @@ const { pathname } = Astro.url;
             >
                 Contact us
             </button>
-        </li>
+        </li> -->
 
-        <li class="cd-z-index-2">
+    <!-- <li class="cd-z-index-2">
             <a>
                 <button
                     data-route-to="/worker/"
@@ -63,259 +67,327 @@ const { pathname } = Astro.url;
                     Worker
                 </button>
             </a>
-        </li>
-    </ul>
+        </li> -->
+    <li
+      class="cd-z-index-2 flex vertical-align-between"
+      style="margin-left: 1rem; margin-block: auto;"
+    >
+      <a href={githubLink} target="_blank" rel="noopener" aria-label="GitHub">
+        <svg
+          height="20"
+          width="20"
+          viewBox="0 0 20 20"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          fill="#000000"
+          ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
+            id="SVGRepo_tracerCarrier"
+            stroke-linecap="round"
+            stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier">
+            <title>github [#142]</title>
+            <desc>Created with Sketch.</desc>
+            <defs> </defs>
+            <g
+              id="Page-1"
+              stroke="none"
+              stroke-width="1"
+              fill="none"
+              fill-rule="evenodd"
+            >
+              <g
+                id="Dribbble-Light-Preview"
+                transform="translate(-140.000000, -7559.000000)"
+                fill="#000000"
+              >
+                <g id="icons" transform="translate(56.000000, 160.000000)">
+                  <path
+                    d="M94,7399 C99.523,7399 104,7403.59 104,7409.253 C104,7413.782 101.138,7417.624 97.167,7418.981 C96.66,7419.082 96.48,7418.762 96.48,7418.489 C96.48,7418.151 96.492,7417.047 96.492,7415.675 C96.492,7414.719 96.172,7414.095 95.813,7413.777 C98.04,7413.523 100.38,7412.656 100.38,7408.718 C100.38,7407.598 99.992,7406.684 99.35,7405.966 C99.454,7405.707 99.797,7404.664 99.252,7403.252 C99.252,7403.252 98.414,7402.977 96.505,7404.303 C95.706,7404.076 94.85,7403.962 94,7403.958 C93.15,7403.962 92.295,7404.076 91.497,7404.303 C89.586,7402.977 88.746,7403.252 88.746,7403.252 C88.203,7404.664 88.546,7405.707 88.649,7405.966 C88.01,7406.684 87.619,7407.598 87.619,7408.718 C87.619,7412.646 89.954,7413.526 92.175,7413.785 C91.889,7414.041 91.63,7414.493 91.54,7415.156 C90.97,7415.418 89.522,7415.871 88.63,7414.304 C88.63,7414.304 88.101,7413.319 87.097,7413.247 C87.097,7413.247 86.122,7413.234 87.029,7413.87 C87.029,7413.87 87.684,7414.185 88.139,7415.37 C88.139,7415.37 88.726,7417.2 91.508,7416.58 C91.513,7417.437 91.522,7418.245 91.522,7418.489 C91.522,7418.76 91.338,7419.077 90.839,7418.982 C86.865,7417.627 84,7413.783 84,7409.253 C84,7403.59 88.478,7399 94,7399"
+                    id="github-[#142]"
+                  >
+                  </path>
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <span class="sr-only">Follow @bonno123</span>
+      </a>
+    </li>
+  </ul>
 
-    <span
-        class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg"
-        id="morph-bg-2"
-        aria-hidden="true"></span>
+  <span
+    class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg"
+    id="morph-bg-2"
+    aria-hidden="true"></span>
 </div>
 
 <script>
-    import { navigate } from "astro:transitions/client";
+  import { navigate } from "astro:transitions/client";
 
-    // Navigate to the selected route when clicking on the button
-    document.addEventListener("click", (event) => {
-        const button = (event.target as Element)?.closest("[data-route-to]");
-        if (!button) return;
+  // Navigate to the selected route when clicking on the button
+  document.addEventListener("click", (event) => {
+    const button = (event.target as Element)?.closest("[data-route-to]");
+    if (!button) return;
 
-        const route = button.getAttribute("data-route-to");
-        navigate(String(route));
+    const route = button.getAttribute("data-route-to");
+    navigate(String(route));
+  });
+
+  var customEventRouteChanged = new CustomEvent("route-changed");
+
+  // since the state is set to persist, we need to update the morph-bg-active attribute when the route changes
+  document.addEventListener(
+    "astro:page-load",
+    (event) => {
+      setupStuff(event.target as Element); // This runs once the page is loaded.
+    },
+    { passive: true }
+  );
+
+  function setupStuff(target: Element | null) {
+    //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to
+    // Assuming `pathname` is reactive and part of your component's state
+    let routePath = window.location.pathname; // Initialize pathname with the current path
+    const buttons = target?.querySelectorAll("[data-route-to]");
+
+    if (!buttons) return;
+
+    buttons.forEach((button) => {
+      const routeTo = button.getAttribute("data-route-to");
+      button.setAttribute(
+        "data-morph-bg-active",
+        String(routeTo === routePath)
+      );
     });
 
-    var customEventRouteChanged = new CustomEvent("route-changed");
+    doneRouteChange(customEventRouteChanged);
+  }
 
-    // since the state is set to persist, we need to update the morph-bg-active attribute when the route changes
-    document.addEventListener(
-        "astro:page-load",
-        (event) => {
-            setupStuff(event.target as Element); // This runs once the page is loaded.
-        },
-        { passive: true },
-    );
-
-    function setupStuff(target: Element | null) {
-        //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to
-        // Assuming `pathname` is reactive and part of your component's state
-        let routePath = window.location.pathname; // Initialize pathname with the current path
-        const buttons = target?.querySelectorAll("[data-route-to]");
-
-        if (!buttons) return;
-
-        buttons.forEach((button) => {
-            const routeTo = button.getAttribute("data-route-to");
-            button.setAttribute(
-                "data-morph-bg-active",
-                String(routeTo === routePath),
-            );
-        });
-
-        doneRouteChange(customEventRouteChanged);
-    }
-
-    function doneRouteChange(customEvent: CustomEvent<unknown>) {
-        window.dispatchEvent(customEvent);
-    }
+  function doneRouteChange(customEvent: CustomEvent<unknown>) {
+    window.dispatchEvent(customEvent);
+  }
 </script>
 
 <script>
-    import MorphBackground from "~/utils/morphBackgroundClass";
+  import MorphBackground from "~/utils/morphBackgroundClass";
 
-    var morphBg = document.getElementsByClassName("js-morph-bg");
+  var morphBg = document.getElementsByClassName("js-morph-bg");
 
-    function initMorph() {
-        if (morphBg.length > 0) {
-            for (var i = 0; i < morphBg.length; i++) {
-                const morphInstance = new MorphBackground(
-                    morphBg[i] as HTMLElement,
-                );
-            }
-        }
+  function initMorph() {
+    if (morphBg.length > 0) {
+      for (var i = 0; i < morphBg.length; i++) {
+        const morphInstance = new MorphBackground(morphBg[i] as HTMLElement);
+      }
     }
+  }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const targetElement = document.querySelector(".demo-morph-bg-button"); // Adjust the selector as needed
+  document.addEventListener("DOMContentLoaded", () => {
+    const targetElement = document.querySelector(".demo-morph-bg-button"); // Adjust the selector as needed
 
-        const observer = new IntersectionObserver(
-            (entries, observer) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        // Element is now visible
-                        initMorph();
-                        // Optionally, stop observing if you only need to initialize once
-                        observer.unobserve(entry.target);
-                    }
-                });
-            },
-            {
-                root: null, // observing the document viewport
-                rootMargin: "0px",
-                threshold: 0.1, // Adjust threshold to control when the callback is executed
-            },
-        );
-
-        // Start observing the target element
-        observer.observe(targetElement!);
-    });
-
-    // ============== MORPH BG RESIZE ============== //
-    // on window resize - reset morph bg size
-    var resizingId: string | number | undefined,
-        customEventMorph = new CustomEvent("update-morphbg"),
-        customEventHide = new CustomEvent("hide-morphbg");
-
-    // on window resize - reset morph bg size
-    window.addEventListener("resize", function () {
-        if (!resizingId) doneResizing(customEventHide);
-        clearTimeout(resizingId as number);
-        resizingId = setTimeout(function () {
-            doneResizing(customEventMorph);
-            resizingId = undefined;
-        }, 100) as unknown as number;
-    });
-
-    // wait for font to be loaded
-    if (document.fonts) {
-        document.fonts.onloadingdone = function (fontFaceSetEvent) {
-            doneResizing(customEventMorph);
-        };
-
-        document.fonts.ready.then(function () {
-            setTimeout(function () {
-                doneResizing(customEventMorph);
-            }, 300);
+    const observer = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Element is now visible
+            initMorph();
+            // Optionally, stop observing if you only need to initialize once
+            observer.unobserve(entry.target);
+          }
         });
-    }
+      },
+      {
+        root: null, // observing the document viewport
+        rootMargin: "0px",
+        threshold: 0.1, // Adjust threshold to control when the callback is executed
+      }
+    );
 
-    function doneResizing(customEvent: CustomEvent<unknown>) {
-        window.dispatchEvent(customEvent);
-    }
+    // Start observing the target element
+    observer.observe(targetElement!);
+  });
+
+  // ============== MORPH BG RESIZE ============== //
+  // on window resize - reset morph bg size
+  var resizingId: string | number | undefined,
+    customEventMorph = new CustomEvent("update-morphbg"),
+    customEventHide = new CustomEvent("hide-morphbg");
+
+  // on window resize - reset morph bg size
+  window.addEventListener("resize", function () {
+    if (!resizingId) doneResizing(customEventHide);
+    clearTimeout(resizingId as number);
+    resizingId = setTimeout(function () {
+      doneResizing(customEventMorph);
+      resizingId = undefined;
+    }, 100) as unknown as number;
+  });
+
+  // wait for font to be loaded
+  if (document.fonts) {
+    document.fonts.onloadingdone = function (fontFaceSetEvent) {
+      doneResizing(customEventMorph);
+    };
+
+    document.fonts.ready.then(function () {
+      setTimeout(function () {
+        doneResizing(customEventMorph);
+      }, 300);
+    });
+  }
+
+  function doneResizing(customEvent: CustomEvent<unknown>) {
+    window.dispatchEvent(customEvent);
+  }
 </script>
 
 <style>
-    /* -------------------------------- 
+  /* -------------------------------- 
 
 Title: Morphing Background
 Descr: A morphing background item that transitions from one element's position to another's
 
 -------------------------------- */
 
-    /* --------------------------------
+  /* --------------------------------
 
 Component 
 
 -------------------------------- */
 
-    .morph-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 1px;
-        width: 1px;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.3s;
-        transform-origin: left top;
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-    }
+  .morph-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1px;
+    width: 1px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    transform-origin: left top;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
 
-    .morph-bg--visible {
-        opacity: 0.2;
-    }
+  .morph-bg--visible {
+    opacity: 0.2;
+  }
 
-    .morph-bg--has-transition {
-        transition: 0.3s;
-        will-change: transform, border-radius, height, width;
-    }
+  .morph-bg--has-transition {
+    transition: 0.3s;
+    will-change: transform, border-radius, height, width;
+  }
 
-    /* -------------------------------- 
+  /* -------------------------------- 
 
 Demo style 
 
 -------------------------------- */
 
-    .demo-morph-bg-paragraph {
-        position: relative; /* This makes z-index applicable */
-        padding: 1rem;
-        font-size: 0.9375rem;
-        color: hsl(240, 4%, 65%);
-    }
+  .demo-morph-bg-paragraph {
+    position: relative; /* This makes z-index applicable */
+    padding: 1rem;
+    font-size: 0.9375rem;
+    color: hsl(240, 66%, 63%);
+  }
 
-    .demo-morph-bg-list {
-        display: inline-flex;
-        flex-wrap: wrap;
-        overflow: hidden;
-    }
+  .demo-morph-bg-list {
+    display: inline-flex;
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
 
-    .demo-morph-bg-link {
-        display: block;
-        padding: 0.75rem 1rem;
-        color: hsl(230, 13%, 9%);
-        text-decoration: none;
-        font-weight: medium;
-    }
+  .demo-morph-bg-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: hsl(230, 13%, 9%);
+    text-decoration: none;
+    font-weight: medium;
+  }
 
-    .demo-morph-bg-target {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        pointer-events: none;
-    }
+  .demo-morph-bg-target {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+  }
 
-    .demo-morph-bg-button {
-        border-radius: 0.1em;
-        font-weight: medium;
-        cursor: pointer;
-        color: hsl(230, 13%, 9%);
-        padding: 0.75rem 1rem;
-    }
+  .demo-morph-bg-button {
+    border-radius: 0.25em;
+    font-weight: 500;
+    cursor: pointer;
+    color: rgb(72, 43, 128);
+    padding: 0.75rem 1rem;
+    transition: all 0.12s ease;
+  }
 
-    /* .demo-morph-bg-1 {
+  .demo-morph-bg-button:hover {
+    /* animation: blur 0.5s forwards; */
+    /* letter-spacing: 3px; */
+    filter: blur(0.2px);
+    transform: scale(1.02);
+  }
+
+  @keyframes blur {
+    0% {
+      filter: blur(0);
+      transform: scale(1);
+    }
+    50% {
+      filter: blur(1.15px);
+      transform: scale(1.02);
+    }
+    100% {
+      filter: blur(0);
+      transform: scale(1.01);
+      /* background: #2ecc71; */
+    }
+  }
+
+  /* .demo-morph-bg-1 {
     background-color: hsl(250, 84%, 54%);
 } */
 
-    .demo-morph-bg-2 {
-        background-color: hsla(0, 0%, 8%, 0.438);
-    }
+  .demo-morph-bg-2 {
+    background-color: rgba(21, 197, 194, 0.71);
+  }
 
-    /* -------------------------------- 
+  /* -------------------------------- 
 
 Utilities 
 
 -------------------------------- */
 
-    .cd-block {
-        display: block;
-    }
+  .cd-block {
+    display: block;
+  }
 
-    .cd-position-relative {
-        position: relative;
-    }
+  .cd-position-relative {
+    position: relative;
+  }
 
-    .cd-z-index-1 {
-        z-index: 1;
-    }
+  .cd-z-index-1 {
+    z-index: 1;
+  }
 
-    .cd-z-index-2 {
-        z-index: 2;
-    }
+  .cd-z-index-2 {
+    z-index: 2;
+  }
 
-    /* .cd-margin-y-xs {
+  /* .cd-margin-y-xs {
     margin-block: 1.675rem;
 } */
 
-    /* .cd-margin-bottom-sm {
+  /* .cd-margin-bottom-sm {
     margin-bottom: 2.5rem;
 } */
 
-    /* .cd-margin-bottom-xl {
+  /* .cd-margin-bottom-xl {
     margin-bottom: 4.5rem;
 } */
 
-    .cd-text-center {
-        text-align: center;
-    }
+  .cd-text-center {
+    text-align: center;
+  }
 </style>

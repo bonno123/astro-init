@@ -1,67 +1,62 @@
 ---
-import { ViewTransitions } from 'astro:transitions';
-import BaseHeadSeo from '~/components/BaseHeadSeo.astro'
-import '~/styles/reset.scss';
-import '~/styles/utility.scss';
-import '~/styles/index.scss';
+import { ClientRouter } from "astro:transitions";
+import BaseHeadSeo from "~/components/BaseHeadSeo.astro";
+import "~/styles/reset.scss";
+import "~/styles/utility.scss";
+import "~/styles/index.scss";
 
-import '~/styles/notification-styles.scss'; // Import the notification styles
+import "~/styles/notification-styles.scss"; // Import the notification styles
 
-import '~/styles/spinner.css'; // Import the spinner styles
-
+import "~/styles/spinner.css"; // Import the spinner styles
 
 interface Props {
-	title: string;
-    metaDescription?: string;
+  title: string;
+  metaDescription?: string;
 }
 
 const { title, metaDescription } = Astro.props;
-
 ---
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content={Astro.generator} />
-    <BaseHeadSeo 
-        title={title}
-        metaDescription={metaDescription}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content={Astro.generator} />
+  <BaseHeadSeo title={title} metaDescription={metaDescription} />
 
-    />
-
-    <ViewTransitions />
+  <ClientRouter />
 </head>
 
-
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"
+></script>
 
 <script>
-declare global {
+  declare global {
     interface Window {
-        dataLayer: any[];
+      dataLayer: any[];
     }
-}
+  }
 
-window.dataLayer = window.dataLayer || [];
-function gtag(...args: any[]){
+  window.dataLayer = window.dataLayer || [];
+  function gtag(...args: any[]) {
     window.dataLayer.push(arguments);
-}
+  }
 
-gtag('js', new Date());
+  gtag("js", new Date());
 
-gtag('config', 'G-GDKJFDWKW7');
+  gtag("config", "G-GDKJFDWKW7");
 </script>
 
-
 <script is:inline>
-    document.addEventListener('astro:before-preparation', ev => {
-      const originalLoader = ev.loader;
-      ev.loader = async function() {
-        const { startSpinner } = await import('/spinner/spinner.js');
-        const stopSpinner = startSpinner('#main-content');
-        await originalLoader();
-        stopSpinner();
-      };
-    });
-  </script>
+  // remove the loader
+
+  // document.addEventListener('astro:before-preparation', ev => {
+  //   const originalLoader = ev.loader;
+  //   ev.loader = async function() {
+  //     const { startSpinner } = await import('/spinner/spinner.js');
+  //     const stopSpinner = startSpinner('#main-content');
+  //     await originalLoader();
+  //     stopSpinner();
+  //   };
+  // });
+</script>

@@ -25,7 +25,8 @@ export type HeroWidget = {
 export const siteInfo: SiteInfo = {
 	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
 	description: `
-		Landing page for Avik Banik, a Software Engineer and Web Developer from Kolkata, India.
+		UI developer and digital craftsman. 
+		Avik Banik builds intuitive interfaces and immersive web experiences from Kolkata, India.
 	`,
 	image: {
 		src: "/og/social.jpg",
@@ -35,41 +36,41 @@ export const siteInfo: SiteInfo = {
 
 export const heroWidget = {
 	title: "Landing",
-	description: "Welcome to my 3D web design portfolio. Dive into a world where static sites come alive.",
+	description: "UI Developer & Digital Craftsman. Creating interfaces that captivate and experiences that inspire.",
 	heroContent: {
-		title: "Here’s a piece of responsive paper",
+		title: "Bringing digital ideas to life through code & design.",
 		description: `
-			Welcome to the space of my imagination! 🚀
+			I help transform concepts into reality for brands.
+			Modern, performant, and visually striking web solutions.
 			<br>
 			<br>
-			While I'm currently enhancing this space with a plan to showcase my latest WebGL and GLSL creations,
+			My expertise spans UI/UX, WebGL/GLSL for interactive experiences, and full-stack development.
+
 			<br>
-			feel free to explore the different sections of the site and discover the intersection of art and technology.
 			<br>
-			<br>
-			Stay tuned for what's next! 🤔
+			Ready to elevate your digital presence? Let's collaborate.
 		`,
 	},
 	socialLinks: [
 		{
 			platform: "github",
-			href: "https://github.com/bonno123/astro-init",
+			href: "https://github.com/bonno123",
 			me: "https://github.com/bonno123",
-			text: "Go to GitHub repo",
+			text: "Check out my GitHub",
 			icon: "social/github",
 		},
 		{
 			platform: "twitter",
 			href: "https://twitter.com/AvikBanik1",
 			me: "https://twitter.com/AvikBanik1",
-			text: "Follow on Twitter",
+			text: "Connect on Twitter",
 			icon: "social/twitter",
 		},
 		{
 			platform: "kaggle",
 			href: "https://www.kaggle.com/avikbanik",
 			me: "https://www.kaggle.com/avikbanik",
-			text: "Follow on kaggle",
+			text: "View my Kaggle profile",
 			footerOnly: true,
 			icon: "social/kaggle",
 		},
@@ -77,32 +78,28 @@ export const heroWidget = {
 			platform: "codepen",
 			href: "https://codepen.io/Bonno123",
 			me: "https://codepen.io/Bonno123",
-			text: "Follow on kaggle",
+			text: "Explore my CodePen",
 			footerOnly: true,
 			icon: "social/codepen",
 		},
 	],
 }
 
-// currently this one is not using Path: src/data/about-me.ts
 export const aboutMeWidget = {
-	title: "About Me",
-	description: "I'm a Software Engineer and Web Developer from Kolkata, India. With a passion for blending art and technology, I've worked on exciting projects.",
+	title: "About",
+	description: "Frontend specialist with full-stack capabilities and a passion for creative coding.",
 	aboutMe: {
-		title: "Hello, I’m Avik",
+		title: "I’m this ...",
 		description: `
-			I'm a Software Engineer and Web Developer from Kolkata, India. 
-			<br/> <br/>
-			With a passion for blending art and technology,
-			I've worked on exiting projects. 
-			My toolkit includes advanced proficiency in Vue.js, Quasar, Node.js, FastAPI, 
-			and leveraging databases like Oracle and PostgreSQL with Prisma ORM 
-			to bring dynamic projects to life.
-			<br/>
-			Currently at RentApp and freelancing, I'm always looking for new opportunities to collaborate on exciting projects.
+			Based in India, I help building digital experiences that blend form and function.
 			<br/><br/>
-			Let's connect!
-    	`,
+			My tech arsenal includes Node.js,
+			Express.js, PostgreSQL, modern front-end frameworks like React and Vue.js, and more.
+			<br/>
+			I take on freelance projects that challenge me to push boundaries.
+			<br/><br/>
+			If you need a UI/UX focused developer for your project, you can reach out to me.
+		`,
 		mail: import.meta.env.PUBLIC_CONTACT_EMAIL,
 	},
 	socialLinks: [
@@ -135,12 +132,13 @@ export const aboutMeWidget = {
 
 export const contactWidget = {
 	title: "Contact",
-	description: "Let's connect! Feel free to reach out to me for any queries or collaborations.",
+	description: "Have a project in mind? Let's discuss how we can make it happen.",
 	contactForm: {
-		title: "Get in touch",
+		title: "Start a conversation",
 		description: `
-			Have a question or want to collaborate on a project? 
-			Feel free to reach out to me using the form below.
+			Whether you need a complete web application, an interactive interface, or technical consultation—I'm here to help turn your vision into reality.
+			<br/><br/>
+			Tell me about your project, and I'll get back to you within 24 hours to discuss how we can collaborate effectively.
 		`,
 	},
 }
