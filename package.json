@@ -18,7 +18,7 @@
     "astro": "5.6.1",
     "astro-seo": "^0.8.0",
     "glslCanvas": "^0.2.6",
-    "jspdf": "^2.5.1",
+    "jspdf": "^3.0.2",
     "three": "^0.161.0",
     "tweakpane": "^4.0.3",
     "vue": "^3.4.0"
