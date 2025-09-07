@@ -4,8 +4,6 @@ import Hero from "~/components/Hero.astro";
 import { contactWidget } from "~/data/site-info";
 import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
 import ContactForm from "~/components/vue-components/ContactForm.vue";
-import MessageSection from "~/components/MessageSection.astro";
-import MessageThread from "~/components/vue-components/MessageThread.vue";
 ---
 
 <MainLayout
@@ -19,11 +17,6 @@ import MessageThread from "~/components/vue-components/MessageThread.vue";
                 Have questions or just want to say hi?
             `}
     />
-
-    <MessageThread client:load />
-
-    <!-- <div class="mt-16">
-      <MessageSection />
-    </div> -->
+    <ContactForm />
   </EvenColumnsLayout>
 </MainLayout>
