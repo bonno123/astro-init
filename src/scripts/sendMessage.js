@@ -1,6 +1,5 @@
 // Store the session ID in localStorage for returning visitors
 const SESSION_KEY = 'portfolio_message_session';
-const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
 
 /**
  * Send a message to the server
@@ -13,6 +12,8 @@ const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
  * @returns {Promise<object>} - Response with session ID and thread ID
  */
 export async function sendMessage(content, options = {}) {
+    const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
+
     try {
         const { name, email, subject, threadId } = options;
 
@@ -59,6 +60,8 @@ export async function sendMessage(content, options = {}) {
  * @returns {Promise<Array>} - Array of messages
  */
 export async function getMessages() {
+    const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;    
+
     try {
         const response = await fetch(`${API_BASE}/api/messages`);
         
@@ -78,6 +81,11 @@ export async function getMessages() {
  * @returns {Promise<Array>} - Array of messages
  */
 export async function getRecentMessages(limit = 10, offset = 0, reverse = true) {
+    const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
+
+        console.log("API_BASE:", API_BASE);
+
+
     try {
         const response = await fetch(`${API_BASE}/api/messages?limit=${limit}&offset=${offset}&sort=${reverse ? 'desc' : 'asc'}`);
         
@@ -97,6 +105,7 @@ export async function getRecentMessages(limit = 10, offset = 0, reverse = true) 
  * @returns {Promise<Array>} - Array of threads
  */
 export async function getUserThreads() {
+    const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
     try {
         const sessionId = localStorage.getItem(SESSION_KEY);
         
@@ -123,6 +132,7 @@ export async function getUserThreads() {
  * @returns {Promise<{thread: object, messages: Array}>} - Thread and messages
  */
 export async function getThreadMessages(threadId) {
+    const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
     try {
         const response = await fetch(`${API_BASE}/api/thread/${threadId}`);
 

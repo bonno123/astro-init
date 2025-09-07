@@ -8,7 +8,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID: string;
   // more env variables...
 
-  readonly PUBLIC_BACKEND_SERVER_URL: string;
+  readonly PUBLIC_API_ENDPOINT: string;
 }
 
 interface ImportMeta {
