@@ -26,10 +26,5 @@ import fragmentShader from "~/glsl/radar-animation/index.frag?raw";
     }
   }
 
-  // Event listener for Astro SPA navigation
-  document.addEventListener("astro:after-swap", () => {
-    initializeShader();
-  });
-
   initializeShader();
 </script>

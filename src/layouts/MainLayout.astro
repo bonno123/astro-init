@@ -6,6 +6,7 @@ import CollapseableNavigationContent from "~/components/navigation/CollapseableN
 // import NavigationBackground from "~/components/glsl/NavigationBackground.astro";
 import LOGO from "~/assets/Logo.astro";
 // import WhatsAppButton from "~/components/WhatsAppButton.astro";
+import ChatButton from "~/components/vue-components/ChatButton.vue";
 
 interface Props {
   title: string;
@@ -57,7 +58,7 @@ const { title: layoutTitle, metaDescription } = Astro.props;
       </div>
     </main>
 
-    <!-- <WhatsAppButton /> -->
+    <ChatButton client:load transition:persist />
   </body>
 </html>
 
