@@ -2,7 +2,7 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
         const corsHeaders = {
-            "Access-Control-Allow-Origin": "https://avikbanik.com, https://www.avikbanik.com, https://bonno123.github.io",
+            "Access-Control-Allow-Origin": "https://avikbanik.com, https://www.avikbanik.com, https://bonno123.github.io, http://localhost:4321",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization"
         };
