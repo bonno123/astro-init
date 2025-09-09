@@ -1,6 +1,13 @@
 <template>
     <div class="floating-chat" :class="{ enter: true, expand: isChatOpen }">
-        <button v-if="!isChatOpen" @click="isChatOpen = true">
+        <button 
+            v-if="!isChatOpen" 
+            @click="isChatOpen = true" 
+            class="open-chat-button" 
+            :class="{ 'unread-badge': unReadMessageCount > 0 }"
+            :style="{ '--unread-count': unreadCountDisplay }"
+            aria-label="Open chat"
+        >
             <svg viewBox="0 0 24 24" 
             height="24" width="24"
             fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -42,17 +49,6 @@
                 </button>
             </div>
 
-            <!-- <ul class="messages">
-                <li class="self">asdasdasasdasdasasdasdasasdasdasasdasdasasdasdasasdasdas</li>
-                <li class="self">Are we dogs??? 🐶</li>
-                <li class="anonymous">no... we're human</li>
-                <li class="self">are you sure???</li>
-                <li class="anonymous">yes.... -___-</li>
-                <li class="self">if we're not dogs.... we might be monkeys 🐵</li>
-                <li class="anonymous">i hate you</li>
-                <li class="self">don't be so negative! here's a banana 🍌</li>
-                <li class="anonymous">......... -___-</li>
-            </ul> -->
             <ul 
                 v-if="messages" 
                 class="messages" 
@@ -64,13 +60,12 @@
                     :style="{ color: getMessageColor(message.session_id) }"
                     :key="index + (message.session_id ?? '')"
                 > 
-                    <span class="username">{{ message.name ? message.name : `anon [${message.session_id ? message.session_id : 'unknown'}]` }}:</span>
+                    <span class="username">{{ message.name ? message.name : `Guest_${message.session_id ? message.session_id : 'unknown'}` }}:</span>
                     <span class="wrap">{{ message.content }}</span>
                 </li>
             </ul>
 
             <div class="footer">
-                <!-- <div class="text-box" contenteditable="true" disabled="true"></div> -->
                 <input class="text-box" type="text" v-model="userMessage" placeholder="your message...">
                 <button id="sendMessage" @click="prepareSubmit">send</button>
             </div>
@@ -79,15 +74,16 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref, watch } from 'vue';
-  import {
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import {
     sendMessage,
     getMessages,
     getUserThreads,
     getThreadMessages,
     hasSession,
     getRecentMessages,
-  } from "~/scripts/sendMessage";
+    startSSE
+} from "~/scripts/sendMessage";
 import useNotification from '~/utils/useNotification';
 
   interface Message {
@@ -103,10 +99,76 @@ import useNotification from '~/utils/useNotification';
   }
   
 const messagesContainer = ref<HTMLElement | null>(null);
+// Add a ref to track the last seen message when chat was open
+const lastSeenMessageId = ref<number>(0);
+
+// Add audio context and sound function
+const audioContext = ref<AudioContext | null>(null);
+const soundEnabled = ref(true); // Allow users to toggle sound
+
+// Unread message count
+const unReadMessageCount = ref(0);
+// Function to mark messages as read when chat opens
+const markMessagesAsRead = () => {
+  if (messages.value.length > 0) {
+    const latestMessageId = messages.value[messages.value.length - 1].id;
+    lastSeenMessageId.value = latestMessageId;
+    localStorage.setItem('last_seen_message_id', latestMessageId.toString());
+  }
+  unReadMessageCount.value = 0;
+};
+
+// Create a subtle notification sound using Web Audio API
+const playNotificationSound = () => {
+  if (!soundEnabled.value) return;
+  
+  try {
+    if (!audioContext.value) {
+      audioContext.value = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+
+    const ctx = audioContext.value;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    // Create a gentle notification sound
+    oscillator.frequency.setValueAtTime(800, ctx.currentTime); // Higher pitch
+    oscillator.frequency.setValueAtTime(600, ctx.currentTime + 0.1); // Lower pitch
+    
+    // Gentle volume curve
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
+    gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
+
+    oscillator.type = 'sine'; // Gentle sine wave
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.2);
+  } catch (error) {
+    console.warn('Could not play notification sound:', error);
+  }
+};
+
+// Function to increment unread count
+const incrementUnreadCount = () => {
+  unReadMessageCount.value++;
+};
+
+const unreadCountDisplay = computed(() => {
+    if (unReadMessageCount.value === 0) return '""';
+    const count = unReadMessageCount.value > 99 
+        ? '99+' 
+        : unReadMessageCount.value.toString();
+    return `"${count}"`;
+});
 
 const { notify } = useNotification();
 
 const isChatOpen = ref(false);
+
+const sseConnection = ref<ReturnType<typeof startSSE> | null>(null);
 
 
 const messages = ref<Message[]>([]);
@@ -140,33 +202,52 @@ function getMessageColor(session_id: string | null | undefined) {
     return color;
 }
 
-function prepareSubmit() {
-  if (userMessage.value.trim() === '') return;
 
+async function prepareSubmit() {
+  if (userMessage.value.trim() === '') return;
   try {
-    sendMessage(userMessage.value, {
-      name: undefined,
-      subject: undefined,
-      email: undefined
+    // console.log("Submitting message:", userMessage.value);
+
+    const response = await sendMessage(userMessage.value, {
+      name: null,
+      subject: null,
+      email: null,
+      threadId: null,
+      sessionId: localStorage.getItem('chat_session') || null,
     });
-  
+    const result: {
+        messageId: number;
+        threadId: number;
+        sessionId: string;
+    } = typeof response.json === 'function' ? await response.json() : response;    
+
     messages.value.push({
-        id: Date.now(), // Temporary ID, replace with actual ID from server if available
-        thread_id: 0, // Replace with actual thread ID if available
+        id: result.messageId,
+        thread_id: result.threadId,
         user_id: 0, // Replace with actual user ID if available
         content: userMessage.value,
         // last four characters
-        session_id: localStorage.getItem('portfolio_message_session')?.slice(-4),
+        session_id: result.sessionId?.slice(-4) ?? localStorage.getItem('chat_session')?.slice(-4),
         is_read: true,
         created_at: new Date().toISOString(),
     });
+
+    // Store the latest message ID for future reference
+    if (messages.value.length > 0) {
+        localStorage.setItem('last_message_id', result.messageId.toString());
+    }
+
     userMessage.value = '';
-    scrollToBottom();
+
+    nextTick(() => {
+      scrollToBottom();
+    });
   } catch (error) {
+    // console.error("Error sending message:", error);
     notify({
       type: 'error',
-      message: (error instanceof Error && error.message) 
-        ? error.message 
+      message: (error instanceof Error && error.message)
+        ? error.message
         : 'Failed to send message. Please try again later.',
     });
   }
@@ -185,21 +266,99 @@ const scrollToBottom = () => {
 async function init() {
   try {
     const messages = await getRecentMessages();
+
+    // Store the latest message ID for future reference
+    if (messages.length > 0) {
+        localStorage.setItem('last_message_id', messages[0].id);
+    }
+
+    // Get last seen message ID from localStorage
+    const storedLastSeen = localStorage.getItem('last_seen_message_id');
+    lastSeenMessageId.value = storedLastSeen ? parseInt(storedLastSeen) : messages[messages.length - 1].id;
+
+    // Calculate initial unread count
+    const unreadMessages = messages.filter(msg => msg.id > lastSeenMessageId.value);
+    unReadMessageCount.value = unreadMessages.length;
+
     return messages.reverse();
-  } catch (error) {
-    console.error('Error fetching user messages:', error);
-    return [];
-  }
+    } catch (error) {
+        console.error('Error fetching user messages:', error);
+        return [];
+    }
 }
 
-onMounted(async() => {
+onMounted(async () => {
     messages.value = await init();
-    // scrollToBottom();
+
+    // Start SSE for real-time updates with page visibility optimization
+    const apiBase = import.meta.env.PUBLIC_API_ENDPOINT || 'https://d1-connect.bonno123.workers.dev';
+    // console.log("Chat component using API base:", apiBase);
+    
+    sseConnection.value = startSSE(apiBase, (newMessage: Message) => {
+        // console.log("Received message via SSE in chat component:", newMessage);
+        nextTick(() => {
+            scrollToBottom();
+        });
+
+        // Show browser notification if page is not visible
+        // if (document.hidden && 'Notification' in window && Notification.permission === 'granted') {
+        //     console.log('Notification permission:', Notification.permission);
+        //     console.log('Document hidden:', document.hidden);
+        //     console.log('New message:', newMessage);
+    
+        //     new Notification('New Message', {
+        //         body: `${newMessage.name || 'Someone'}: ${newMessage.content.substring(0, 50)}...`,
+        //         icon: '/favicon.ico'
+        //     });
+        // }
+
+        if (!messages.value.some(m => m.id === newMessage.id)) {
+            // console.log("Adding new message to chat UI:", data);
+            messages.value.push({
+                id: newMessage.id,
+                thread_id: newMessage.thread_id || 0,
+                user_id: newMessage.user_id || 0,
+                content: newMessage.content,
+                session_id: newMessage.session_id || null,
+                is_read: true,
+                created_at: newMessage.created_at,
+                name: newMessage.name || null,
+                email: newMessage.email || null
+            });
+
+            // Store the latest message ID for future reference
+            localStorage.setItem('last_message_id', newMessage.id.toString());
+
+            // Increment unread count only if chat is closed and it's not from current user
+            const currentSessionId = localStorage.getItem('chat_session')?.slice(-4);
+            const messageSessionId = newMessage.session_id?.slice(-4);
+            
+            if (!isChatOpen.value && messageSessionId !== currentSessionId) {
+                incrementUnreadCount();
+
+                // Play sound for new messages from others
+                playNotificationSound();
+            }
+
+            if (isChatOpen.value) {
+                scrollToBottom();
+            }
+        }
+    });
+});
+
+
+// Handle SSE connection cleanup on component unmount
+onUnmounted(() => {
+    if (sseConnection.value && sseConnection.value.cleanup) {
+        sseConnection.value.cleanup();
+    }
 });
 
 // Also scroll to bottom when chat is opened
 watch(isChatOpen, (newValue) => {
   if (newValue) {
+    markMessagesAsRead();
     scrollToBottom();
   }
 });
@@ -223,8 +382,6 @@ $default-shadow-color: rgb(0, 0, 0);
 // Mixins
 // --------------------------------------
 @mixin fancy-background() {
-    // background: -moz-linear-gradient(-45deg, #183850 0, #183850 25%, #192C46 50%, #22254C 75%, #22254C 100%);
-    // background: -webkit-linear-gradient(-45deg, #183850 0, #183850 25%, #192C46 50%, #22254C 75%, #22254C 100%);
     background: -moz-linear-gradient(-45deg, #70c917 0, #183850 25%, #192C46 50%, #22254C 75%, #22254C 100%);
     background: -webkit-linear-gradient(-45deg, #183850 0, #183850 25%, #192C46 50%, #22254C 75%, #22254C 100%);
     background-repeat: no-repeat;
@@ -246,15 +403,11 @@ $default-shadow-color: rgb(0, 0, 0);
 }
 
 @mixin scrolling-shadows($background-color: transparent, $shadow-intensity: 0.5, $shadow-color: $default-shadow-color, $cover-size: 40px, $shadow-size: 14px) {
-    // Shadow covers
     background: linear-gradient($background-color 30%, rgba($background-color, 0)), linear-gradient(rgba($background-color, 0), $background-color 70%) 0 100%, radial-gradient(50% 0, farthest-side, rgba($shadow-color, $shadow-intensity), rgba($shadow-color, 0)), radial-gradient(50% 100%, farthest-side, rgba($shadow-color, $shadow-intensity), rgba($shadow-color, 0)) 0 100%;
     background: linear-gradient($background-color 30%, rgba($background-color, 0)), linear-gradient(rgba($background-color, 0), $background-color 70%) 0 100%, radial-gradient(farthest-side at 50% 0, rgba($shadow-color, $shadow-intensity), rgba($shadow-color, 0));
-    // also add button shadow:
-    //radial-gradient(farthest-side at 50% 100%, rgba($shadow-color,$shadow-intensity), rgba($shadow-color,0)) 0 100%;
     background-repeat: no-repeat;
     background-color: $background-color;
     background-size: 100% $cover-size, 100% $cover-size, 100% $shadow-size, 100% $shadow-size;
-    // Opera doesn't support this in the shorthand
     background-attachment: local, local, scroll, scroll;
 }
 
@@ -422,8 +575,6 @@ body {
                 -moz-animation: show-chat-even 0.15s 1 ease-in;
                 -webkit-animation: show-chat-even 0.15s 1 ease-in;
                 float: left;
-                // margin-left: $chat-thread-offset;
-                // color: #0EC879;
             }
             // li.other:before {
             //     left: -$chat-thread-offset;
@@ -532,5 +683,23 @@ body {
     100% {
         margin-right: 0;
     }
+}
+
+
+// add a message counter badge to the chat button when there are unread messages
+.floating-chat .unread-badge::after {
+    content: var(--unread-count);
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: rgb(203, 73, 95);
+    color: white;
+    font-size: 10px;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    line-height: 16px;
+    border-radius: 50%;
+    // display: none;
 }
 </style>

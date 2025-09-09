@@ -98,7 +98,7 @@ export const aboutMeWidget = {
 			<br/>
 			I take on freelance projects that challenge me to push boundaries.
 			<br/><br/>
-			If you need a UI/UX focused developer for your project, you can reach out to me.
+			Looking for a UI/UX focused developer for your project? Let's connect!
 		`,
 		mail: import.meta.env.PUBLIC_CONTACT_EMAIL,
 	},
@@ -122,11 +122,7 @@ export const aboutMeWidget = {
 		{
 			label: "Kaggle",
 			link: "https://www.kaggle.com/avikbanik",
-		},
-		{
-			label: "Instagram",
-			link: "https://www.instagram.com/_sporadikos_/",
-		},
+		}
 	],
 }
 
