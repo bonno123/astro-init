@@ -13,7 +13,7 @@ const SESSION_KEY = 'chat_session';
  */
 export async function sendMessage(content, options = {}) {
     const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT;
-    console.log('Sending message to API:', API_BASE);
+    // console.log('Sending message to API:', API_BASE);
     
     if (!API_BASE) {
         console.error('API_BASE is undefined. Check your environment variables.');
@@ -81,7 +81,7 @@ export function startSSE(apiBase, onMessage) {
     // Get the last message ID from local storage
     let lastMessageId = localStorage.getItem('last_message_id') || '';
 
-    console.log("Starting SSE with URL:", `${apiBase}/api/stream?lastId=${lastMessageId}`);
+    // console.log("Starting SSE with URL:", `${apiBase}/api/stream?lastId=${lastMessageId}`);
 
     let es = new EventSource(`${apiBase}/api/stream?lastId=${lastMessageId}`);
     let activityTimer = null;
@@ -101,19 +101,19 @@ export function startSSE(apiBase, onMessage) {
                 pageVisible: isPageVisible,
                 timestamp: Date.now()
             })
-        }).catch(e => console.log('Activity ping failed:', e));
+        }).catch(e => console.info('Activity ping failed:', e));
     };
 
     // Fallback polling mechanism when SSE fails
     const startFallbackPolling = () => {
         if (fallbackTimer) clearInterval(fallbackTimer);
-        console.log("Starting fallback polling mechanism");
+        console.info("Starting fallback polling");
         usingFallback = true;
         fallbackTimer = setInterval(async () => {
             try {
                 // Skip polling if Just reconnected via SSE
                 if(Date.now() - lastProcessedMessageTime < 5000) {
-                    console.log("Skipping fallback polling due to recent SSE activity");
+                    console.info("Skipping fallback polling due to recent SSE activity");
                     return;
                 }
 
@@ -124,7 +124,7 @@ export function startSSE(apiBase, onMessage) {
                     const latestMessage = messages[0];
                     if (lastMessageId !== latestMessage.id) {
                         lastMessageId = latestMessage.id;
-                        console.log("Fallback polling found new message:", latestMessage);
+                        // console.log("Fallback polling found new message:", latestMessage);
                         if (typeof onMessage === 'function') {
                             onMessage(latestMessage);
                         }
@@ -147,8 +147,8 @@ export function startSSE(apiBase, onMessage) {
     const reconnectSSE = () => {
         const delay = Math.min(30000, 1000 * Math.pow(2, reconnectAttempts));
         reconnectAttempts++;
-        console.log(`Attempting to reconnect SSE in ${delay/1000} seconds (attempt ${reconnectAttempts})...`);
-        
+        console.info(`Attempting to reconnect SSE in ${delay/1000} seconds (attempt ${reconnectAttempts})...`);
+
         setTimeout(() => {
             try {
                 if (es) {
@@ -173,7 +173,7 @@ export function startSSE(apiBase, onMessage) {
         isPageVisible = !document.hidden;
         
         if (isPageVisible && !wasVisible) {
-            console.log("Page became visible - sending activity ping");
+            // console.log("Page became visible - sending activity ping");
             sendActivityPing('page_visible');
             lastActivityTime = Date.now();
             
@@ -202,7 +202,7 @@ export function startSSE(apiBase, onMessage) {
                 reconnectSSE();
             }
         } else if (!isPageVisible && wasVisible) {
-            console.log("Page became hidden - server will slow down polling");
+            // console.log("Page became hidden - server will slow down polling");
             sendActivityPing('page_hidden');
         }
     };
@@ -222,7 +222,7 @@ export function startSSE(apiBase, onMessage) {
     // Setup event handlers for the EventSource
     const setupEventHandlers = () => {
         es.onopen = () => {
-            console.log("SSE connection opened successfully");
+            // console.log("SSE connection opened successfully");
             reconnectAttempts = 0;
             usingFallback = false;
             if (fallbackTimer) {
@@ -233,10 +233,10 @@ export function startSSE(apiBase, onMessage) {
         };
 
         es.onmessage = (event) => {
-            console.log("SSE message received:", event.data);
+            // console.log("SSE message received:", event.data);
             try {
                 const data = JSON.parse(event.data);
-                console.log("Parsed SSE data:", data);
+                // console.log("Parsed SSE data:", data);
 
                 if (data.id) {
                     // Store last message ID
@@ -298,7 +298,7 @@ export function startSSE(apiBase, onMessage) {
                 document.removeEventListener(event, handleUserActivity);
             });
             if (es) es.close();
-            console.log("SSE connection and listeners cleaned up");
+            console.info("SSE connection and listeners cleaned up");
         }
     };
 }
@@ -331,7 +331,7 @@ export async function getMessages() {
  */
 export async function getRecentMessages(limit = 10, offset = 0, reverse = true) {
     const API_BASE = import.meta.env.PUBLIC_API_ENDPOINT || 'https://d1-connect.bonno123.workers.dev';
-    console.log("Getting messages from API:", API_BASE);
+    // console.log("Getting messages from API:", API_BASE);
 
     try {
         const response = await fetch(`${API_BASE}/api/messages?limit=${limit}&offset=${offset}&sort=${reverse ? 'desc' : 'asc'}`);
@@ -341,7 +341,7 @@ export async function getRecentMessages(limit = 10, offset = 0, reverse = true) 
         }
         
         const data = await response.json();
-        console.log("Received messages from API:", data);
+        // console.log("Received messages from API:", data);
         return data;
     } catch (error) {
         console.error("Error getting messages:", error);

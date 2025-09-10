@@ -60,7 +60,7 @@
                     :style="{ color: getMessageColor(message.session_id) }"
                     :key="index + (message.session_id ?? '')"
                 > 
-                    <span class="username">{{ message.name ? message.name : `Guest_${message.session_id ? message.session_id : 'unknown'}` }}:</span>
+                    <span class="username">{{ message.username ? message.username : `Guest_${message.session_id ? message.session_id : 'unknown'}` }}:</span>
                     <span class="wrap">{{ message.content }}</span>
                 </li>
             </ul>
@@ -94,6 +94,7 @@ import useNotification from '~/utils/useNotification';
     is_read: boolean;
     created_at: string;
     name?: string | null;
+    username?: string | null;
     email?: string | null;
     session_id?: string | null;
   }

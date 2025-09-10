@@ -88,7 +88,7 @@ export default {
                                     query = `SELECT m.id, m.thread_id, m.user_id, 
                                             SUBSTR(m.content, 1, 200) as content, m.is_read,
                                             SUBSTR(u.session_id, -4) as session_id,
-                                            datetime(m.created_at) as created_at, u.name
+                                            datetime(m.created_at) as created_at, u.name, u.username
                                             FROM messages m
                                             JOIN users u ON m.user_id = u.id
                                             WHERE m.id > ?
@@ -99,7 +99,7 @@ export default {
                                     query = `SELECT m.id, m.thread_id, m.user_id, 
                                             SUBSTR(m.content, 1, 200) as content, m.is_read,
                                             SUBSTR(u.session_id, -4) as session_id,
-                                            datetime(m.created_at) as created_at, u.name
+                                            datetime(m.created_at) as created_at, u.name, u.username
                                             FROM messages m
                                             JOIN users u ON m.user_id = u.id
                                             WHERE m.created_at > datetime(?, '+0 seconds')
@@ -110,7 +110,7 @@ export default {
                                     query = `SELECT m.id, m.thread_id, m.user_id, 
                                             SUBSTR(m.content, 1, 200) as content, m.is_read,
                                             SUBSTR(u.session_id, -4) as session_id,
-                                            datetime(m.created_at) as created_at, u.name
+                                            datetime(m.created_at) as created_at, u.name, u.username
                                             FROM messages m
                                             JOIN users u ON m.user_id = u.id
                                             ORDER BY m.created_at DESC LIMIT 1`;
@@ -266,11 +266,8 @@ export default {
                 // 2. Create or get thread
                 let actualThreadId = threadId;
                 if (!actualThreadId) {
-                    // Create new thread
-                    const { results } = await db.prepare("INSERT INTO threads (subject) VALUES (?) RETURNING id")
-                        .bind(subject || "New Message")
-                        .all();
-                    actualThreadId = results[0].id;
+                    // Default to "Troll Section" thread (ID = 1) for public messages
+                    actualThreadId = 1;
                 }
                 
                 // 3. Save the message
@@ -397,6 +394,7 @@ export default {
                         m.is_read,
                         datetime(m.created_at) as created_at,
                         u.name,
+                        u.username,
                         SUBSTR(u.session_id, -4) as session_id
                     FROM messages m
                     JOIN users u ON m.user_id = u.id
