@@ -1,20 +1,8 @@
----
+return Astro.redirect('/lab/');
 import MainLayout from '~/layouts/MainLayout.astro';
+
 import BOSHelloWorld from '~/widgets/glsl/BOSHelloWorld.astro';
+
 import MDNHelloGlsl from '~/widgets/glsl/MDNHelloGlsl.astro';
+
 import ShapingFunctions from '~/widgets/glsl/ShapingFunctions.astro'
-
----
-<MainLayout
-	title={`playground`}
-	metaDescription={`show case of glsl canvas and how to use it in astro`}
->
-	<MDNHelloGlsl />
-
-	<BOSHelloWorld />
-
-	<ShapingFunctions />
-</MainLayout>
-
-
-

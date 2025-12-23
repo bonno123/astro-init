@@ -22,16 +22,27 @@ const { pathname } = Astro.url;
       </a>
     </li>
 
-    <!-- <li class="cd-z-index-2">
-            <button
-                data-route-to="/playground/"
-                class="demo-morph-bg-button"
-                data-morph-bg="morph-bg-2"
-                data-morph-bg-active={pathname === "/playground/"}
-            >
-                Playground
-            </button>
-        </li> -->
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/projects/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/projects/"}
+      >
+        Projects
+      </button>
+    </li>
+
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/services/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/services/"}
+      >
+        Services
+      </button>
+    </li>
 
     <li class="cd-z-index-2">
       <button
@@ -44,30 +55,38 @@ const { pathname } = Astro.url;
       </button>
     </li>
 
-    <!-- <li class="cd-z-index-2">
-            <button
-                data-route-to="/contact/"
-                class="demo-morph-bg-button"
-                data-morph-bg="morph-bg-2"
-                data-morph-bg-active={pathname === "/contact/"}
-            >
-                Contact us
-            </button>
-        </li> -->
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/contact/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/contact/"}
+      >
+        Contact
+      </button>
+    </li>
 
-    <!-- <li class="cd-z-index-2">
-            <a>
-                <button
-                    data-route-to="/worker/"
-                    class="demo-morph-bg-button"
-                    style="opacity: 0.1; cursor: not-allowed;"
-                    data-morph-bg="morph-bg-2"
-                    data-morph-bg-active={pathname === "/worker/"}
-                >
-                    Worker
-                </button>
-            </a>
-        </li> -->
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/resume/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/resume/"}
+      >
+        Resume
+      </button>
+    </li>
+
+    <li class="cd-z-index-2">
+      <button
+        data-route-to="/lab/"
+        class="demo-morph-bg-button"
+        data-morph-bg="morph-bg-2"
+        data-morph-bg-active={pathname === "/lab/"}
+      >
+        Lab
+      </button>
+    </li>
     <li
       class="cd-z-index-2 flex vertical-align-between"
       style="margin-left: 1rem; margin-block: auto;"

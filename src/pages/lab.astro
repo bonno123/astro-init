@@ -1,0 +1,12 @@
+---
+import MainLayout from "~/layouts/MainLayout.astro";
+import BOSHelloWorld from "~/widgets/glsl/BOSHelloWorld.astro";
+import MDNHelloGlsl from "~/widgets/glsl/MDNHelloGlsl.astro";
+import ShapingFunctions from "~/widgets/glsl/ShapingFunctions.astro";
+---
+
+<MainLayout title={`Lab`} metaDescription={`Creative coding experiments and GLSL canvases`}>
+	<MDNHelloGlsl />
+	<BOSHelloWorld />
+	<ShapingFunctions />
+</MainLayout>

@@ -1,0 +1,28 @@
+---
+import MainLayout from "~/layouts/MainLayout.astro";
+import ProjectCard from "~/components/ProjectCard.astro";
+import { projectsWidget } from "~/data/site-info";
+---
+
+<MainLayout title="Projects" metaDescription="Web development projects by Avik Banik">
+	<div class="container padding-block-700">
+		<h1 class="fs-primary-heading fw-bold text-center margin-bottom-700">
+			Featured Projects
+		</h1>
+
+		<div class="projects-grid">
+			{projectsWidget.projects.map((project) => (
+				<ProjectCard {...project} />
+			))}
+		</div>
+	</div>
+</MainLayout>
+
+<style>
+	.projects-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+		gap: 2rem;
+		margin-top: 3rem;
+	}
+</style>

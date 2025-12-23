@@ -13,14 +13,95 @@ import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
       description={heroWidget.heroContent.description}
     />
 
+    <div class="cta-buttons margin-top-500">
+      <a href="/projects" class="btn btn-primary btn-lg">
+        View My Work
+      </a>
+      <a href="/contact" class="btn btn-secondary btn-lg">
+        Let's Talk
+      </a>
+    </div>
+
     <div class="radar-wrapper">
       <RadarAnimation />
     </div>
   </EvenColumnsLayout>
+
+  <section class="testimonials padding-block-700">
+    <div class="container">
+      <h2 class="fs-secondary-heading fw-bold text-center">
+        What Clients Say
+      </h2>
+
+      <p class="text-center margin-top-400" data-width="wide">
+        Just getting started with freelance work. Your project could be featured here!
+      </p>
+
+      {/** Future testimonials can replace this placeholder grid */}
+    </div>
+  </section>
 </MainLayout>
 
 <style>
   .radar-wrapper {
     aspect-ratio: 1 / 1;
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-lg {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--clr-accent-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-secondary {
+    border: 2px solid var(--clr-accent);
+    color: var(--clr-accent);
+    background: transparent;
+  }
+
+  .btn-secondary:hover {
+    background: var(--clr-accent);
+    color: white;
+  }
+
+  @media (max-width: 55em) {
+    .cta-buttons {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .testimonials {
+    background: var(--clr-primary-transparent, rgba(0, 0, 0, 0.05));
+    border-radius: 12px;
+    margin-top: 4rem;
   }
 </style>

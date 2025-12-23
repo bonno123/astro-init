@@ -149,3 +149,40 @@ export const contactWidget = {
 		`,
 	},
 }
+
+export const projectsWidget = {
+	title: "Projects",
+	description: "Selected work showcasing web development and creative coding",
+	projects: [
+		{
+			title: "E-Commerce Platform",
+			description:
+				"Built a custom online store with real-time inventory management and payment integration. Increased sales by 40% in first month.",
+			image: "/projects/ecommerce.jpg",
+			tags: ["React", "Node.js", "PostgreSQL"],
+			liveUrl: "https://example.com",
+			githubUrl: "https://github.com/bonno123/project",
+			featured: true,
+		},
+		{
+			title: "Restaurant Booking System",
+			description:
+				"Developed a reservation system with SMS notifications and admin dashboard. Reduced booking errors by 80%.",
+			image: "/projects/restaurant.jpg",
+			tags: ["Vue.js", "Express", "Twilio"],
+			liveUrl: "https://example.com",
+			githubUrl: null,
+			featured: true,
+		},
+		{
+			title: "Interactive Portfolio",
+			description:
+				"Created this portfolio with WebGL animations and smooth transitions. Focus on performance and visual impact.",
+			image: "/projects/portfolio.jpg",
+			tags: ["Astro", "WebGL", "GLSL"],
+			liveUrl: "https://avikb.dev",
+			githubUrl: "https://github.com/bonno123/astro-init",
+			featured: true,
+		},
+	],
+}

@@ -1,0 +1,148 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  image: string;
+  tags: string[];
+  liveUrl?: string;
+  githubUrl?: string;
+  featured?: boolean;
+}
+
+const { title, description, image, tags, liveUrl, githubUrl, featured } =
+  Astro.props;
+---
+
+<article class="project-card">
+  {featured && <span class="featured-badge">Featured</span>}
+
+  <div class="project-image">
+    <img src={image} alt={title} loading="lazy" />
+  </div>
+
+  <div class="project-content">
+    <h3 class="fs-600 fw-bold">{title}</h3>
+    <p class="margin-top-300">{description}</p>
+
+    <div class="tags margin-top-300">
+      {tags.map((tag) => (
+        <span class="tag">{tag}</span>
+      ))}
+    </div>
+
+    <div class="project-links margin-top-400">
+      {liveUrl && (
+        <a href={liveUrl} target="_blank" class="btn btn-primary">
+          View Live →
+        </a>
+      )}
+      {githubUrl && (
+        <a href={githubUrl} target="_blank" class="btn btn-secondary">
+          Code
+        </a>
+      )}
+    </div>
+  </div>
+</article>
+
+<style>
+  .project-card {
+    background: var(--clr-neutral-dark, #0f1115);
+    color: var(--clr-neutral-100, #f8f9fb);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .project-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--clr-accent);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    z-index: 1;
+  }
+
+  .project-image {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--clr-accent-transparent, rgba(0, 0, 0, 0.1));
+  }
+
+  .project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .project-card:hover .project-image img {
+    transform: scale(1.05);
+  }
+
+  .project-content {
+    padding: 1.5rem;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    background: var(--clr-accent-transparent, rgba(0, 0, 0, 0.1));
+    color: var(--clr-accent);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  .project-links {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .btn-primary {
+    background: var(--clr-accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: var(--clr-accent-light, var(--clr-accent));
+  }
+
+  .btn-secondary {
+    border: 2px solid var(--clr-accent);
+    color: var(--clr-accent);
+    background: transparent;
+  }
+
+  .btn-secondary:hover {
+    background: var(--clr-accent);
+    color: white;
+  }
+</style>
