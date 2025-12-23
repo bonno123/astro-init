@@ -36,19 +36,22 @@ export const siteInfo: SiteInfo = {
 
 export const heroWidget = {
 	title: "Landing",
-	description: "UI Developer & Digital Craftsman. Creating interfaces that captivate and experiences that inspire.",
+	description:
+		"Freelance Web Developer | Turning your ideas into high-performance, client-winning websites.",
 	heroContent: {
-		title: "Bringing digital ideas to life through code & design.",
+		title: "Hi, I'm Avik Banik 👋",
 		description: `
-			I help transform concepts into reality for brands.
-			Modern, performant, and visually striking web solutions.
+			I build modern, fast, and beautiful websites that help businesses grow.
+			<br><br>
+			<strong>What I do:</strong>
+			<ul style="margin-top: 1rem; line-height: 1.8;">
+				<li>🎨 Custom Website Development</li>
+				<li>⚡ Performance Optimization</li>
+				<li>🎯 Interactive Web Experiences</li>
+				<li>📱 Responsive Design</li>
+			</ul>
 			<br>
-			<br>
-			My expertise spans UI/UX, WebGL/GLSL for interactive experiences, and full-stack development.
-
-			<br>
-			<br>
-			Ready to elevate your digital presence? Let's collaborate.
+			Based in Kolkata, India • Available for freelance projects worldwide
 		`,
 	},
 	socialLinks: [
@@ -87,18 +90,26 @@ export const heroWidget = {
 
 export const aboutMeWidget = {
 	title: "About",
-	description: "Frontend specialist with full-stack capabilities and a passion for creative coding.",
+	description:
+		"Freelance web developer specializing in modern, performant websites that deliver results.",
 	aboutMe: {
-		title: "I’m this ...",
+		title: "Hi, I'm Avik 👋",
 		description: `
-			Based in India, I help building digital experiences that blend form and function.
+			I'm a freelance web developer based in Kolkata, India, with a passion for building websites that are both beautiful and functional.
 			<br/><br/>
-			My tech arsenal includes Node.js,
-			Express.js, PostgreSQL, modern front-end frameworks like React and Vue.js, and more.
-			<br/>
-			I take on freelance projects that challenge me to push boundaries.
+			<strong>What makes me different:</strong>
 			<br/><br/>
-			Looking for a UI/UX focused developer for your project? Let's connect!
+			🎨 <strong>Design + Code:</strong> I don't just write code—I craft experiences. Every pixel matters.
+			<br/><br/>
+			⚡ <strong>Performance First:</strong> Fast websites rank better and convert more. I optimize for speed.
+			<br/><br/>
+			🎯 <strong>Results Driven:</strong> Your success is my success. I focus on delivering measurable results.
+			<br/><br/>
+			<strong>Tech I use:</strong> React, Vue.js, Node.js, PostgreSQL, Astro, WebGL/GLSL for creative animations, and more.
+			<br/><br/>
+			When I'm not coding, you'll find me exploring creative coding on CodePen or working on open-source projects.
+			<br/><br/>
+			<strong>Ready to work together?</strong> Let's build something amazing!
 		`,
 		mail: import.meta.env.PUBLIC_CONTACT_EMAIL,
 	},
