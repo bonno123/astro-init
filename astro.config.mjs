@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://www.avikbanik.com',
+  site: 'https://www.avikb.dev',
 
   integrations: [
     vue({

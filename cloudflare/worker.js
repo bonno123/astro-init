@@ -4,8 +4,8 @@ export default {
 
         // Define allowed origins
         const allowedOrigins = [
-            "https://avikbanik.com",
-            "https://www.avikbanik.com", 
+            "https://avikb.dev",
+            "https://www.avikb.dev", 
             "https://bonno123.github.io",
             "http://localhost:4321"
         ];
@@ -14,7 +14,7 @@ export default {
         const origin = request.headers.get("Origin");
         
         const corsHeaders = {
-            "Access-Control-Allow-Origin": allowedOrigins.includes(origin) ? origin : "https://avikbanik.com",
+            "Access-Control-Allow-Origin": allowedOrigins.includes(origin) ? origin : "https://avikb.dev",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization"
         };
