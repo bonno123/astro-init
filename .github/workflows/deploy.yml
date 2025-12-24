@@ -14,6 +14,7 @@ env:
   PUBLIC_CONTACT_PHONE: ${{ vars.PUBLIC_CONTACT_PHONE }}
   PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID: ${{ vars.PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID }}
   PUBLIC_API_ENDPOINT: ${{ vars.PUBLIC_API_ENDPOINT }}
+  PUBLIC_MAIN_SITE_URL: ${{ vars.PUBLIC_MAIN_SITE_URL }}
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
