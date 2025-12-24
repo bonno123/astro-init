@@ -2,9 +2,11 @@
 type Props = {
   height?: number;
   width?: number;
+  /** Highlight when on home route. */
+  isHome?: boolean;
 };
 
-const { height = 100, width = 100 } = Astro.props;
+const { height = 100, width = 100, isHome = false } = Astro.props;
 
 const viewboxHeight = 10;
 const viewboxWidth = 10;
@@ -15,7 +17,7 @@ const viewboxWidth = 10;
   viewBox={`0 0 ${viewboxHeight} ${viewboxWidth}`}
   x="0"
   y="0"
-  class="icon-toggle"
+  class={`icon-toggle ${isHome ? "logo--home" : ""}`}
   aria-expanded="false"
   height={`${height}`}
   width={`${width}`}
@@ -39,7 +41,10 @@ const viewboxWidth = 10;
         )}
     </g> -->
 
-  <g fill="var(--clr-primary)" fill-rule="evenodd">
+  <g
+    fill={isHome ? "var(--clr-accent)" : "var(--clr-primary)"}
+    fill-rule="evenodd"
+  >
     <path
       d="
                 M5,1 
@@ -83,10 +88,10 @@ const viewboxWidth = 10;
   }
 
   svg {
-    /* width: 30%; */
     height: 70%;
-    /* background: #eeeeeeb4; */
-    /* margin-bottom: 5%; */
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease;
   }
 
   svg polyline,
@@ -95,7 +100,19 @@ const viewboxWidth = 10;
     fill: none;
     stroke: var(--clr-neutral);
     stroke-linecap: round;
-    /* stroke-linejoin: round; */
     transition: 150ms;
+  }
+
+  .icon-toggle {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  }
+
+  .icon-toggle.logo--home {
+    filter: drop-shadow(0 6px 18px rgba(32, 126, 209, 0.25));
+    border-color: var(--clr-primary);
+  }
+
+  .icon-toggle:hover {
+    transform: translateY(-1px) scale(1.02);
   }
 </style>

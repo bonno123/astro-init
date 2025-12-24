@@ -4,90 +4,68 @@ import { heroWidget } from "~/data/site-info";
 const githubLink = heroWidget.socialLinks[0].href;
 
 const { pathname } = Astro.url;
+
+const navItems = [
+  { label: "Home", route: "/", icon: "home" },
+  { label: "Projects", route: "/projects/", icon: "projects" },
+  { label: "Services", route: "/services/", icon: "services" },
+  { label: "About", route: "/about/", icon: "about" },
+  { label: "Contact", route: "/contact/", icon: "contact" },
+];
+
+const icons: Record<string, { viewBox: string; path: string }> = {
+  home: {
+    viewBox: "0 0 24 24",
+    path: "M4.5 10.5 12 4l7.5 6.5v7a1 1 0 0 1-1 1h-5.5v-5h-2v5H5.5a1 1 0 0 1-1-1z",
+  },
+  projects: {
+    viewBox: "0 0 24 24",
+    path: "M4 5.5A1.5 1.5 0 0 1 5.5 4h5A1.5 1.5 0 0 1 12 5.5v5A1.5 1.5 0 0 1 10.5 12h-5A1.5 1.5 0 0 1 4 10.5zM13 6h5.5A1.5 1.5 0 0 1 20 7.5v3A1.5 1.5 0 0 1 18.5 12H13zM4 15.5A1.5 1.5 0 0 1 5.5 14h5A1.5 1.5 0 0 1 12 15.5v3A1.5 1.5 0 0 1 10.5 20h-5A1.5 1.5 0 0 1 4 18.5zM13 15h5.5a1.5 1.5 0 0 1 1.5 1.5v2a1.5 1.5 0 0 1-1.5 1.5H13z",
+  },
+  services: {
+    viewBox: "0 0 24 24",
+    path: "M12 4a4 4 0 0 1 3.46 2H20v2h-2.1a6.02 6.02 0 0 1-.9 2.15l1.49 1.48-1.42 1.42-1.49-1.49A6 6 0 1 1 6 11a6.02 6.02 0 0 1 .9-2.15L5.41 7.36 6.83 5.94 8.32 7.43A6.02 6.02 0 0 1 11 6.1V4zm0 4a3 3 0 1 0 3 3 3 3 0 0 0-3-3Z",
+  },
+  about: {
+    viewBox: "0 0 24 24",
+    path: "M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-3.33 0-6 1.34-6 3v1h12v-1c0-1.66-2.67-3-6-3Z",
+  },
+  contact: {
+    viewBox: "0 0 24 24",
+    path: "M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm0 2v.38l8 4.62 8-4.62V7Zm16 2.76-7.55 4.36a1 1 0 0 1-.9 0L4 9.76V18h16Z",
+  },
+};
 ---
 
 <!-- ========Click Effect====== -->
 <div class="nav-bar">
   <div class="position-relative js-morph-bg-wrapper">
     <ul class="demo-morph-bg-list" role="menu">
-      <!-- <li class="cd-z-index-2">
-      <a>
-        <button
-          data-route-to="/"
-          class="demo-morph-bg-button"
-          data-morph-bg="morph-bg-2"
-          data-morph-bg-active={pathname === "/"}
-        >
-          Home
-        </button>
-      </a>
-    </li> -->
-
-      <li class="cd-z-index-2">
-        <button
-          data-route-to="/projects/"
-          class="demo-morph-bg-button"
-          data-morph-bg="morph-bg-2"
-          data-morph-bg-active={pathname === "/projects/"}
-        >
-          Projects
-        </button>
-      </li>
-
-      <li class="cd-z-index-2">
-        <button
-          data-route-to="/services/"
-          class="demo-morph-bg-button"
-          data-morph-bg="morph-bg-2"
-          data-morph-bg-active={pathname === "/services/"}
-        >
-          Services
-        </button>
-      </li>
-
-      <li class="cd-z-index-2">
-        <button
-          data-route-to="/about/"
-          class="demo-morph-bg-button"
-          data-morph-bg="morph-bg-2"
-          data-morph-bg-active={pathname === "/about/"}
-        >
-          About
-        </button>
-      </li>
-
-      <li class="cd-z-index-2">
-        <button
-          data-route-to="/contact/"
-          class="demo-morph-bg-button"
-          data-morph-bg="morph-bg-2"
-          data-morph-bg-active={pathname === "/contact/"}
-        >
-          Contact
-        </button>
-      </li>
-
-      <!-- <li class="cd-z-index-2">
-      <button
-        data-route-to="/resume/"
-        class="demo-morph-bg-button"
-        data-morph-bg="morph-bg-2"
-        data-morph-bg-active={pathname === "/resume/"}
-      >
-        Resume
-      </button>
-    </li> -->
-
-      <!-- <li class="cd-z-index-2">
-      <button
-        data-route-to="/lab/"
-        class="demo-morph-bg-button"
-        data-morph-bg="morph-bg-2"
-        data-morph-bg-active={pathname === "/lab/"}
-      >
-        Lab
-      </button>
-    </li> -->
+      {
+        navItems.map((item) => (
+          <li class="cd-z-index-2">
+            <button
+              data-route-to={item.route}
+              class="demo-morph-bg-button"
+              data-morph-bg="morph-bg-2"
+              data-morph-bg-active={pathname === item.route}
+              aria-label={item.label}
+            >
+              <span class="nav-icon" aria-hidden="true">
+                <svg
+                  viewBox={icons[item.icon].viewBox}
+                  width="20"
+                  height="20"
+                  fill="currentColor"
+                >
+                  <path d={icons[item.icon].path} />
+                </svg>
+              </span>
+              <span class="nav-label">{item.label}</span>
+            </button>
+          </li>
+        ))
+      }
     </ul>
 
     <span
@@ -354,6 +332,22 @@ Demo style
     background: transparent;
     position: relative;
     z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: var(--clr-neutral);
+  }
+
+  .nav-label {
+    font-size: 0.95rem;
   }
 
   .demo-morph-bg-button:hover {
@@ -444,7 +438,12 @@ Demo style
     }
 
     .demo-morph-bg-button {
-      padding: 0.6rem 0.9rem;
+      padding: 0.6rem 0.75rem;
+      gap: 0;
+    }
+
+    .nav-label {
+      display: none;
     }
   }
 

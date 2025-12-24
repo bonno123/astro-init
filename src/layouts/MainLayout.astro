@@ -13,6 +13,8 @@ interface Props {
 }
 
 const { title: layoutTitle, metaDescription } = Astro.props;
+const { pathname } = Astro.url;
+const isHome = pathname === "/";
 ---
 
 <!doctype html>
@@ -26,11 +28,13 @@ const { title: layoutTitle, metaDescription } = Astro.props;
       >
         <a
           href="/"
-          class=""
-          style=" display: flex; align-items: center; gap: 0.5rem;"
+          class="logo-link"
+          aria-label="Go to homepage"
+          aria-current={isHome ? "page" : undefined}
+          data-home={isHome}
         >
           <span class="sr-only">avik banik logo</span>
-          <LOGO height={50} width={50} />
+          <LOGO height={48} width={48} isHome={isHome} />
         </a>
 
         <nav transition:persist="">
@@ -67,6 +71,47 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 
 <!-- TODO: refactor button styles -->
 <style>
+  .logo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px 8px 48% 48% / 8px 8px 38% 38%;
+    border: 1px solid var(--color-primary);
+    background: var(--clr-surface);
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.06),
+      inset 0 0 0 0.5px hsla(204, 86%, 55%, 0.15);
+    transition: all 0.2s ease;
+  }
+
+  .logo-link:hover {
+    border-color: hsla(204, 86%, 55%, 0.5);
+    transform: translateY(-1px);
+    box-shadow:
+      0 6px 16px rgba(32, 126, 209, 0.15),
+      inset 0 0 0 0.5px hsla(204, 86%, 55%, 0.3);
+  }
+
+  .logo-link[data-home="true"] {
+    border-color: hsla(204, 86%, 55%, 0.35);
+    background: linear-gradient(
+      135deg,
+      hsla(204, 86%, 55%, 0.06),
+      hsla(204, 86%, 55%, 0.12)
+    );
+    box-shadow:
+      0 8px 24px rgba(32, 126, 209, 0.2),
+      inset 0 0 0 1px hsla(204, 86%, 55%, 0.25);
+  }
+
+  .logo-link[data-home="true"]:hover {
+    border-color: hsla(204, 86%, 55%, 0.6);
+    box-shadow:
+      0 10px 32px rgba(32, 126, 209, 0.25),
+      inset 0 0 0 1px hsla(204, 86%, 55%, 0.4);
+  }
+
   :root {
     /* colors aligned to global tokens */
     --color-primary-hsl: 204, 86%, 55%;
