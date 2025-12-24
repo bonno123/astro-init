@@ -25,22 +25,24 @@ const { title, description, image, tags, liveUrl, githubUrl, featured } =
     <p class="margin-top-300">{description}</p>
 
     <div class="tags margin-top-300">
-      {tags.map((tag) => (
-        <span class="tag">{tag}</span>
-      ))}
+      {tags.map((tag) => <span class="tag">{tag}</span>)}
     </div>
 
     <div class="project-links margin-top-400">
-      {liveUrl && (
-        <a href={liveUrl} target="_blank" class="btn btn-primary">
-          View Live →
-        </a>
-      )}
-      {githubUrl && (
-        <a href={githubUrl} target="_blank" class="btn btn-secondary">
-          Code
-        </a>
-      )}
+      {
+        liveUrl && (
+          <a href={liveUrl} target="_blank" class="btn btn-primary">
+            View Live →
+          </a>
+        )
+      }
+      {
+        githubUrl && (
+          <a href={githubUrl} target="_blank" class="btn btn-secondary">
+            Code
+          </a>
+        )
+      }
     </div>
   </div>
 </article>
@@ -51,7 +53,9 @@ const { title, description, image, tags, liveUrl, githubUrl, featured } =
     color: var(--clr-neutral-100, #f8f9fb);
     border-radius: 8px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease;
     position: relative;
     border: 1px solid rgba(255, 255, 255, 0.05);
   }

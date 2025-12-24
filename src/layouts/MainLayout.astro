@@ -1,11 +1,7 @@
 ---
-// import PreHeader from '~/components/PreHeader.astro';
 import BaseHead from "~/components/common/BaseHead.astro";
-// import Header from "~/components/navigation/Header.astro";
-import CollapseableNavigationContent from "~/components/navigation/CollapseableNavigationContent.astro";
-// import NavigationBackground from "~/components/glsl/NavigationBackground.astro";
+import MorphedNavigationItems from "~/components/navigation/MorphedNavigationItems.astro";
 import LOGO from "~/assets/Logo.astro";
-// import WhatsAppButton from "~/components/WhatsAppButton.astro";
 import ChatButton from "~/components/vue-components/ChatButton.vue";
 
 interface Props {
@@ -24,8 +20,6 @@ const { title: layoutTitle, metaDescription } = Astro.props;
   <BaseHead title={layoutTitle} metaDescription={metaDescription} />
 
   <body>
-    <!-- <PreHeader /> -->
-
     <main transition:animate="none">
       <header
         class="page-container margin-block-500 flex vertical-align-center horizontal-align-between"
@@ -39,17 +33,8 @@ const { title: layoutTitle, metaDescription } = Astro.props;
           <LOGO height={50} width={50} />
         </a>
 
-        <nav
-          id="collappsable-nav"
-          class="js-collapse"
-          style=""
-          data-collapse-animate="on"
-          transition:persist=""
-        >
-          <section class="position-relative">
-            <!-- <NavigationBackground id="navigation-canvas" /> -->
-            <CollapseableNavigationContent />
-          </section>
+        <nav transition:persist="">
+          <MorphedNavigationItems />
         </nav>
       </header>
 
@@ -61,81 +46,6 @@ const { title: layoutTitle, metaDescription } = Astro.props;
     <ChatButton client:load transition:persist />
   </body>
 </html>
-
-<script>
-  import Collapse from "~/utils/collapse";
-
-  const NAV_COLLAPSED_KEY = "nav-collapsed"; // Use the same key as inlined script
-
-  // Get all collapsible elements on the page and the canvas element
-  // to be resized based on the collapsible element's dimensions
-  var collapses = document.getElementsByClassName("js-collapse");
-  var canvas = document.querySelector(
-    "#navigation-canvas"
-  ) as HTMLCanvasElement;
-
-  if (canvas) {
-    // Set initial dimensions based on its parent or a default value
-    canvas.style.height = "100%"; // Adjust as needed
-    canvas.style.width = "100%"; // Adjust as needed
-
-    // Apply transition styles after ensuring initial dimensions are set
-    requestAnimationFrame(() => {
-      canvas.style.transition = "all 0.3s ease, width 0.5s ease";
-    });
-  }
-
-  if (collapses.length > 0) {
-    for (var i = 0; i < collapses.length; i++) {
-      var collapseElement = collapses[i] as HTMLElement;
-      const collapseInstance = new Collapse(collapseElement);
-
-      collapseInstance.setOnExpanded(() => {
-        updateNavState(false); // isCollapsed -> false
-
-        if (!canvas) return;
-
-        requestAnimationFrame(() => {
-          // Set canvas dimensions to match the collapsible element after expansion
-          canvas.style.height = `${collapseElement.scrollHeight}px`;
-          canvas.style.width = `${collapseElement.scrollWidth}px`;
-        });
-      });
-
-      collapseInstance.setOnCollapsed(() => {
-        updateNavState(true); // isCollapsed -> true
-      });
-    }
-  }
-
-  // Function to update local storage and class list on collapse/expand
-  function updateNavState(isCollapsed: boolean) {
-    localStorage.setItem(NAV_COLLAPSED_KEY, isCollapsed.toString());
-    const navElement = document.getElementById("collappsable-nav");
-    if (navElement) {
-      if (isCollapsed) {
-        navElement.classList.add("hide");
-      } else {
-        navElement.classList.remove("hide");
-      }
-    }
-  }
-</script>
-
-<script is:inline>
-  const NAV_COLLAPSED_KEY = "nav-collapsed"; // Use the same key as previous script
-
-  function applyInitialStateFromLocalStorage() {
-    const isNavCollapsed = localStorage.getItem(NAV_COLLAPSED_KEY) === "true";
-    const navElement = document.getElementById("collappsable-nav");
-
-    if (navElement) {
-      navElement.classList.toggle("hide", isNavCollapsed);
-    }
-  }
-
-  applyInitialStateFromLocalStorage();
-</script>
 
 <style is:global>
   /* general styling */
@@ -157,14 +67,6 @@ const { title: layoutTitle, metaDescription } = Astro.props;
 
 <!-- TODO: refactor button styles -->
 <style>
-  .hide {
-    display: none;
-    /* visibility: hidden; */
-  }
-
-  .overflow-hidden {
-    overflow: hidden;
-  }
   :root {
     /* colors aligned to global tokens */
     --color-primary-hsl: 204, 86%, 55%;
