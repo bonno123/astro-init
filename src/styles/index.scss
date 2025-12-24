@@ -2,16 +2,21 @@
 :root {
     /* basic color variables */
     // --clr-primary: hsl(228 39% 5% / 1);
-    --clr-primary: rgb(72, 43, 161);
-    --clr-primary-transparent: hsla(226, 30%, 11%, 0.1);
+    --clr-primary: hsl(222, 47%, 11%);
+    --clr-primary-transparent: hsla(222, 47%, 11%, 0.08);
 
-    --clr-accent: hsl(281, 97%, 27%);
-    --clr-accent-light: hsl(281, 100%, 64%);
-    --clr-accent-transparent: hsla(281, 97%, 27%, 0.2);
+    --clr-accent: hsl(204, 86%, 55%);
+    --clr-accent-light: hsl(204, 92%, 64%);
+    --clr-accent-transparent: hsla(204, 86%, 55%, 0.18);
   
-    --clr-neutral: hsl(235, 18%, 26%);
+    --clr-neutral: hsl(220, 14%, 23%);
     
-    --clr-neutral-dark: hsl(232, 12%, 13%);
+    --clr-neutral-dark: hsl(220, 18%, 12%);
+
+    --clr-surface: hsl(222, 47%, 97%);
+    --clr-surface-strong: hsl(222, 47%, 94%);
+    --clr-border: hsla(220, 14%, 23%, 0.12);
+    --clr-text-subtle: hsl(220, 14%, 40%);
 
     /* basic font variables */  
     --ff-primary: "Be Vietnam Pro", sans-serif;
