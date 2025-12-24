@@ -39,19 +39,13 @@ export const heroWidget = {
 	description:
 		"Freelance Web Developer | Turning your ideas into high-performance, client-winning websites.",
 	heroContent: {
-		title: "Hi, I'm Avik Banik 👋",
+		title: "Hi, I'm Avik Banik",
 		description: `
-			I build modern, fast, and beautiful websites that help businesses grow.
+			I build modern, fast, and calm-to-use websites that help businesses grow.
 			<br><br>
-			<strong>What I do:</strong>
-			<ul style="margin-top: 1rem; line-height: 1.8;">
-				<li>🎨 Custom Website Development</li>
-				<li>⚡ Performance Optimization</li>
-				<li>🎯 Interactive Web Experiences</li>
-				<li>📱 Responsive Design</li>
-			</ul>
-			<br>
-			Based in Kolkata, India • Available for freelance projects worldwide
+			Custom sites • Performance tuning • Interactive experiences • Responsive by default.
+			<br><br>
+			Based in Kolkata, India • Available worldwide
 		`,
 	},
 	socialLinks: [
@@ -97,17 +91,15 @@ export const aboutMeWidget = {
 		description: `
 			I'm a freelance web developer based in Kolkata, India, with a passion for building websites that are both beautiful and functional.
 			<br/><br/>
-			<strong>What makes me different:</strong>
+			<strong>What I see:</strong>
 			<br/><br/>
 			🎨 <strong>Design + Code:</strong> I don't just write code—I craft experiences. Every pixel matters.
 			<br/><br/>
 			⚡ <strong>Performance First:</strong> Fast websites rank better and convert more. I optimize for speed.
 			<br/><br/>
-			🎯 <strong>Results Driven:</strong> Your success is my success. I focus on delivering measurable results.
+			🎯 <strong>Results Driven:</strong> I focus on delivering measurable results.
 			<br/><br/>
 			<strong>Tech I use:</strong> React, Vue.js, Node.js, PostgreSQL, Astro, WebGL/GLSL for creative animations, and more.
-			<br/><br/>
-			When I'm not coding, you'll find me exploring creative coding on CodePen or working on open-source projects.
 			<br/><br/>
 			<strong>Ready to work together?</strong> Let's build something amazing!
 		`,

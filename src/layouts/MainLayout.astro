@@ -166,15 +166,14 @@ const { title: layoutTitle, metaDescription } = Astro.props;
     overflow: hidden;
   }
   :root {
-    /* colors */
-    --color-primary-hsl: 250, 84%, 54%;
+    /* colors aligned to global tokens */
+    --color-primary-hsl: 204, 86%, 55%;
+    --color-primary-light-hsl: 204, 92%, 64%;
+    --color-primary-darker-hsl: 204, 70%, 45%;
     --color-bg-hsl: 0, 0%, 100%;
-    --color-contrast-higher-hsl: 230, 13%, 9%;
-    --color-bg-dark-hsl: 240, 4%, 95%;
-
+    --color-bg-dark-hsl: 222, 47%, 97%;
+    --color-contrast-higher-hsl: 220, 14%, 23%;
     --color-white-hsl: 0, 0%, 100%;
-    --color-primary-darker-hsl: 250, 84%, 38%;
-    --color-primary-light-hsl: 250, 84%, 60%;
   }
 
   /* buttons */
@@ -189,54 +188,40 @@ const { title: layoutTitle, metaDescription } = Astro.props;
     background: hsl(var(--color-bg-dark-hsl));
     color: hsl(var(--color-contrast-higher-hsl));
     cursor: pointer;
-    text-decoration: none;
     line-height: 1.2;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
     will-change: transform;
-    /* padding: var(--space-2xs) var(--space-sm); */
-    border-radius: 0.25em;
-    border: 1px solid transparent;
+    border-radius: 999px;
+    border: 1px solid hsla(var(--color-contrast-higher-hsl), 0.08);
+    padding: 0.65rem 1.25rem;
   }
 
   .btn:focus-visible {
     box-shadow:
       0px 0px 0px 2px hsl(var(--color-bg-hsl)),
-      0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.15);
+      0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.12);
     outline: none;
   }
 
   .btn:active {
-    transform: translateY(2px);
+    transform: translateY(1px);
   }
 
   .btn--primary {
     background: hsl(var(--color-primary-hsl));
     color: hsl(var(--color-white-hsl));
-    box-shadow:
-      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
-      0px 1px 3px hsla(var(--color-primary-darker-hsl), 0.25),
-      0px 2px 6px hsla(var(--color-primary-darker-hsl), 0.1),
-      0px 6px 10px -2px hsla(var(--color-primary-darker-hsl), 0.25);
+    box-shadow: none;
   }
 
   .btn--primary:hover {
     background: hsl(var(--color-primary-light-hsl));
-    box-shadow:
-      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
-      0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25),
-      0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1),
-      0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25);
   }
 
   .btn--primary:focus {
     box-shadow:
-      inset 0px 1px 0px hsla(var(--color-white-hsl), 0.15),
-      0px 1px 2px hsla(var(--color-primary-darker-hsl), 0.25),
-      0px 1px 4px hsla(var(--color-primary-darker-hsl), 0.1),
-      0px 3px 6px -2px hsla(var(--color-primary-darker-hsl), 0.25),
       0px 0px 0px 2px hsl(var(--color-bg-hsl)),
-      0px 0px 0px 4px hsl(var(--color-primary-hsl));
+      0px 0px 0px 4px hsla(var(--color-primary-hsl), 0.4);
   }
 </style>
