@@ -39,7 +39,24 @@ const icons: Record<string, { viewBox: string; path: string }> = {
 
 <!-- ========Click Effect====== -->
 <div class="nav-bar">
-  <div class="position-relative js-morph-bg-wrapper">
+  <!-- Mobile Menu Button -->
+  <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <line x1="3" y1="6" x2="21" y2="6" class="menu-line menu-line-1"></line>
+      <line x1="3" y1="12" x2="21" y2="12" class="menu-line menu-line-2"></line>
+      <line x1="3" y1="18" x2="21" y2="18" class="menu-line menu-line-3"></line>
+    </svg>
+  </button>
+
+  <!-- Desktop Navigation -->
+  <div class="position-relative js-morph-bg-wrapper desktop-nav">
     <ul class="demo-morph-bg-list" role="menu">
       {
         navItems.map((item) => (
@@ -72,6 +89,38 @@ const icons: Record<string, { viewBox: string; path: string }> = {
       class="morph-bg cd-z-index-1 demo-morph-bg-2 js-morph-bg"
       id="morph-bg-2"
       aria-hidden="true"></span>
+  </div>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu" id="mobile-menu">
+    <nav class="mobile-menu-content">
+      <ul class="mobile-nav-list">
+        {
+          navItems.map((item) => (
+            <li>
+              <button
+                data-route-to={item.route}
+                class="mobile-nav-item"
+                data-mobile-nav={true}
+                aria-current={pathname === item.route ? "page" : undefined}
+              >
+                <span class="mobile-nav-icon">
+                  <svg
+                    viewBox={icons[item.icon].viewBox}
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                  >
+                    <path d={icons[item.icon].path} />
+                  </svg>
+                </span>
+                <span class="mobile-nav-label">{item.label}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
   </div>
 
   <a
@@ -126,12 +175,37 @@ const icons: Record<string, { viewBox: string; path: string }> = {
 <script>
   import { navigate } from "astro:transitions/client";
 
+  // Mobile menu toggle
+  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  function toggleMobileMenu() {
+    mobileMenu?.classList.toggle("mobile-menu--open");
+    mobileMenuBtn?.classList.toggle("mobile-menu-btn--open");
+    document.body.classList.toggle("menu-open");
+  }
+
+  mobileMenuBtn?.addEventListener("click", toggleMobileMenu);
+
+  // Close menu when clicking outside
+  mobileMenu?.addEventListener("click", (e) => {
+    if (e.target === mobileMenu) {
+      toggleMobileMenu();
+    }
+  });
+
   // Navigate to the selected route when clicking on the button
   document.addEventListener("click", (event) => {
     const button = (event.target as Element)?.closest("[data-route-to]");
     if (!button) return;
 
     const route = button.getAttribute("data-route-to");
+
+    // Close mobile menu if it's a mobile nav item
+    if (button.getAttribute("data-mobile-nav")) {
+      toggleMobileMenu();
+    }
+
     navigate(String(route));
   });
 
@@ -241,6 +315,12 @@ const icons: Record<string, { viewBox: string; path: string }> = {
     window.dispatchEvent(customEvent);
   }
 </script>
+
+<style is:global>
+  body.menu-open {
+    overflow: hidden;
+  }
+</style>
 
 <style>
   /* -------------------------------- 
@@ -394,6 +474,7 @@ Demo style
     align-items: center;
     gap: 0.65rem;
     width: 100%;
+    justify-content: flex-end;
   }
 
   .github-icon-link {
@@ -416,34 +497,179 @@ Demo style
     transform: translateY(-1px);
   }
 
+  .desktop-nav {
+    display: flex;
+  }
+
+  /* Mobile Menu Button Styles */
+  .mobile-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--clr-border);
+    background: var(--clr-surface);
+    color: var(--clr-neutral);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    position: relative;
+    z-index: 10;
+  }
+
+  .mobile-menu-btn:hover {
+    border-color: var(--clr-accent);
+    color: var(--clr-accent);
+  }
+
+  .menu-line {
+    transition: all 0.3s ease;
+    transform-origin: center;
+  }
+
+  .mobile-menu-btn--open .menu-line-1 {
+    transform: rotate(45deg) translateY(6px);
+  }
+
+  .mobile-menu-btn--open .menu-line-2 {
+    opacity: 0;
+  }
+
+  .mobile-menu-btn--open .menu-line-3 {
+    transform: rotate(-45deg) translateY(-6px);
+  }
+
   @media (max-width: 55em) {
     .nav-bar {
       gap: 0.5rem;
+      justify-content: space-between;
     }
 
-    .demo-morph-bg-list {
-      width: 100%;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .demo-morph-bg-list::-webkit-scrollbar {
+    .desktop-nav {
       display: none;
     }
 
-    .demo-morph-bg-list li {
-      scroll-snap-align: center;
+    .mobile-menu-btn {
+      display: inline-flex;
     }
 
-    .demo-morph-bg-button {
-      padding: 0.6rem 0.75rem;
-      gap: 0;
+    .github-icon-link {
+      width: 44px;
+      height: 44px;
+    }
+  }
+
+  /* Mobile Menu Overlay */
+
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  @media (max-width: 55em) {
+    .mobile-menu {
+      display: block;
+      pointer-events: none;
     }
 
-    .nav-label {
+    .mobile-menu--open {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+
+  .mobile-menu-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: 320px;
+    background: var(--clr-surface);
+    border-radius: 24px;
+    padding: 1.5rem;
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      inset 0 0 0 1px hsla(204, 86%, 55%, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-menu--open .mobile-menu-content {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .mobile-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--clr-neutral);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-item:hover {
+    background: hsla(204, 86%, 55%, 0.08);
+    border-color: hsla(204, 86%, 55%, 0.2);
+    color: var(--clr-accent);
+  }
+
+  .mobile-nav-item[aria-current="page"] {
+    background: linear-gradient(
+      135deg,
+      hsla(204, 86%, 55%, 0.12),
+      hsla(204, 86%, 55%, 0.18)
+    );
+    border-color: hsla(204, 86%, 55%, 0.35);
+    color: var(--clr-neutral-dark);
+  }
+
+  .mobile-nav-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-nav-label {
+    flex: 1;
+    text-align: left;
+  }
+
+  @media (min-width: 55.01em) {
+    .mobile-menu-btn {
       display: none;
+    }
+
+    .mobile-menu {
+      display: none !important;
     }
   }
 
