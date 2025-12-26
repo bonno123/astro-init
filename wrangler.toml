@@ -2,8 +2,26 @@ name = "d1-connect"
 main = "cloudflare/worker.js"
 compatibility_date = "2024-05-11"
 
-# Binding for D1 database
+# Top-level non-secret environment variables for default deployment
+vars = { ADMIN_EMAIL = "avik@avikb.dev", DEFAULT_TIMEZONE = "Asia/Kolkata", MAIL_API_URL = "https://api.resend.com/emails" }
+
+# Top-level D1 binding so default (no env) worker has DB available
 [[d1_databases]]
+binding = "DB"
+database_name = "portfolio-messages-db"
+database_id = "a8f9ae11-d30f-4376-9d55-525f246032b6"
+
+# Environment variables (non-secret). Put secrets via `wrangler secret put ...`.
+[env.production]
+vars = {ADMIN_EMAIL = "avik@avikb.dev", DEFAULT_TIMEZONE = "Asia/Kolkata", MAIL_API_URL = "https://api.resend.com/emails"}
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "portfolio-messages-db"
+database_id = "a8f9ae11-d30f-4376-9d55-525f246032b6"
+
+[env.development]
+vars = {ADMIN_EMAIL = "avik@avikb.dev", DEFAULT_TIMEZONE = "Asia/Kolkata", MAIL_API_URL = "https://api.resend.com/emails"}
+[[env.development.d1_databases]]
 binding = "DB"
 database_name = "portfolio-messages-db"
 database_id = "a8f9ae11-d30f-4376-9d55-525f246032b6"

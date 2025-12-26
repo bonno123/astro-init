@@ -1,0 +1,177 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                        BOOKING SYSTEM DEPLOY CHECKLIST                       ║
+║                                                                              ║
+║  Your booking system is ready! Follow these steps to go live:               ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📋 PRE-DEPLOYMENT
+═════════════════════════════════════════════════════════════════════════════
+
+  ☐ Read BOOKING_QUICK_START.md (3-5 min overview)
+  ☐ Choose email service: Resend, SendGrid, or Mailgun
+  ☐ Create account at chosen email service
+  ☐ Verify your domain in email service
+  ☐ Get API key from email service
+  ☐ Generate secure ADMIN_API_TOKEN:
+    node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+🔧 CONFIGURATION (15-20 min)
+═════════════════════════════════════════════════════════════════════════════
+
+  Step 1: Update wrangler.toml
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Open wrangler.toml
+  ☐ Update [env.production.vars]:
+     - ADMIN_EMAIL = "avik@avikb.dev"
+     - ADMIN_API_TOKEN = "your-generated-token-above"
+     - MAIL_API_URL = "your-email-service-url"
+  
+  Email Service URLs:
+  • Resend:   https://api.resend.com/emails
+  • SendGrid: https://api.sendgrid.com/v3/mail/send
+  • Mailgun:  https://api.mailgun.net/v3/your-domain/messages
+  
+  See EMAIL_SERVICE_SETUP.md for your service!
+
+  Step 2: Store API Key Securely
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Run: npx wrangler secret put MAIL_API_KEY
+  ☐ Paste your email service API key when prompted
+  ☐ Verify: npx wrangler secret list
+
+  Step 3: Database Setup
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Run migration:
+    npx wrangler d1 execute portfolio-messages-db \
+      --file=migrations/0003_create_bookings_table.sql
+  
+  ☐ Verify tables created:
+    npx wrangler d1 shell portfolio-messages-db
+    > .tables
+    > SELECT COUNT(*) FROM bookings;
+
+  Step 4: Deploy
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Run: npm run deploy
+  ☐ Wait for deployment to complete
+  ☐ Check: Deployment successful message appears
+
+🧪 TESTING (10-15 min)
+═════════════════════════════════════════════════════════════════════════════
+
+  Test 1: Local Development
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Run: npm run dev
+  ☐ Visit: http://localhost:3000/contact
+  ☐ Fill booking form completely
+  ☐ Click "Request Call"
+  ☐ See success confirmation screen
+  ☐ See "Download Calendar Invite" option
+
+  Test 2: Email Notification
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Check email inbox (avik@avikb.dev)
+  ☐ Look for "New call booking request" email
+  ☐ Verify booking details are correct
+  ☐ Verify booking ID is present
+
+  Test 3: Conflict Detection
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Submit first booking (e.g., Mon 2:00 PM)
+  ☐ Try to submit overlapping time (e.g., Mon 2:15 PM)
+  ☐ Should see error: "This time slot is already booked"
+
+  Test 4: Admin Approval
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Get booking ID from admin email
+  ☐ Run approval command (see BOOKING_QUICK_START.md):
+    curl -X POST https://your-domain/api/admin/bookings/approve \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+      -d '{"bookingId":"booking-id","meetLink":"https://meet..."}'
+  
+  ☐ Check user email inbox for confirmation
+  ☐ Verify confirmation email includes meet link
+
+  Test 5: ICS File
+  ─────────────────────────────────────────────────────────────────────────
+  ☐ Download ICS from success page
+  ☐ Open in Google Calendar
+  ☐ Verify date/time is correct
+  ☐ Verify duration is correct
+
+✅ VERIFICATION (5 min)
+═════════════════════════════════════════════════════════════════════════════
+
+  ☐ Visit /contact page on live site
+  ☐ Booking form appears and loads
+  ☐ Form is responsive on mobile
+  ☐ All fields have proper labels
+  ☐ Date/time pickers work
+  ☐ Submit button works
+  ☐ Success confirmation shows
+  ☐ Email notification arrives
+
+🚀 POST-DEPLOYMENT
+═════════════════════════════════════════════════════════════════════════════
+
+  ☐ Share contact page link: https://avikb.dev/contact
+  ☐ Update any marketing materials with booking link
+  ☐ Monitor first few bookings for any issues
+  ☐ Test approval workflow with real meeting link
+  ☐ (Optional) Create admin dashboard for easier management
+
+📚 DOCUMENTATION
+═════════════════════════════════════════════════════════════════════════════
+
+Keep these files handy:
+  • BOOKING_QUICK_START.md     ← Troubleshooting & testing
+  • BOOKING_SYSTEM.md          ← Full API reference
+  • EMAIL_SERVICE_SETUP.md     ← Email configuration
+  • IMPLEMENTATION_SUMMARY.md  ← What was implemented
+
+💡 USEFUL COMMANDS
+═════════════════════════════════════════════════════════════════════════════
+
+  View Worker Logs:
+    npx wrangler tail --format pretty
+
+  Test Email Service:
+    # Follow EMAIL_SERVICE_SETUP.md for your service
+
+  Query Database:
+    npx wrangler d1 shell portfolio-messages-db
+    > SELECT * FROM bookings;
+    > SELECT COUNT(*) FROM bookings WHERE status='pending';
+
+  List Stored Secrets:
+    npx wrangler secret list
+
+  Redeploy:
+    npm run deploy
+
+🆘 ISSUES?
+═════════════════════════════════════════════════════════════════════════════
+
+  Form not showing?
+    → npm run build && npm run dev
+
+  Emails not sending?
+    → Check: npx wrangler tail
+    → Check: npx wrangler secret list
+    → Verify API key is correct
+
+  Time conflicts not detected?
+    → Check: npx wrangler d1 shell portfolio-messages-db
+    → Query: SELECT * FROM bookings WHERE status IN ('pending', 'approved')
+
+  Admin approval fails?
+    → Check: Authorization header format
+    → Check: Token matches ADMIN_API_TOKEN in wrangler.toml
+
+See BOOKING_QUICK_START.md "Troubleshooting" section for more help!
+
+═════════════════════════════════════════════════════════════════════════════
+Estimated Total Time: 45-60 minutes
+Ready? Start with: npx wrangler secret put MAIL_API_KEY
+═════════════════════════════════════════════════════════════════════════════

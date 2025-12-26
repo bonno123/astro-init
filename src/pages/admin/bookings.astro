@@ -1,0 +1,10 @@
+---
+import MainLayout from "~/layouts/MainLayout.astro";
+import AdminBookings from "~/components/vue-components/AdminBookings.vue";
+---
+
+<MainLayout title="Admin Bookings">
+  <section class="page-container margin-block-500">
+    <AdminBookings client:load />
+  </section>
+</MainLayout>

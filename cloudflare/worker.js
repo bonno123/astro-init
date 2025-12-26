@@ -292,6 +292,334 @@ export default {
                 });
             }
             
+            // Book a call endpoint
+            if (request.method === "POST" && url.pathname === "/api/book") {
+                const data = await request.json();
+                const { name, email, topic, details, start_at, duration_minutes = 30, timezone } = data;
+                const userTimeZone = timezone || env.DEFAULT_TIMEZONE || 'Asia/Kolkata';
+                
+                // Input validation
+                if (!name || !email || !topic || !start_at) {
+                    return new Response(JSON.stringify({ 
+                        error: "name, email, topic, and start_at are required" 
+                    }), { 
+                        status: 400, 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+                
+                try {
+                    const db = env.DB;
+                    const bookingId = crypto.randomUUID();
+                    
+                    // Check for overlapping bookings (pending or approved)
+                    const startDate = new Date(start_at);
+                    const endDate = new Date(startDate.getTime() + duration_minutes * 60000);
+                    
+                    const conflicts = await db.prepare(`
+                        SELECT id FROM bookings 
+                        WHERE status IN ('pending', 'approved')
+                        AND (
+                            (start_at < ? AND datetime(start_at, '+' || duration_minutes || ' minutes') > ?)
+                            OR (start_at >= ? AND start_at < ?)
+                        )
+                    `).bind(endDate.toISOString(), start_at, start_at, endDate.toISOString()).all();
+                    
+                    if (conflicts.results && conflicts.results.length > 0) {
+                        return new Response(JSON.stringify({ 
+                            error: "This time slot is already booked. Please select another time." 
+                        }), { 
+                            status: 409, 
+                            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                        });
+                    }
+                    
+                    // Insert booking
+                    await db.prepare(`
+                        INSERT INTO bookings (id, name, email, topic, details, start_at, duration_minutes, status, timezone)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?)
+                    `).bind(bookingId, name, email, topic, details || null, start_at, duration_minutes, userTimeZone).run();
+                    
+                    // Send email notification to admin
+                    if (env.MAIL_API_URL && env.MAIL_API_KEY) {
+                        try {
+                            const startDate = new Date(start_at);
+                            const startDateLocal = formatInTimeZone(startDate, userTimeZone);
+                            const startDateIST = formatInTimeZone(startDate, 'Asia/Kolkata');
+                            const startDateUTC = formatInTimeZone(startDate, 'UTC');
+                            const adminEmail = env.ADMIN_EMAIL || 'avik@avikb.dev';
+                            
+                            await fetch(env.MAIL_API_URL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${env.MAIL_API_KEY}`
+                                },
+                                body: JSON.stringify({
+                                    from: env.ADMIN_EMAIL ? `Booking <${env.ADMIN_EMAIL}>` : 'Booking <booking@avikb.dev>',
+                                    to: adminEmail,
+                                    subject: `New call booking request from ${name}`,
+                                    html: `
+                                        <h2>New Call Booking Request</h2>
+                                        <p><strong>Name:</strong> ${name}</p>
+                                        <p><strong>Email:</strong> ${email}</p>
+                                        <p><strong>Topic:</strong> ${topic}</p>
+                                        <p><strong>Requested Time:</strong> ${startDateLocal} (${userTimeZone})</p>
+                                        <p><strong>In IST:</strong> ${startDateIST}</p>
+                                        <p><strong>In UTC:</strong> ${startDateUTC}</p>
+                                        <p><strong>Duration:</strong> ${duration_minutes} minutes</p>
+                                        <p><strong>Details:</strong> ${details || 'None'}</p>
+                                        <p><strong>Requester Timezone:</strong> ${userTimeZone}</p>
+                                        <p><a href="https://avikb.dev/admin/bookings">View in Admin Dashboard</a></p>
+                                    `
+                                })
+                            });
+                        } catch (e) {
+                            console.error("Failed to send notification email:", e);
+                        }
+                    }
+                    
+                    // Generate ICS calendar invite
+                    const icsContent = generateICS({
+                        uid: bookingId,
+                        summary: `Call with ${name} - ${topic}`,
+                        description: `${details || ''}\nTime zone: ${userTimeZone}`,
+                        startDate: new Date(start_at),
+                        duration: duration_minutes,
+                        attendeeEmail: email,
+                        organizerEmail: env.ADMIN_EMAIL || 'avik@avikb.dev'
+                    });
+                    
+                    return new Response(JSON.stringify({ 
+                        success: true,
+                        bookingId,
+                        message: "Booking request submitted. You'll receive a confirmation email shortly.",
+                        ics: icsContent
+                    }), { 
+                        status: 201,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                    
+                } catch (error) {
+                    console.error("Booking error:", error);
+                    return new Response(JSON.stringify({ 
+                        error: "Failed to process booking: " + error.message 
+                    }), { 
+                        status: 500, 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+            }
+            
+            // Get available booking slots
+            if (request.method === "GET" && url.pathname === "/api/booking-slots") {
+                try {
+                    const db = env.DB;
+                    const days = parseInt(url.searchParams.get('days')) || 7;
+                    const durationMins = parseInt(url.searchParams.get('duration')) || 30;
+                    
+                    // Generate available slots for next N days (9 AM - 5 PM, 30 min slots)
+                    const slots = [];
+                    const now = new Date();
+                    
+                    for (let d = 1; d <= days; d++) {
+                        const date = new Date(now);
+                        date.setDate(date.getDate() + d);
+                        
+                        // Skip weekends
+                        if (date.getDay() === 0 || date.getDay() === 6) continue;
+                        
+                        for (let hour = 9; hour < 17; hour++) {
+                            for (let min = 0; min < 60; min += durationMins) {
+                                const slotStart = new Date(date);
+                                slotStart.setHours(hour, min, 0, 0);
+                                const slotEnd = new Date(slotStart.getTime() + durationMins * 60000);
+                                
+                                // Check if booked
+                                const conflict = await db.prepare(`
+                                    SELECT id FROM bookings 
+                                    WHERE status IN ('pending', 'approved')
+                                    AND (
+                                        (start_at < ? AND datetime(start_at, '+' || duration_minutes || ' minutes') > ?)
+                                    )
+                                `).bind(slotEnd.toISOString(), slotStart.toISOString()).first();
+                                
+                                if (!conflict) {
+                                    slots.push({
+                                        start: slotStart.toISOString(),
+                                        end: slotEnd.toISOString(),
+                                        label: slotStart.toLocaleString()
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    
+                    return new Response(JSON.stringify(slots), { 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                } catch (error) {
+                    console.error("Slots error:", error);
+                    return new Response(JSON.stringify({ error: "Failed to fetch slots" }), { 
+                        status: 500,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+            }
+            
+            // Get bookings for admin (protected)
+            if (request.method === "GET" && url.pathname === "/api/admin/bookings") {
+                const authHeader = request.headers.get('Authorization');
+                const token = authHeader?.replace('Bearer ', '');
+                
+                if (token !== env.ADMIN_API_TOKEN) {
+                    return new Response(JSON.stringify({ error: "Unauthorized" }), { 
+                        status: 401,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+                
+                try {
+                    const db = env.DB;
+                    const { results } = await db.prepare(`
+                        SELECT * FROM bookings 
+                        ORDER BY start_at DESC 
+                        LIMIT 50
+                    `).all();
+                    
+                    return new Response(JSON.stringify(results), { 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                } catch (error) {
+                    return new Response(JSON.stringify({ error: error.message }), { 
+                        status: 500,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+            }
+            
+            // Approve booking (protected)
+            if (request.method === "POST" && url.pathname === "/api/admin/bookings/approve") {
+                const authHeader = request.headers.get('Authorization');
+                const token = authHeader?.replace('Bearer ', '');
+                
+                if (token !== env.ADMIN_API_TOKEN) {
+                    return new Response(JSON.stringify({ error: "Unauthorized" }), { 
+                        status: 401,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+                
+                try {
+                    const data = await request.json();
+                    const { bookingId, meetLink } = data;
+                    
+                    const db = env.DB;
+                    const booking = await db.prepare("SELECT * FROM bookings WHERE id = ?").bind(bookingId).first();
+                    
+                    if (!booking) {
+                        return new Response(JSON.stringify({ error: "Booking not found" }), { 
+                            status: 404,
+                            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                        });
+                    }
+                    
+                    // Update booking
+                    await db.prepare(`
+                        UPDATE bookings 
+                        SET status = 'approved', meet_link = ?, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = ?
+                    `).bind(meetLink || null, bookingId).run();
+                    
+                    // Send confirmation email to user
+                    if (env.MAIL_API_URL && env.MAIL_API_KEY) {
+                        try {
+                            const bookingTz = booking.timezone || env.DEFAULT_TIMEZONE || 'Asia/Kolkata';
+                            const startDate = new Date(booking.start_at);
+                            const startDateLocal = formatInTimeZone(startDate, bookingTz);
+                            const startDateIST = formatInTimeZone(startDate, 'Asia/Kolkata');
+                            const startDateUTC = formatInTimeZone(startDate, 'UTC');
+
+                            await fetch(env.MAIL_API_URL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${env.MAIL_API_KEY}`
+                                },
+                                body: JSON.stringify({
+                                    from: env.ADMIN_EMAIL ? `Booking <${env.ADMIN_EMAIL}>` : 'Booking <booking@avikb.dev>',
+                                    to: booking.email,
+                                    subject: `Call Confirmed - ${booking.topic}`,
+                                    html: `
+                                        <h2>Your Call is Confirmed!</h2>
+                                        <p>Hi ${booking.name},</p>
+                                        <p>Your call request for <strong>${booking.topic}</strong> has been approved.</p>
+                                        <p><strong>When:</strong> ${startDateLocal} (${bookingTz})</p>
+                                        <p><strong>In IST:</strong> ${startDateIST}</p>
+                                        <p><strong>In UTC:</strong> ${startDateUTC}</p>
+                                        <p><strong>Duration:</strong> ${booking.duration_minutes} minutes</p>
+                                        ${meetLink ? `<p><strong>Join:</strong> <a href="${meetLink}">${meetLink}</a></p>` : ''}
+                                        <p>Looking forward to speaking with you!</p>
+                                    `
+                                })
+                            });
+                        } catch (e) {
+                            console.error("Failed to send confirmation email:", e);
+                        }
+                    }
+                    
+                    return new Response(JSON.stringify({ success: true, booking }), { 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                } catch (error) {
+                    return new Response(JSON.stringify({ error: error.message }), { 
+                        status: 500,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+            }
+            
+            function formatInTimeZone(date, timeZone) {
+                try {
+                    return new Intl.DateTimeFormat('en-GB', {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                        timeZone
+                    }).format(date);
+                } catch (e) {
+                    return date.toISOString();
+                }
+            }
+
+            // Helper function to generate ICS calendar file
+            function generateICS(opts) {
+                const { uid, summary, description, startDate, duration, attendeeEmail, organizerEmail } = opts;
+                const endDate = new Date(startDate.getTime() + duration * 60000);
+                
+                const formatDate = (date) => {
+                    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                };
+                
+                return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Avik Banik//Call Booking//EN
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${formatDate(new Date())}
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+ORGANIZER;CN=Avik Banik:mailto:${organizerEmail}
+ATTENDEE;CN=${attendeeEmail}:mailto:${attendeeEmail}
+STATUS:TENTATIVE
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR`;
+            }
+            
             // Lightweight activity ping endpoint (to reset inactivity timers)
             if (request.method === "POST" && url.pathname === "/api/activity") {
                 const data = await request.json().catch(() => ({}));

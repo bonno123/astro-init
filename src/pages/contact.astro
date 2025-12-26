@@ -3,20 +3,82 @@ import MainLayout from "~/layouts/MainLayout.astro";
 import Hero from "~/components/Hero.astro";
 import { contactWidget } from "~/data/site-info";
 import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
-import ContactForm from "~/components/vue-components/ContactForm.vue";
+import BookingForm from "~/components/vue-components/BookingForm.vue";
 ---
 
 <MainLayout
   title={contactWidget.title}
   metaDescription={contactWidget.description}
 >
-  <EvenColumnsLayout>
+  <div class="contact-container">
     <Hero
-      title={`...`}
+      title={`Let's Work Together`}
       description={`
-                Have questions or just want to say hi?
-            `}
+        Have a project in mind? Schedule a call and let's discuss your goals and how I can help bring your vision to life.
+      `}
     />
-    <ContactForm />
-  </EvenColumnsLayout>
+    <div class="booking-section">
+      <BookingForm client:load />
+    </div>
+
+    <div class="contact-info">
+      <h3>Other ways to reach me</h3>
+      <p>
+        <strong>Email:</strong>
+        <a href="mailto:avik@avikb.dev">avik@avikb.dev</a>
+      </p>
+      <p>
+        <strong>Location:</strong> Available for remote projects worldwide
+      </p>
+    </div>
+  </div>
 </MainLayout>
+
+<style>
+  .contact-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .booking-section {
+    margin: 3rem 0;
+  }
+
+  .contact-info {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--clr-border);
+  }
+
+  .contact-info h3 {
+    font-size: 1.25rem;
+    color: var(--clr-primary);
+    margin-bottom: 1rem;
+  }
+
+  .contact-info p {
+    margin-bottom: 0.75rem;
+    color: var(--clr-contrast-medium);
+  }
+
+  .contact-info a {
+    color: var(--clr-accent);
+    text-decoration: none;
+  }
+
+  .contact-info a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 55em) {
+    .contact-container {
+      padding: 1.5rem 1rem;
+    }
+
+    .booking-section {
+      margin: 2rem 0;
+    }
+  }
+</style>
