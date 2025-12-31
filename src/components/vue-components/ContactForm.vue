@@ -772,8 +772,10 @@ textarea.form-input {
 /* Confirmation Card */
 .confirmation-card {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.75rem;
     min-height: 400px;
     text-align: center;
 }
@@ -813,6 +815,7 @@ textarea.form-input {
     font-size: 0.875rem;
     color: var(--clr-contrast-medium);
     line-height: 1.5;
+    margin-bottom: 0.25rem;
 }
 
 /* Utility Classes */
