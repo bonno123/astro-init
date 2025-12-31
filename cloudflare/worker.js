@@ -292,6 +292,112 @@ export default {
                 });
             }
             
+            // Send contact message endpoint (direct message without booking)
+            if (request.method === "POST" && url.pathname === "/api/contact-message") {
+                const data = await request.json();
+                const { name, email, subject, message } = data;
+                
+                // Input validation
+                if (!name || !email || !subject || !message) {
+                    return new Response(JSON.stringify({ 
+                        error: "name, email, subject, and message are required" 
+                    }), { 
+                        status: 400, 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+                
+                try {
+                    const db = env.DB;
+                    const messageId = crypto.randomUUID();
+                    
+                    // Insert contact message
+                    await db.prepare(`
+                        INSERT INTO contact_messages (id, name, email, subject, message, status, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, 'new', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                    `).bind(messageId, name, email, subject, message).run();
+                    
+                    // Send email notification to admin
+                    if (env.MAIL_API_URL && env.MAIL_API_KEY) {
+                        try {
+                            const adminEmail = env.ADMIN_EMAIL || 'avik@avikb.dev';
+                            
+                            await fetch(env.MAIL_API_URL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${env.MAIL_API_KEY}`
+                                },
+                                body: JSON.stringify({
+                                    from: env.ADMIN_EMAIL ? `Contact <${env.ADMIN_EMAIL}>` : 'Contact <contact@avikb.dev>',
+                                    to: adminEmail,
+                                    subject: `New Message: ${subject}`,
+                                    html: `
+                                        <h2>New Message from Contact Form</h2>
+                                        <p><strong>From:</strong> ${name}</p>
+                                        <p><strong>Email:</strong> ${email}</p>
+                                        <p><strong>Subject:</strong> ${subject}</p>
+                                        <hr>
+                                        <h3>Message:</h3>
+                                        <p>${message.replace(/\n/g, '<br>')}</p>
+                                        <hr>
+                                        <p><small>Submitted at: ${new Date().toISOString()}</small></p>
+                                    `
+                                })
+                            });
+                        } catch (e) {
+                            console.error("Failed to send contact notification email:", e);
+                        }
+                    }
+                    
+                    // Send confirmation email to user
+                    if (env.MAIL_API_URL && env.MAIL_API_KEY) {
+                        try {
+                            await fetch(env.MAIL_API_URL, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${env.MAIL_API_KEY}`
+                                },
+                                body: JSON.stringify({
+                                    from: env.ADMIN_EMAIL ? `Contact <${env.ADMIN_EMAIL}>` : 'Contact <contact@avikb.dev>',
+                                    to: email,
+                                    subject: `We received your message - ${subject}`,
+                                    html: `
+                                        <p>Hi ${name},</p>
+                                        <p>Thank you for reaching out! We've received your message and will get back to you as soon as possible.</p>
+                                        <p><strong>Your message subject:</strong> ${subject}</p>
+                                        <p>Best regards,<br>Avik</p>
+                                    `
+                                })
+                            });
+                        } catch (e) {
+                            console.error("Failed to send confirmation email to user:", e);
+                        }
+                    }
+                    
+                    console.log("New contact message created:", messageId);
+                    
+                    return new Response(JSON.stringify({ 
+                        success: true,
+                        messageId,
+                        message: "Thank you for your message! We'll get back to you shortly."
+                    }), { 
+                        status: 201,
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                    
+                } catch (error) {
+                    console.error("Contact message error:", error);
+                    return new Response(JSON.stringify({ 
+                        error: "Failed to send message: " + error.message 
+                    }), { 
+                        status: 500, 
+                        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+                    });
+                }
+            }
+            
             // Book a call endpoint
             if (request.method === "POST" && url.pathname === "/api/book") {
                 const data = await request.json();

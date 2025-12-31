@@ -3,7 +3,7 @@ import MainLayout from "~/layouts/MainLayout.astro";
 import Hero from "~/components/Hero.astro";
 import { contactWidget } from "~/data/site-info";
 import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
-import BookingForm from "~/components/vue-components/BookingForm.vue";
+import ContactForm from "~/components/vue-components/ContactForm.vue";
 ---
 
 <MainLayout
@@ -14,11 +14,11 @@ import BookingForm from "~/components/vue-components/BookingForm.vue";
     <Hero
       title={`Let's Work Together`}
       description={`
-        Have a project in mind? Schedule a call and let's discuss your goals and how I can help bring your vision to life.
+        Have a project in mind? Schedule a call or send us a message and let's discuss your goals and how I can help bring your vision to life.
       `}
     />
     <div class="booking-section">
-      <BookingForm client:load />
+      <ContactForm client:load />
     </div>
 
     <div class="contact-info">
