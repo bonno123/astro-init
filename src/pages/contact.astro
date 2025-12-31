@@ -23,11 +23,13 @@ import ContactForm from "~/components/vue-components/ContactForm.vue";
 
     <div class="contact-info">
       <h3>Other ways to reach me</h3>
-      <p>
+      <p class="text-center">
         <strong>Email:</strong>
-        <a href="mailto:avik@avikb.dev">avik@avikb.dev</a>
+        <a href={`mailto:${import.meta.env.PUBLIC_CONTACT_EMAIL}`}
+          >{import.meta.env.PUBLIC_CONTACT_EMAIL}</a
+        >
       </p>
-      <p>
+      <p class="text-center">
         <strong>Location:</strong> Available for remote projects worldwide
       </p>
     </div>
