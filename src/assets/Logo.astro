@@ -6,113 +6,88 @@ type Props = {
   isHome?: boolean;
 };
 
-const { height = 100, width = 100, isHome = false } = Astro.props;
-
-const viewboxHeight = 10;
-const viewboxWidth = 10;
+const { height = 40, width = 40, isHome = false } = Astro.props;
 ---
 
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  viewBox={`0 0 ${viewboxHeight} ${viewboxWidth}`}
-  x="0"
-  y="0"
-  class={`icon-toggle ${isHome ? "logo--home" : ""}`}
-  aria-expanded="false"
+  viewBox="0 0 100 100"
+  class={`logo-svg ${isHome ? "logo--active" : ""}`}
   height={`${height}`}
   width={`${width}`}
+  aria-label="Logo"
 >
-  <!-- bg-grid: visual helper -->
-  <!-- <g>
-        {[...Array(viewboxWidth+1).keys()].map((i) =>
-            <line 
-                x1={i} x2={i}
-                y1={0} y2={viewboxHeight}
-                style="stroke: var(--clr-primary-transparent); stroke-width: 0.02;"
-            />
-        )}
-
-        {[...Array(viewboxHeight+1).keys()].map((i) =>
-            <line 
-                x1={0} x2={viewboxWidth}
-                y1={i} y2={i}
-                style="stroke: var(--clr-primary-transparent); stroke-width: 0.02;"
-            />
-        )}
-    </g> -->
-
-  <g
-    fill={isHome ? "var(--clr-accent)" : "var(--clr-primary)"}
-    fill-rule="evenodd"
-  >
+  <!-- Seven-segment display style "A" -->
+  <g class="segment-display">
+    <!-- Top horizontal segment -->
     <path
-      d="
-                M5,1 
-                l-4,0
-                l0, 5
-                Q 1,9.5 5,9.5 T 9, 6
-            "
-    ></path>
+      class="segment segment-top"
+      d="M 30 25 L 35 30 L 65 30 L 70 25 L 65 20 L 35 20 Z"></path>
 
+    <!-- Top-left vertical segment -->
     <path
-      d="
-                M9,6 
-                l0,-5
-                l-3.67, 0
-                v 6
-                Q 3.4,7.5 3,8.5
-            "
-    ></path>
+      class="segment segment-top-left"
+      d="M 25 30 L 30 35 L 30 48 L 25 53 L 20 48 L 20 35 Z"></path>
 
-    <rect
-      x="1.8"
-      y="3"
-      width="3"
-      height="1.4"
-      rx="5"
-      transform="translate(0.4,-0.5) rotate(8)"></rect>
+    <!-- Top-right vertical segment -->
+    <path
+      class="segment segment-top-right"
+      d="M 70 35 L 75 30 L 80 35 L 80 48 L 75 53 L 70 48 Z"></path>
+
+    <!-- Middle horizontal segment -->
+    <path
+      class="segment segment-middle"
+      d="M 30 50 L 35 55 L 65 55 L 70 50 L 65 45 L 35 45 Z"></path>
+
+    <!-- Bottom-left vertical segment -->
+    <path
+      class="segment segment-bottom-left"
+      d="M 20 52 L 25 47 L 30 52 L 30 72 L 25 77 L 20 72 Z"></path>
+
+    <!-- Bottom-right vertical segment -->
+    <path
+      class="segment segment-bottom-right"
+      d="M 70 52 L 75 47 L 80 52 L 80 72 L 75 77 L 70 72 Z"></path>
   </g>
 </svg>
 
 <style>
-  .icon-toggle[aria-expanded="true"] .path1 {
-    d: path("M8,2 L2,8");
+  .logo-svg {
+    display: block;
+    transition: all 0.3s ease;
   }
 
-  .icon-toggle[aria-expanded="true"] .path3 {
-    d: path("M8,8 L2,2");
-  }
-
-  .icon-toggle[aria-expanded="true"] .path2 {
-    d: path("M8,5 L8,5");
-  }
-
-  svg {
-    height: 70%;
+  /* Seven-segment display segments */
+  .segment {
+    fill: rgba(15, 23, 42, 0.12);
     transition:
-      transform 0.2s ease,
-      filter 0.2s ease;
+      fill 0.3s ease,
+      filter 0.3s ease;
   }
 
-  svg polyline,
-  svg line,
-  svg path {
-    fill: none;
-    stroke: var(--clr-neutral);
-    stroke-linecap: round;
-    transition: 150ms;
+  /* Inactive state - dim segments */
+  .logo-svg:not(.logo--active) .segment {
+    fill: rgba(15, 23, 42, 0.12);
+    filter: brightness(0.8);
   }
 
-  .icon-toggle {
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  /* Active state (homepage) - light up segments with cyan */
+  .logo-svg.logo--active .segment {
+    fill: #06b6d4;
+    filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.6)) brightness(1.2);
   }
 
-  .icon-toggle.logo--home {
-    filter: drop-shadow(0 6px 18px rgba(32, 126, 209, 0.25));
-    border-color: var(--clr-primary);
+  /* Hover state - light up segments */
+  .logo-svg:hover .segment {
+    fill: #06b6d4;
+    filter: drop-shadow(0 0 3px rgba(6, 182, 212, 0.5)) brightness(1.1);
   }
 
-  .icon-toggle:hover {
-    transform: translateY(-1px) scale(1.02);
+  /* Active + hover - gradient glow effect */
+  .logo-svg.logo--active:hover .segment-top,
+  .logo-svg.logo--active:hover .segment-top-right,
+  .logo-svg.logo--active:hover .segment-bottom-right {
+    fill: #ef4444;
+    filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)) brightness(1.2);
   }
 </style>

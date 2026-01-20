@@ -25,12 +25,12 @@ export type HeroWidget = {
 export const siteInfo: SiteInfo = {
 	title: `%s | ${import.meta.env.PUBLIC_SITE_NAME}`,
 	description: `
-		UI developer and digital craftsman. 
-		Avik Banik builds intuitive interfaces and immersive web experiences from Kolkata, India.
+		Small team of developers building production-grade web applications. 
+		Specializing in Web3, DeFi protocols, and modern web experiences.
 	`,
 	image: {
 		src: "/og/social.jpg",
-		alt: "Build the web you want",
+		alt: "We ship products fast",
 	},
 }
 

@@ -1,286 +1,737 @@
 ---
 import MainLayout from "~/layouts/MainLayout.astro";
-import Hero from "~/components/Hero.astro";
 import RadarAnimation from "~/canvases/radarAnimation.astro";
-import { heroWidget } from "~/data/site-info";
-import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
 ---
 
-<MainLayout title={heroWidget.title} metaDescription={heroWidget.description}>
-  <EvenColumnsLayout class="hero-section padding-block-700">
-    <div class="hero-stack">
-      <p class="eyebrow">Available for new freelance projects</p>
-      <Hero
-        title={heroWidget.heroContent.title}
-        description={heroWidget.heroContent.description}
-      />
+<MainLayout
+  title="Home"
+  metaDescription="We ship production-grade web products fast. Specializing in Web3, DeFi, and modern web applications."
+>
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-content">
+          <p class="eyebrow">Building the Future of Web</p>
+          <h1 class="hero-title">
+            We ship <span class="text-gradient">products fast</span>
+          </h1>
+          <p class="hero-description">
+            Small team of developers crafting production-grade web applications.
+            Specializing in Web3, DeFi protocols, and modern web experiences.
+          </p>
 
-      <!-- <div class="cta-buttons margin-top-500">
-        <a href="/projects" class="btn btn-primary btn-lg">View projects</a>
-        <a href="/contact" class="btn btn-ghost btn-lg">Book a call</a>
-      </div> -->
+          <div class="proof-bar">
+            <div class="proof-item">
+              <span class="proof-value">30+</span>
+              <span class="proof-label">Shipped</span>
+            </div>
+            <div class="proof-divider"></div>
+            <div class="proof-item">
+              <span class="proof-value">&lt;24h</span>
+              <span class="proof-label">SLA</span>
+            </div>
+            <div class="proof-divider"></div>
+            <div class="proof-item">
+              <span class="proof-value">Web3</span>
+              <span class="proof-label">Native</span>
+            </div>
+          </div>
 
-      <!-- <p class="hero-meta">
-        Independent developer crafting fast, minimal, conversion-focused sites.
-      </p> -->
+          <div class="cta-buttons">
+            <a href="/contact/" class="btn btn-primary">Book a call</a>
+            <a href="/projects/" class="btn btn-ghost">View work</a>
+          </div>
+        </div>
 
-      <div class="cta-buttons mt-96">
-        <a href="/projects/" class="btn btn-primary btn-lg">View projects</a>
-        <a href="/contact/" class="btn btn-ghost btn-lg">Book a call</a>
+        <div class="hero-visual">
+          <div class="visual-wrapper">
+            <RadarAnimation />
+          </div>
+          <div class="visual-label">
+            <span class="pulse-dot"></span>
+            <span>Real-time interactive demo</span>
+          </div>
+        </div>
       </div>
     </div>
+  </section>
 
-    <div class="visual-panel">
-      <div class="radar-wrapper">
-        <RadarAnimation />
-      </div>
-      <div class="panel-footer">
-        <span>Interactive WebGL demo</span>
-        <span class="dot" aria-hidden="true"></span>
-        <span>Performance-first builds</span>
-      </div>
-    </div>
-  </EvenColumnsLayout>
-
-  <section class="testimonials padding-block-800">
+  <!-- Services Section -->
+  <section class="services-section">
     <div class="container">
       <div class="section-header">
-        <div>
-          <p class="eyebrow">Testimonials</p>
-          <h2 class="fs-secondary-heading fw-bold">What clients say</h2>
-          <p class="text-muted" data-width="wide">
-            Early in the freelance journey—your project could be the next
-            featured story. Placeholders stand in until real feedback arrives.
-          </p>
-        </div>
-        <a href="/contact/" class="btn btn-primary">Add yours</a>
+        <p class="eyebrow">What We Do</p>
+        <h2>Services</h2>
       </div>
 
-      <div class="testimonial-grid margin-top-500">
-        <article class="testimonial-card">
-          <div class="avatar" aria-hidden="true"></div>
-          <p class="quote">
-            “Avik delivered our site ahead of schedule with a smooth handoff.”
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">⚡</div>
+          <h3>Web3 App Development</h3>
+          <p>
+            Full-stack DeFi protocols, NFT platforms, and blockchain
+            integrations. Solana, Ethereum, and EVM-compatible chains.
           </p>
-          <p class="client">Future Client · SaaS</p>
-        </article>
-        <article class="testimonial-card">
-          <div class="avatar" aria-hidden="true"></div>
-          <p class="quote">
-            “Great communication, thoughtful design choices, and fast
-            performance.”
+          <ul class="service-stack">
+            <li>Smart Contracts</li>
+            <li>Wallet Integration</li>
+            <li>Token Economics</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🎨</div>
+          <h3>Modern Web Apps</h3>
+          <p>
+            High-performance, conversion-focused web applications with modern UX
+            patterns and minimal design.
           </p>
-          <p class="client">Future Client · E‑commerce</p>
+          <ul class="service-stack">
+            <li>Astro / Next.js</li>
+            <li>Vue / React</li>
+            <li>Tailwind CSS</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">🔒</div>
+          <h3>Cloud & Infrastructure</h3>
+          <p>
+            Scalable deployment on Cloudflare, AWS, and Vercel. Performance
+            optimization and security-first architecture.
+          </p>
+          <ul class="service-stack">
+            <li>Edge Computing</li>
+            <li>CI/CD Pipelines</li>
+            <li>Database Design</li>
+          </ul>
+        </div>
+
+        <div class="service-card">
+          <div class="service-icon">📊</div>
+          <h3>Product Discovery</h3>
+          <p>
+            Strategy, wireframing, and technical architecture. We help define
+            MVPs and roadmaps for Web3 projects.
+          </p>
+          <ul class="service-stack">
+            <li>Market Research</li>
+            <li>Technical Audits</li>
+            <li>MVP Definition</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Case Studies Section -->
+  <section class="work-section">
+    <div class="container">
+      <div class="section-header-split">
+        <div>
+          <p class="eyebrow">Recent Work</p>
+          <h2>Selected Projects</h2>
+        </div>
+        <a href="/projects/" class="btn btn-secondary">View all projects</a>
+      </div>
+
+      <div class="projects-list">
+        <article class="project-card">
+          <div class="project-meta">
+            <span class="project-tag">DeFi</span>
+            <span class="project-date">2025</span>
+          </div>
+          <h3>Liquidity Protocol Dashboard</h3>
+          <p>
+            Real-time analytics for a Solana-based liquidity protocol. Built
+            with Astro, Vue, and integrated with Anchor programs.
+          </p>
+          <div class="project-metrics">
+            <div class="metric">
+              <span class="metric-value">$2M+</span>
+              <span class="metric-label">TVL tracked</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">98%</span>
+              <span class="metric-label">Uptime</span>
+            </div>
+          </div>
+          <a href="/projects/" class="project-link">View case study →</a>
         </article>
-        <article class="testimonial-card muted">
-          <div class="placeholder">Your testimonial could be here.</div>
+
+        <article class="project-card">
+          <div class="project-meta">
+            <span class="project-tag">Web3</span>
+            <span class="project-date">2025</span>
+          </div>
+          <h3>NFT Marketplace Platform</h3>
+          <p>
+            Custom marketplace with zero-knowledge authentication and gasless
+            transactions. Sub-second minting experience.
+          </p>
+          <div class="project-metrics">
+            <div class="metric">
+              <span class="metric-value">10K+</span>
+              <span class="metric-label">Mints</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">&lt;1s</span>
+              <span class="metric-label">Mint time</span>
+            </div>
+          </div>
+          <a href="/projects/" class="project-link">View case study →</a>
         </article>
+
+        <article class="project-card">
+          <div class="project-meta">
+            <span class="project-tag">SaaS</span>
+            <span class="project-date">2024</span>
+          </div>
+          <h3>Analytics Dashboard</h3>
+          <p>
+            Real-time data visualization platform processing 1M+ events daily.
+            Edge-deployed for global performance.
+          </p>
+          <div class="project-metrics">
+            <div class="metric">
+              <span class="metric-value">250ms</span>
+              <span class="metric-label">P95 latency</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value">99.9%</span>
+              <span class="metric-label">Availability</span>
+            </div>
+          </div>
+          <a href="/projects/" class="project-link">View case study →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  <section class="process-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">How We Work</p>
+        <h2>Our Process</h2>
+      </div>
+
+      <div class="process-strip">
+        <div class="process-step">
+          <div class="step-number">01</div>
+          <h3>Discover</h3>
+          <p>
+            Define goals, scope, and technical requirements. Research and
+            strategy.
+          </p>
+        </div>
+        <div class="process-arrow">→</div>
+
+        <div class="process-step">
+          <div class="step-number">02</div>
+          <h3>Design</h3>
+          <p>
+            Wireframes, prototypes, and system architecture. Iterative
+            refinement.
+          </p>
+        </div>
+        <div class="process-arrow">→</div>
+
+        <div class="process-step">
+          <div class="step-number">03</div>
+          <h3>Build</h3>
+          <p>
+            Sprint-based development with weekly demos. Continuous integration.
+          </p>
+        </div>
+        <div class="process-arrow">→</div>
+
+        <div class="process-step">
+          <div class="step-number">04</div>
+          <h3>Ship</h3>
+          <p>Production deployment, monitoring, and ongoing maintenance.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to build something great?</h2>
+        <p>
+          Let's discuss your project and explore how we can help bring it to
+          life.
+        </p>
+        <div class="cta-buttons">
+          <a href="/contact/" class="btn btn-primary btn-lg">Schedule a call</a>
+          <a href="mailto:hello@avikb.dev" class="btn btn-ghost-light btn-lg"
+            >Email us</a
+          >
+        </div>
       </div>
     </div>
   </section>
 </MainLayout>
 
 <style>
+  /* Hero Section */
   .hero-section {
-    padding-top: 2rem;
+    padding: 3rem 0 5rem;
   }
 
-  .hero-stack {
+  @media (min-width: 768px) {
+    .hero-section {
+      padding: 4rem 0 6rem;
+    }
+  }
+
+  .hero-grid {
     display: grid;
-    gap: 1rem;
-    max-width: 560px;
-  }
-
-  .eyebrow {
-    font-size: 0.9rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--clr-text-subtle, #556070);
-    /* margin: 0; */
-  }
-
-  .visual-panel {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: 16px;
-    padding: 1rem;
-    box-shadow: 0 16px 60px rgba(0, 0, 0, 0.08);
-    display: grid;
-    gap: 0.75rem;
-  }
-
-  .radar-wrapper {
-    aspect-ratio: 1 / 1;
-    border-radius: 12px;
-    overflow: hidden;
-    background: radial-gradient(
-      circle at 30% 30%,
-      rgba(255, 255, 255, 0.4),
-      rgba(255, 255, 255, 0)
-    );
-  }
-
-  .panel-footer {
-    display: inline-flex;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
     align-items: center;
-    gap: 0.5rem;
-    font-weight: 600;
-    color: var(--clr-text-subtle, #556070);
   }
 
-  .dot {
-    width: 6px;
-    height: 6px;
-    background: var(--clr-accent);
-    border-radius: 999px;
-    display: inline-block;
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
   .cta-buttons {
     display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.7rem 1.6rem;
-    border-radius: 999px;
-    text-decoration: none;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-  }
-
-  .btn-lg {
-    font-size: 1rem;
-  }
-
-  .btn-primary {
-    background: var(--clr-accent);
-    color: white;
-    box-shadow: none;
-  }
-
-  .btn-primary:hover {
-    background: var(--clr-accent-light);
-    transform: translateY(-1px);
-  }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--clr-neutral);
-    border-color: var(--clr-border);
-  }
-
-  .btn-ghost:hover {
-    border-color: var(--clr-accent);
-    color: var(--clr-accent);
-    transform: translateY(-1px);
-  }
-
-  .hero-meta {
-    color: hsl(220, 14%, 40%);
-    max-width: 42ch;
-  }
-
-  @media (max-width: 55em) {
-    .cta-buttons {
-      flex-direction: column;
-    }
-
-    .btn {
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  .testimonials {
-    background: var(--clr-primary-transparent, rgba(0, 0, 0, 0.05));
-    border-radius: 12px;
-    margin-top: 4rem;
-    margin-bottom: 4rem;
-  }
-
-  .testimonials .container {
-    max-width: 1100px;
-    margin-inline: auto;
-    padding-block: 3.5rem;
-    padding-inline: 1rem;
-    display: grid;
-    gap: 2.5rem;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
   }
 
-  .text-muted {
-    color: var(--clr-text-subtle, #556070);
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.1;
+    margin: 0;
   }
 
-  .testimonial-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
+  .hero-description {
+    font-size: 1.125rem;
+    line-height: 1.6;
+    color: var(--color-slate-600);
+    max-width: 540px;
   }
 
-  .testimonial-card {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: 12px;
-    padding: 1.25rem;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
-    display: grid;
-    gap: 0.5rem;
-  }
-
-  .testimonial-card.muted {
+  .proof-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: var(--clr-text-subtle, #556070);
-    text-align: center;
-    font-weight: 600;
-    min-height: 160px;
+    gap: 1.5rem;
+    padding: 1rem 0;
   }
 
-  .placeholder {
-    opacity: 0.7;
+  .proof-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
-  .avatar {
-    width: 44px;
-    height: 44px;
+  .proof-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-cyan);
+  }
+
+  .proof-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-slate-600);
+  }
+
+  .proof-divider {
+    width: 1px;
+    height: 2rem;
+    background: var(--color-slate-light);
+  }
+
+  .hero-visual {
+    position: relative;
+  }
+
+  .visual-wrapper {
+    aspect-ratio: 1;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: var(--color-navy);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+  }
+
+  .visual-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: var(--color-slate-600);
+    font-family: var(--font-mono);
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-cyan);
     border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  /* Services Section */
+  .services-section {
+    padding: 3rem 0;
+    background: var(--color-off-white);
+  }
+
+  @media (min-width: 768px) {
+    .services-section {
+      padding: 5rem 0;
+    }
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-header h2 {
+    margin-top: 0.5rem;
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+  }
+
+  .service-card {
+    background: var(--color-white);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 250ms ease;
+  }
+
+  .service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .service-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .service-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .service-card p {
+    color: var(--color-slate-600);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .service-stack {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .service-stack li {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--color-cyan);
+    border-radius: 0.375rem;
+    font-family: var(--font-mono);
+  }
+
+  /* Work Section */
+  .work-section {
+    padding: 3rem 0;
+    background: var(--color-navy);
+    color: var(--color-off-white);
+  }
+
+  @media (min-width: 768px) {
+    .work-section {
+      padding: 5rem 0;
+    }
+  }
+
+  .work-section h2,
+  .work-section h3 {
+    color: var(--color-off-white);
+  }
+
+  .work-section .eyebrow {
+    color: var(--color-cyan);
+  }
+
+  .section-header-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  .projects-list {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .project-card {
+    background: var(--color-navy-light);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    transition: all 250ms ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-cyan);
+    box-shadow: 0 12px 40px rgba(6, 182, 212, 0.15);
+  }
+
+  .project-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  .project-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--color-red);
+    border-radius: 0.375rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .project-date {
+    font-size: 0.875rem;
+    color: var(--color-slate);
+    font-family: var(--font-mono);
+  }
+
+  .project-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .project-card > p {
+    color: var(--color-slate-light);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  .project-metrics {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .metric-value {
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-cyan);
+  }
+
+  .metric-label {
+    font-size: 0.75rem;
+    color: var(--color-slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-cyan);
+    font-weight: 600;
+    transition: gap 250ms ease;
+  }
+
+  .project-link:hover {
+    gap: 0.75rem;
+  }
+
+  /* Process Section */
+  .process-section {
+    padding: 3rem 0;
+    background: var(--color-off-white);
+  }
+
+  @media (min-width: 768px) {
+    .process-section {
+      padding: 5rem 0;
+    }
+  }
+
+  .process-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .process-step {
+    flex: 1;
+    text-align: center;
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    background: var(--color-cyan);
+    color: var(--color-navy);
+    border-radius: 50%;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+
+  .process-step h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .process-step p {
+    color: var(--color-slate-600);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .process-arrow {
+    color: var(--color-cyan);
+    font-size: 2rem;
+    font-weight: 300;
+  }
+
+  /* CTA Section */
+  .cta-section {
+    padding: 4rem 0;
     background: linear-gradient(
       135deg,
-      var(--clr-accent),
-      var(--clr-accent-light)
+      var(--color-navy) 0%,
+      var(--color-navy-light) 100%
     );
-    opacity: 0.9;
+    color: var(--color-off-white);
   }
 
-  .quote {
-    font-weight: 600;
-    color: var(--clr-neutral);
+  @media (min-width: 768px) {
+    .cta-section {
+      padding: 6rem 0;
+    }
   }
 
-  .client {
-    color: var(--clr-text-subtle, #556070);
-    font-weight: 500;
+  .cta-content {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
   }
 
-  @media (max-width: 55em) {
-    .visual-panel {
+  .cta-content h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: var(--color-off-white);
+    margin-bottom: 1rem;
+  }
+
+  .cta-content > p {
+    font-size: 1.125rem;
+    color: var(--color-slate-light);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .cta-content .cta-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-lg {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    .hero-visual {
       order: -1;
+    }
+
+    .services-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .process-strip {
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .process-arrow {
+      transform: rotate(90deg);
+    }
+
+    .section-header-split {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .cta-buttons {
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .cta-buttons .btn {
+      width: 100%;
     }
   }
 </style>

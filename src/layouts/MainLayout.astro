@@ -22,29 +22,29 @@ const isHome = pathname === "/";
   <BaseHead title={layoutTitle} metaDescription={metaDescription} />
 
   <body>
-    <main transition:animate="none">
-      <header
-        class="page-container margin-block-500 flex vertical-align-center horizontal-align-between"
-      >
-        <a
-          href="/"
-          class="logo-link"
-          aria-label="Go to homepage"
-          aria-current={isHome ? "page" : undefined}
-          data-home={isHome}
-        >
-          <span class="sr-only">avik banik logo</span>
-          <LOGO height={48} width={48} isHome={isHome} />
-        </a>
+    <header class="site-header">
+      <div class="container">
+        <div class="header-content">
+          <a
+            href="/"
+            class="logo-link"
+            aria-label="Go to homepage"
+            aria-current={isHome ? "page" : undefined}
+            data-home={isHome}
+          >
+            <span class="sr-only">avik banik logo</span>
+            <LOGO height={48} width={48} isHome={isHome} />
+          </a>
 
-        <nav transition:persist="">
-          <MorphedNavigationItems />
-        </nav>
-      </header>
-
-      <div transition:animate="fade" id="main-content">
-        <slot />
+          <nav transition:persist="">
+            <MorphedNavigationItems />
+          </nav>
+        </div>
       </div>
+    </header>
+
+    <main transition:animate="none" id="main-content">
+      <slot />
     </main>
 
     <ChatButton client:load transition:persist />
@@ -52,123 +52,69 @@ const isHome = pathname === "/";
 </html>
 
 <style is:global>
-  /* general styling */
+  /* Base Layout */
   body {
-    font-size: var(--fs-body);
-    font-family: var(--ff-body);
-    color: var(--clr-neutral);
+    margin: 0;
+    padding: 0;
   }
 
-  p:not([class]) {
-    opacity: 0.7;
-    max-width: 32ch;
-  }
-
-  p[data-width="wide"] {
-    max-width: 50ch;
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 </style>
 
-<!-- TODO: refactor button styles -->
+<!-- Header Styles -->
 <style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: transparent;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    isolation: isolate;
+  }
+
+  .site-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(248, 250, 252, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: -1;
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0;
+  }
+
   .logo-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem;
-    border-radius: 8px 8px 48% 48% / 8px 8px 38% 38%;
-    border: 1px solid var(--color-primary);
-    background: var(--clr-surface);
-    box-shadow:
-      0 4px 12px rgba(0, 0, 0, 0.06),
-      inset 0 0 0 0.5px hsla(204, 86%, 55%, 0.15);
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid transparent;
     transition: all 0.2s ease;
   }
 
   .logo-link:hover {
-    border-color: hsla(204, 86%, 55%, 0.5);
-    transform: translateY(-1px);
-    box-shadow:
-      0 6px 16px rgba(32, 126, 209, 0.15),
-      inset 0 0 0 0.5px hsla(204, 86%, 55%, 0.3);
+    border-color: rgba(6, 182, 212, 0.3);
+    background: rgba(6, 182, 212, 0.08);
   }
 
   .logo-link[data-home="true"] {
-    border-color: hsla(204, 86%, 55%, 0.35);
-    background: linear-gradient(
-      135deg,
-      hsla(204, 86%, 55%, 0.06),
-      hsla(204, 86%, 55%, 0.12)
-    );
-    box-shadow:
-      0 8px 24px rgba(32, 126, 209, 0.2),
-      inset 0 0 0 1px hsla(204, 86%, 55%, 0.25);
-  }
-
-  .logo-link[data-home="true"]:hover {
-    border-color: hsla(204, 86%, 55%, 0.6);
-    box-shadow:
-      0 10px 32px rgba(32, 126, 209, 0.25),
-      inset 0 0 0 1px hsla(204, 86%, 55%, 0.4);
-  }
-
-  :root {
-    /* colors aligned to global tokens */
-    --color-primary-hsl: 204, 86%, 55%;
-    --color-primary-light-hsl: 204, 92%, 64%;
-    --color-primary-darker-hsl: 204, 70%, 45%;
-    --color-bg-hsl: 0, 0%, 100%;
-    --color-bg-dark-hsl: 222, 47%, 97%;
-    --color-contrast-higher-hsl: 220, 14%, 23%;
-    --color-white-hsl: 0, 0%, 100%;
-  }
-
-  /* buttons */
-  .btn {
-    position: relative;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1em;
-    white-space: nowrap;
-    text-decoration: none;
-    background: hsl(var(--color-bg-dark-hsl));
-    color: hsl(var(--color-contrast-higher-hsl));
-    cursor: pointer;
-    line-height: 1.2;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: all 0.18s ease;
-    will-change: transform;
-    border-radius: 999px;
-    border: 1px solid hsla(var(--color-contrast-higher-hsl), 0.08);
-    padding: 0.65rem 1.25rem;
-  }
-
-  .btn:focus-visible {
-    box-shadow:
-      0px 0px 0px 2px hsl(var(--color-bg-hsl)),
-      0px 0px 0px 4px hsla(var(--color-contrast-higher-hsl), 0.12);
-    outline: none;
-  }
-
-  .btn:active {
-    transform: translateY(1px);
-  }
-
-  .btn--primary {
-    background: hsl(var(--color-primary-hsl));
-    color: hsl(var(--color-white-hsl));
-    box-shadow: none;
-  }
-
-  .btn--primary:hover {
-    background: hsl(var(--color-primary-light-hsl));
-  }
-
-  .btn--primary:focus {
-    box-shadow:
-      0px 0px 0px 2px hsl(var(--color-bg-hsl)),
-      0px 0px 0px 4px hsla(var(--color-primary-hsl), 0.4);
+    border-color: rgba(6, 182, 212, 0.3);
+    background: rgba(6, 182, 212, 0.12);
   }
 </style>

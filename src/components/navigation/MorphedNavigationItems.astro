@@ -217,7 +217,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
     (event) => {
       setupStuff(event.target as Element); // This runs once the page is loaded.
     },
-    { passive: true }
+    { passive: true },
   );
 
   function setupStuff(target: Element | null) {
@@ -232,7 +232,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
       const routeTo = button.getAttribute("data-route-to");
       button.setAttribute(
         "data-morph-bg-active",
-        String(routeTo === routePath)
+        String(routeTo === routePath),
       );
     });
 
@@ -275,7 +275,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
         root: null, // observing the document viewport
         rootMargin: "0px",
         threshold: 0.1, // Adjust threshold to control when the callback is executed
-      }
+      },
     );
 
     // Start observing the target element
@@ -375,22 +375,21 @@ Demo style
   .demo-morph-bg-list {
     display: inline-flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.25rem;
     overflow: hidden;
-    padding: 0.35rem;
-    background: var(--clr-surface);
-    border-radius: 999px;
-    border: 1px solid var(--clr-border);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(12px);
   }
 
   .demo-morph-bg-link {
     display: block;
     padding: 0.75rem 1rem;
-    color: hsl(230, 13%, 9%);
+    color: #0f172a;
     text-decoration: none;
-    font-weight: medium;
+    font-weight: 600;
   }
 
   .demo-morph-bg-target {
@@ -402,44 +401,41 @@ Demo style
   }
 
   .demo-morph-bg-button {
-    border-radius: 999px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    color: var(--clr-neutral);
-    padding: 0.65rem 1rem;
-    transition: all 0.18s ease;
+    color: var(--color-slate-600);
+    padding: 0.625rem 1rem;
+    transition: all 0.2s ease;
     border: 1px solid transparent;
     background: transparent;
     position: relative;
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
   }
 
   .nav-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    color: var(--clr-neutral);
+    display: none;
   }
 
   .nav-label {
-    font-size: 0.95rem;
+    font-size: 0.9375rem;
   }
 
   .demo-morph-bg-button:hover {
-    transform: translateY(-1px);
-    color: var(--clr-accent);
-    border-color: var(--clr-border);
+    color: var(--color-navy);
+    background: rgba(6, 182, 212, 0.08);
   }
 
   .demo-morph-bg-button[data-morph-bg-active="true"] {
-    color: var(--clr-neutral-dark);
+    color: var(--color-navy);
     font-weight: 700;
-    border-color: var(--clr-accent);
+    background: rgba(6, 182, 212, 0.12);
+    border-color: rgba(6, 182, 212, 0.3);
   }
 
   @keyframes blur {
@@ -463,16 +459,15 @@ Demo style
 } */
 
   .demo-morph-bg-2 {
-    background-color: hsla(204, 86%, 55%, 0.18);
-    box-shadow:
-      0 0 0 2px hsla(204, 86%, 55%, 0.25),
-      0 10px 30px hsla(204, 86%, 35%, 0.18);
+    background: rgba(6, 182, 212, 0.15);
+    border-radius: 8px;
+    border: 1px solid rgba(6, 182, 212, 0.3);
   }
 
   .nav-bar {
     display: flex;
     align-items: center;
-    gap: 0.65rem;
+    gap: 1rem;
     width: 100%;
     justify-content: flex-end;
   }
@@ -483,18 +478,17 @@ Demo style
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    border: 1px solid var(--clr-border);
-    background: var(--clr-surface);
-    color: var(--clr-neutral);
+    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--color-slate-600);
     transition: all 0.2s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   }
 
   .github-icon-link:hover {
-    color: var(--clr-accent);
-    border-color: var(--clr-accent);
-    transform: translateY(-1px);
+    color: var(--color-cyan);
+    border-color: rgba(6, 182, 212, 0.3);
+    background: rgba(6, 182, 212, 0.05);
   }
 
   .desktop-nav {
@@ -508,20 +502,20 @@ Demo style
     justify-content: center;
     width: 44px;
     height: 44px;
-    border-radius: 12px;
-    border: 1px solid var(--clr-border);
-    background: var(--clr-surface);
-    color: var(--clr-neutral);
+    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.6);
+    color: var(--color-slate-600);
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     position: relative;
     z-index: 10;
   }
 
   .mobile-menu-btn:hover {
-    border-color: var(--clr-accent);
-    color: var(--clr-accent);
+    border-color: rgba(6, 182, 212, 0.3);
+    color: var(--color-cyan);
+    background: rgba(6, 182, 212, 0.05);
   }
 
   .menu-line {
@@ -566,10 +560,10 @@ Demo style
   .mobile-menu {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     z-index: 1000;
@@ -579,7 +573,7 @@ Demo style
 
   @media (max-width: 55em) {
     .mobile-menu {
-      display: block;
+      display: flex;
       pointer-events: none;
     }
 
@@ -590,23 +584,21 @@ Demo style
   }
 
   .mobile-menu-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    width: 90%;
-    max-width: 320px;
-    background: var(--clr-surface);
-    border-radius: 24px;
-    padding: 1.5rem;
-    box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.3),
-      inset 0 0 0 1px hsla(204, 86%, 55%, 0.1);
+    position: relative;
+    width: min(90%, 360px);
+    max-height: 85vh;
+    overflow-y: auto;
+    background: rgba(248, 250, 252, 0.98);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    transform: scale(0.94);
     transition: transform 0.3s ease;
   }
 
   .mobile-menu--open .mobile-menu-content {
-    transform: translate(-50%, -50%) scale(1);
+    transform: scale(1);
   }
 
   .mobile-nav-list {
@@ -621,41 +613,43 @@ Demo style
   .mobile-nav-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
     width: 100%;
-    padding: 1rem 1.25rem;
-    border-radius: 14px;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
     border: 1px solid transparent;
     background: transparent;
-    color: var(--clr-neutral);
-    font-size: 1rem;
+    color: var(--color-slate-600);
+    font-size: 0.9375rem;
     font-weight: 600;
+    font-family: var(--font-display);
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .mobile-nav-item:hover {
-    background: hsla(204, 86%, 55%, 0.08);
-    border-color: hsla(204, 86%, 55%, 0.2);
-    color: var(--clr-accent);
+    background: rgba(6, 182, 212, 0.08);
+    border-color: rgba(6, 182, 212, 0.2);
+    color: var(--color-navy);
   }
 
   .mobile-nav-item[aria-current="page"] {
     background: linear-gradient(
       135deg,
-      hsla(204, 86%, 55%, 0.12),
-      hsla(204, 86%, 55%, 0.18)
+      rgba(6, 182, 212, 0.12),
+      rgba(239, 68, 68, 0.08)
     );
-    border-color: hsla(204, 86%, 55%, 0.35);
-    color: var(--clr-neutral-dark);
+    border-color: rgba(6, 182, 212, 0.25);
+    color: var(--color-navy);
+    font-weight: 700;
   }
 
   .mobile-nav-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
   }
 
   .mobile-nav-label {
