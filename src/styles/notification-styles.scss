@@ -1,32 +1,61 @@
 .notification {
     position: fixed;
-    bottom: 1rem;
-    left: 1rem;
+    bottom: 1.5rem;
+    right: 1.5rem;
 
-    color: white;
-    font-size: var(--fs-600);
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.25rem;
+    color: var(--color-navy);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: 1rem 1.25rem;
+    border-radius: 6px;
 
-    z-index: var(--z-index-fixed-element, 10);
-    transition: .2s;
-    transform: translateY(1rem);
+    z-index: 9999;
+    transition: all 0.3s ease;
+    transform: translateX(400px);
     opacity: 0;
 
-    background-color: hsla(240, 4%, 95%, 1);
-    border: 1px solid hsla(240, 4%, 80%, 0.7);
-    box-shadow: inset 0px 0px 0px 1px hsla(240, 4%, 95%, 1);
-    // visibility: visible;
+    background-color: var(--color-white);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.1);
+    font-family: var(--font-body);
 }
+
 .notification.show {
-    transform: translateY(0);
+    transform: translateX(0);
     opacity: 1;
 }
+
 .notification.success {
-    color: #3ec757;
+    background: rgba(6, 182, 212, 0.08);
+    border-color: var(--color-cyan);
+    color: var(--color-cyan);
 }
+
+.notification.success::before {
+    content: "✓ ";
+    font-weight: 700;
+}
+
 .notification.error {
-    color: #fe3834;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: var(--color-red);
+    color: var(--color-red);
+}
 
+.notification.error::before {
+    content: "✕ ";
+    font-weight: 700;
+}
 
+@media (max-width: 768px) {
+    .notification {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+        transform: translateY(120%);
+    }
+
+    .notification.show {
+        transform: translateY(0);
+    }
 }

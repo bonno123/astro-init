@@ -41,6 +41,7 @@
                                     class="form-input width-100" 
                                     required
                                     placeholder="Your name"
+                                    inputmode="text"
                                 >
                             </div>
 
@@ -56,6 +57,7 @@
                                     class="form-input width-100" 
                                     required
                                     placeholder="your@email.com"
+                                    inputmode="email"
                                 >
                             </div>
 
@@ -585,34 +587,34 @@ function resetMessageForm() {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     margin-bottom: 2rem;
-    background: var(--clr-border);
+    background: rgba(15, 23, 42, 0.05);
     padding: 0.4rem;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .tab-button {
     padding: 0.875rem 1.5rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     background: transparent;
-    color: var(--clr-contrast-medium);
+    color: var(--color-slate-600);
     text-align: center;
     user-select: none;
 }
 
 .tab-button:hover:not(.active) {
-    color: var(--clr-primary);
-    background: rgba(0, 0, 0, 0.05);
+    color: var(--color-navy);
+    background: rgba(15, 23, 42, 0.08);
 }
 
 .tab-button.active {
-    background: var(--clr-accent);
+    background: var(--color-cyan);
     color: white;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
 }
 
 .tab-button:active {
@@ -637,9 +639,9 @@ function resetMessageForm() {
 
 .booking-form-wrapper,
 .message-form-wrapper {
-    background: var(--clr-surface);
-    border: 1px solid var(--clr-border);
-    border-radius: 12px;
+    background: var(--color-white);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 8px;
     padding: 2rem;
 }
 
@@ -653,7 +655,7 @@ function resetMessageForm() {
 .form-legend {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--clr-primary);
+    color: var(--color-navy);
     margin-bottom: 0.5rem;
 }
 
@@ -661,35 +663,42 @@ function resetMessageForm() {
     display: block;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--clr-primary);
+    color: var(--color-navy);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
 }
 
 .form-input {
     padding: 0.75rem 1rem;
-    border: 1px solid var(--clr-border);
-    border-radius: 8px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 6px;
     font-size: 1rem;
-    font-family: inherit;
-    background: white;
-    color: var(--clr-primary);
+    font-family: var(--font-body);
+    background: var(--color-white);
+    color: var(--color-navy);
     transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+    color: var(--color-slate-600);
 }
 
 .form-input:focus {
     outline: none;
-    border-color: var(--clr-accent);
-    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    border-color: var(--color-cyan);
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
 }
 
 .form-input:disabled {
-    background: var(--clr-border);
+    background: rgba(15, 23, 42, 0.03);
     cursor: not-allowed;
     opacity: 0.6;
 }
 
 select.form-input {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230f172a' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 1rem center;
     padding-right: 2.5rem;
@@ -698,15 +707,16 @@ select.form-input {
 textarea.form-input {
     resize: vertical;
     min-height: 6rem;
+    font-family: var(--font-body);
 }
 
 /* Buttons */
 .btn {
     padding: 0.75rem 1.5rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none;
@@ -715,34 +725,36 @@ textarea.form-input {
 }
 
 .btn--primary {
-    background: var(--clr-accent);
+    background: var(--color-red);
     color: white;
 }
 
 .btn--primary:hover:not(:disabled) {
     opacity: 0.9;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .btn--secondary {
-    background: var(--clr-border);
-    color: var(--clr-primary);
+    background: rgba(15, 23, 42, 0.05);
+    color: var(--color-navy);
+    border: 1px solid rgba(15, 23, 42, 0.12);
 }
 
 .btn--secondary:hover:not(:disabled) {
-    background: var(--clr-accent);
+    background: var(--color-cyan);
     color: white;
+    border-color: var(--color-cyan);
 }
 
 .btn--tertiary {
     background: transparent;
-    color: var(--clr-accent);
-    border: 1px solid var(--clr-accent);
+    color: var(--color-cyan);
+    border: 1px solid var(--color-cyan);
 }
 
 .btn--tertiary:hover:not(:disabled) {
-    background: var(--clr-accent);
+    background: var(--color-cyan);
     color: white;
 }
 
@@ -759,14 +771,14 @@ textarea.form-input {
 /* Alerts */
 .alert {
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 0.875rem;
 }
 
 .alert--error {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border: 1px solid rgba(220, 53, 69, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-red);
+    border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
 /* Confirmation Card */
@@ -782,7 +794,7 @@ textarea.form-input {
 
 .confirmation-icon {
     font-size: 3.5rem;
-    color: var(--clr-accent);
+    color: var(--color-cyan);
     margin-bottom: 1rem;
     animation: scaleIn 0.3s ease;
 }
@@ -800,20 +812,20 @@ textarea.form-input {
 
 .confirmation-card h2 {
     font-size: 1.75rem;
-    color: var(--clr-primary);
+    color: var(--color-navy);
     margin-bottom: 1rem;
 }
 
 .confirmation-message {
     font-size: 1rem;
-    color: var(--clr-primary);
+    color: var(--color-navy);
     line-height: 1.6;
     margin-bottom: 1rem;
 }
 
 .confirmation-subtitle {
     font-size: 0.875rem;
-    color: var(--clr-contrast-medium);
+    color: var(--color-slate-600);
     line-height: 1.5;
     margin-bottom: 0.25rem;
 }
@@ -852,7 +864,7 @@ textarea.form-input {
 }
 
 .fw3-color-contrast-medium {
-    color: var(--clr-contrast-medium);
+    color: var(--color-slate-600);
 }
 
 .fw3-margin-top-2xs {
@@ -910,6 +922,4 @@ textarea.form-input {
         gap: 1rem;
     }
 }
-
-
 </style>

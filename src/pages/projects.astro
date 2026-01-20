@@ -4,25 +4,187 @@ import ProjectCard from "~/components/ProjectCard.astro";
 import { projectsWidget } from "~/data/site-info";
 ---
 
-<MainLayout title="Projects" metaDescription="Web development projects by Avik Banik">
-	<div class="container padding-block-700">
-		<h1 class="fs-primary-heading fw-bold text-center margin-bottom-700">
-			Featured Projects
-		</h1>
+<MainLayout
+  title="Projects"
+  metaDescription="Featured web development projects - Web3, DeFi, and modern web applications."
+>
+  <section class="projects-section">
+    <div class="container">
+      <div class="section-header">
+        <p class="eyebrow">Our Work</p>
+        <h1>Featured Projects</h1>
+      </div>
 
-		<div class="projects-grid">
-			{projectsWidget.projects.map((project) => (
-				<ProjectCard {...project} />
-			))}
-		</div>
-	</div>
+      <div class="projects-grid">
+        {
+          projectsWidget.projects.map((project) => (
+            <article class="project-card">
+              <div class="project-meta">
+                <span class="project-tag">{project.category || "Project"}</span>
+                <span class="project-date">{project.year || "2025"}</span>
+              </div>
+              <h3>{project.title}</h3>
+              <p class="project-description">{project.description}</p>
+              {project.technologies && (
+                <div class="project-tech">
+                  {project.technologies.map((tech) => (
+                    <span class="tech-tag">{tech}</span>
+                  ))}
+                </div>
+              )}
+              {project.link && (
+                <a href={project.link} class="project-link">
+                  View project →
+                </a>
+              )}
+            </article>
+          ))
+        }
+      </div>
+
+      {
+        projectsWidget.projects.length === 0 && (
+          <div class="projects-empty">
+            <p class="eyebrow">Coming Soon</p>
+            <p>We're working on our case studies. Check back soon!</p>
+          </div>
+        )
+      }
+    </div>
+  </section>
 </MainLayout>
 
 <style>
-	.projects-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-		gap: 2rem;
-		margin-top: 3rem;
-	}
+  .projects-section {
+    padding: 4rem 0;
+    background: var(--color-off-white);
+  }
+
+  @media (min-width: 768px) {
+    .projects-section {
+      padding: 6rem 0;
+    }
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .section-header h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-top: 0.5rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .project-card {
+    background: var(--color-white);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    transition: all 250ms ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-cyan);
+    box-shadow: 0 12px 24px rgba(6, 182, 212, 0.12);
+  }
+
+  .project-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  .project-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(6, 182, 212, 0.1);
+    color: var(--color-cyan);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  .project-date {
+    font-size: 0.875rem;
+    color: var(--color-slate);
+    font-family: var(--font-mono);
+  }
+
+  .project-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--color-navy);
+  }
+
+  .project-description {
+    color: var(--color-slate-600);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tech-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-red);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-weight: 500;
+  }
+
+  .project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-cyan);
+    font-weight: 600;
+    transition: gap 250ms ease;
+    text-decoration: none;
+  }
+
+  .project-link:hover {
+    gap: 0.75rem;
+  }
+
+  .projects-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--color-off-white);
+    border-radius: var(--radius-lg);
+    border: 1px dashed rgba(15, 23, 42, 0.2);
+  }
+
+  .projects-empty p {
+    margin: 0.5rem 0;
+    color: var(--color-slate-600);
+    font-size: 1.125rem;
+  }
+
+  @media (max-width: 768px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+  }
 </style>

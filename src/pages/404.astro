@@ -1,24 +1,50 @@
 ---
 import MainLayout from "~/layouts/MainLayout.astro";
-import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
-import MdnHello from "~/canvases/MdnHello.astro";
 ---
 
 <MainLayout
-	title="playground"
-	metaDescription="show case of glsl canvas and how to use it in astro"
+  title="Page Not Found"
+  metaDescription="The page you're looking for doesn't exist."
 >
-	<EvenColumnsLayout>
-		<div class="flow">
-			<div class="">
-				<h1 class="fs-secondary-heading fw-bold">ERROR CODE 404</h1>
-				<p data-width="wide" class="margin-top-400">
-					No file is served at this location currently. Please go back
-					to <a href="/" class="fw-medium">home</a>
-				</p>
-			</div>
-		</div>
-
-		<MdnHello />
-	</EvenColumnsLayout>
+  <section class="not-found-section">
+    <div class="container">
+      <div class="not-found-content">
+        <p class="eyebrow">Error 404</p>
+        <h1>Page Not Found</h1>
+        <p class="not-found-description">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <a href="/" class="btn btn-primary">Back to Home</a>
+      </div>
+    </div>
+  </section>
 </MainLayout>
+
+<style>
+  .not-found-section {
+    padding: 6rem 0;
+    background: var(--color-off-white);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .not-found-content {
+    text-align: center;
+  }
+
+  .not-found-content h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-top: 0.5rem;
+    color: var(--color-navy);
+  }
+
+  .not-found-description {
+    font-size: 1.125rem;
+    color: var(--color-slate-600);
+    max-width: 500px;
+    margin: 1rem auto 2rem;
+    line-height: 1.6;
+  }
+</style>

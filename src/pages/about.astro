@@ -1,60 +1,223 @@
 ---
 import MainLayout from "~/layouts/MainLayout.astro";
-
 import { aboutMeWidget } from "~/data/site-info";
-import EvenColumnsLayout from "~/layouts/EvenColumnsLayout.astro";
-import ProfileArticle from "~/components/ProfileArticle.astro";
 import SocialArea from "~/components/SocialArea.astro";
-import ScratchEmailReveal from "~/components/common/ScratchEmailReveal.vue";
-
 import PatricioGLobe from "~/canvases/patricio-globe.astro";
 ---
 
 <MainLayout
-	title={aboutMeWidget.title}
-	metaDescription={aboutMeWidget.description}
+  title={aboutMeWidget.title}
+  metaDescription={aboutMeWidget.description}
 >
-	<EvenColumnsLayout>
-		<div class="">
-			<ProfileArticle
-				title={aboutMeWidget.aboutMe.title}
-				description={aboutMeWidget.aboutMe.description}
-			/>
+  <section class="about-section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-content">
+          <p class="eyebrow">About Us</p>
+          <h1>Small Team, Big Ideas</h1>
 
-			<div class="margin-top-400 flex vertical-align-center">
-				<span class="fw-bold">Email: </span>
-				<ScratchEmailReveal client:only />
-			</div>
+          <div class="about-text">
+            <p>
+              We're a focused team of developers specializing in Web3 and modern
+              web experiences. We build production-grade applications with an
+              emphasis on performance, security, and user experience.
+            </p>
 
-			<div class="margin-top-400">
-				<SocialArea socials={aboutMeWidget.socialLinks} />
-			</div>
-		</div>
+            <p>
+              From DeFi protocols to complex web applications, we've shipped
+              products across blockchain ecosystems and traditional web
+              platforms. We believe in clean code, minimal design, and shipping
+              fast.
+            </p>
 
-		<div style="aspect-ratio: 1;">
-			<PatricioGLobe />
-		</div>
-	</EvenColumnsLayout>
+            <p>
+              Currently available for contract work and strategic partnerships.
+              Let's build something great together.
+            </p>
+          </div>
+
+          <div class="about-stats">
+            <div class="stat">
+              <div class="stat-value">30+</div>
+              <div class="stat-label">Projects Shipped</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">&lt;24h</div>
+              <div class="stat-label">Response Time</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">Web3</div>
+              <div class="stat-label">Native</div>
+            </div>
+          </div>
+
+          <div class="about-cta">
+            <a href="/contact/" class="btn btn-primary">Get in Touch</a>
+            <a href="mailto:hello@avikb.dev" class="btn btn-ghost">Send Email</a
+            >
+          </div>
+
+          <div class="about-socials">
+            <h3>Connect</h3>
+            <SocialArea socials={aboutMeWidget.socialLinks} />
+          </div>
+        </div>
+
+        <div class="about-visual">
+          <div class="globe-wrapper">
+            <PatricioGLobe />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </MainLayout>
 
+<style>
+  .about-section {
+    padding: 4rem 0;
+    background: var(--color-off-white);
+  }
+
+  @media (min-width: 768px) {
+    .about-section {
+      padding: 6rem 0;
+    }
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .about-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .about-content h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+    color: var(--color-navy);
+  }
+
+  .about-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .about-text p {
+    color: var(--color-slate-600);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-cyan);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--color-slate-600);
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+  }
+
+  .about-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .about-socials {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .about-socials h3 {
+    color: var(--color-navy);
+    margin-bottom: 1rem;
+    font-size: 1.125rem;
+  }
+
+  .about-visual {
+    position: relative;
+  }
+
+  .globe-wrapper {
+    aspect-ratio: 1;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: linear-gradient(
+      135deg,
+      var(--color-navy) 0%,
+      var(--color-navy-light) 100%
+    );
+    border: 1px solid rgba(6, 182, 212, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .about-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .about-cta {
+      flex-direction: column;
+    }
+
+    .about-cta .btn {
+      width: 100%;
+    }
+  }
+</style>
+
 <script>
-	const descriptionWrapper = document.querySelector(".description-wrapper");
+  const descriptionWrapper = document.querySelector(".description-wrapper");
 
-	// description wrapper child p tags
-	const descriptionWrapperChildren = descriptionWrapper?.children;
+  // description wrapper child p tags
+  const descriptionWrapperChildren = descriptionWrapper?.children;
 
-	// if description wrapper has children
-	if (descriptionWrapperChildren) {
-		// loop through each child
-		for (let i = 0; i < descriptionWrapperChildren.length; i++) {
-			// get the child
-			const child = descriptionWrapperChildren[i];
-			// if the child is a p tag
-			if (child.tagName === "P") {
-				// add a class to the p tag
-				child.setAttribute("data-width", "wide");
-				child.setAttribute("style", "display: inline-block;");
-			}
-		}
-	}
+  // if description wrapper has children
+  if (descriptionWrapperChildren) {
+    // loop through each child
+    for (let i = 0; i < descriptionWrapperChildren.length; i++) {
+      // get the child
+      const child = descriptionWrapperChildren[i];
+      // if the child is a p tag
+      if (child.tagName === "P") {
+        // add a class to the p tag
+        child.setAttribute("data-width", "wide");
+        child.setAttribute("style", "display: inline-block;");
+      }
+    }
+  }
 </script>
