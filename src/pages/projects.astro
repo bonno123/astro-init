@@ -1,6 +1,5 @@
 ---
 import MainLayout from "~/layouts/MainLayout.astro";
-import ProjectCard from "~/components/ProjectCard.astro";
 import { projectsWidget } from "~/data/site-info";
 ---
 
@@ -19,24 +18,27 @@ import { projectsWidget } from "~/data/site-info";
         {
           projectsWidget.projects.map((project) => (
             <article class="project-card">
-              <div class="project-meta">
-                <span class="project-tag">{project.category || "Project"}</span>
-                <span class="project-date">{project.year || "2025"}</span>
-              </div>
               <h3>{project.title}</h3>
               <p class="project-description">{project.description}</p>
-              {project.technologies && (
+              {project.tags && (
                 <div class="project-tech">
-                  {project.technologies.map((tech) => (
+                  {project.tags.map((tech: string) => (
                     <span class="tech-tag">{tech}</span>
                   ))}
                 </div>
               )}
-              {project.link && (
-                <a href={project.link} class="project-link">
-                  View project →
-                </a>
-              )}
+              <div class="project-links">
+                {project.liveUrl && (
+                  <a href={project.liveUrl} class="project-link" target="_blank">
+                    View live →
+                  </a>
+                )}
+                {project.githubUrl && (
+                  <a href={project.githubUrl} class="project-link" target="_blank">
+                    GitHub →
+                  </a>
+                )}
+              </div>
             </article>
           ))
         }
