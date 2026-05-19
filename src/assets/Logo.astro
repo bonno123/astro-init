@@ -59,16 +59,25 @@ const { height = 40, width = 40, isHome = false } = Astro.props;
 
   /* Seven-segment display segments */
   .segment {
-    fill: rgba(15, 23, 42, 0.12);
+    fill: #111827;
     transition:
       fill 0.3s ease,
       filter 0.3s ease;
   }
 
-  /* Inactive state - dim segments */
+  /* Inactive state - readable without competing with the active cyan logo. */
   .logo-svg:not(.logo--active) .segment {
-    fill: rgba(15, 23, 42, 0.12);
-    filter: brightness(0.8);
+    fill: #111827;
+    filter: none;
+  }
+
+  .logo-svg:not(.logo--active) .segment-middle {
+    fill: #ef4444;
+  }
+
+  .logo-svg:not(.logo--active) .segment-top,
+  .logo-svg:not(.logo--active) .segment-top-right {
+    fill: #06b6d4;
   }
 
   /* Active state (homepage) - light up segments with cyan */

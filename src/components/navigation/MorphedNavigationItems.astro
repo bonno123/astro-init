@@ -58,11 +58,13 @@ const icons: Record<string, { viewBox: string; path: string }> = {
         navItems.map((item) => (
           <li class="cd-z-index-2">
             <button
+              type="button"
               data-route-to={item.route}
               class="demo-morph-bg-button"
               data-morph-bg="morph-bg-2"
               data-morph-bg-active={pathname === item.route}
               aria-label={item.label}
+              aria-current={pathname === item.route ? "page" : undefined}
             >
               <span class="nav-icon" aria-hidden="true">
                 <svg
@@ -95,6 +97,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
           navItems.map((item) => (
             <li>
               <button
+                type="button"
                 data-route-to={item.route}
                 class="mobile-nav-item"
                 data-mobile-nav={true}
@@ -175,13 +178,18 @@ const icons: Record<string, { viewBox: string; path: string }> = {
   const mobileMenuBtn = document.getElementById("mobile-menu-btn");
   const mobileMenu = document.getElementById("mobile-menu");
 
-  function toggleMobileMenu() {
-    mobileMenu?.classList.toggle("mobile-menu--open");
-    mobileMenuBtn?.classList.toggle("mobile-menu-btn--open");
-    document.body.classList.toggle("menu-open");
+  function toggleMobileMenu(force?: boolean) {
+    const shouldOpen =
+      typeof force === "boolean"
+        ? force
+        : !mobileMenu?.classList.contains("mobile-menu--open");
+
+    mobileMenu?.classList.toggle("mobile-menu--open", shouldOpen);
+    mobileMenuBtn?.classList.toggle("mobile-menu-btn--open", shouldOpen);
+    document.body.classList.toggle("menu-open", shouldOpen);
   }
 
-  mobileMenuBtn?.addEventListener("click", toggleMobileMenu);
+  mobileMenuBtn?.addEventListener("click", () => toggleMobileMenu());
 
   // Close menu when clicking outside
   mobileMenu?.addEventListener("click", (e) => {
@@ -199,7 +207,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
 
     // Close mobile menu if it's a mobile nav item
     if (button.getAttribute("data-mobile-nav")) {
-      toggleMobileMenu();
+      toggleMobileMenu(false);
     }
 
     navigate(String(route));
@@ -217,10 +225,9 @@ const icons: Record<string, { viewBox: string; path: string }> = {
   );
 
   function setupStuff(target: Element | null) {
-    //  change the attribute data-morph-bg-active to true if the pathname matches the button's data-route-to
-    // Assuming `pathname` is reactive and part of your component's state
-    let routePath = window.location.pathname; // Initialize pathname with the current path
-    const buttons = target?.querySelectorAll("[data-route-to]");
+    const routePath = window.location.pathname;
+    const root = target?.ownerDocument ?? document;
+    const buttons = root.querySelectorAll("[data-route-to]");
 
     if (!buttons) return;
 
@@ -230,9 +237,17 @@ const icons: Record<string, { viewBox: string; path: string }> = {
         "data-morph-bg-active",
         String(routeTo === routePath),
       );
+
+      if (routeTo === routePath) {
+        button.setAttribute("aria-current", "page");
+      } else {
+        button.removeAttribute("aria-current");
+      }
     });
 
-    doneRouteChange(customEventRouteChanged);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => doneRouteChange(customEventRouteChanged));
+    });
   }
 
   function doneRouteChange(customEvent: CustomEvent<unknown>) {
@@ -248,13 +263,18 @@ const icons: Record<string, { viewBox: string; path: string }> = {
   function initMorph() {
     if (morphBg.length > 0) {
       for (var i = 0; i < morphBg.length; i++) {
-        const morphInstance = new MorphBackground(morphBg[i] as HTMLElement);
+        const morphElement = morphBg[i] as HTMLElement;
+        if (morphElement.dataset.morphInitialized === "true") continue;
+
+        morphElement.dataset.morphInitialized = "true";
+        new MorphBackground(morphElement);
       }
     }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const targetElement = document.querySelector(".demo-morph-bg-button"); // Adjust the selector as needed
+    const targetElement = document.querySelector(".demo-morph-bg-button");
+    if (!targetElement) return;
 
     const observer = new IntersectionObserver(
       (entries, observer) => {
@@ -278,6 +298,11 @@ const icons: Record<string, { viewBox: string; path: string }> = {
     observer.observe(targetElement!);
   });
 
+  document.addEventListener("astro:page-load", () => {
+    initMorph();
+    requestAnimationFrame(() => doneResizing(customEventMorph));
+  });
+
   // ============== MORPH BG RESIZE ============== //
   // on window resize - reset morph bg size
   var resizingId: string | number | undefined,
@@ -296,7 +321,7 @@ const icons: Record<string, { viewBox: string; path: string }> = {
 
   // wait for font to be loaded
   if (document.fonts) {
-    document.fonts.onloadingdone = function (fontFaceSetEvent) {
+    document.fonts.onloadingdone = function () {
       doneResizing(customEventMorph);
     };
 
@@ -340,7 +365,7 @@ Component
     width: 1px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 180ms ease;
     transform-origin: left top;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
@@ -351,7 +376,12 @@ Component
   }
 
   .morph-bg--has-transition {
-    transition: 0.3s;
+    transition:
+      transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      width 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      height 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-radius 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 180ms ease;
     will-change: transform, border-radius, height, width;
   }
 
@@ -369,16 +399,15 @@ Demo style
   }
 
   .demo-morph-bg-list {
+    position: relative;
+    z-index: 2;
     display: inline-flex;
     flex-wrap: wrap;
     gap: 0.25rem;
     overflow: hidden;
-    padding: 0.5rem;
-    background: #ffffff;
-    border-radius: 8px;
-    border: 2px solid #111827;
-    box-shadow: 4px 4px 0 #111827;
-    backdrop-filter: blur(12px);
+    padding: 0;
+    background: transparent;
+    border-radius: 6px;
   }
 
   .demo-morph-bg-link {
@@ -415,6 +444,13 @@ Demo style
     font-size: 0.9375rem;
   }
 
+  .demo-morph-bg-button .nav-icon,
+  .demo-morph-bg-button .nav-label {
+    color: #111827;
+    position: relative;
+    z-index: 3;
+  }
+
   .nav-icon {
     display: none;
   }
@@ -430,10 +466,17 @@ Demo style
   }
 
   .demo-morph-bg-button[data-morph-bg-active="true"] {
-    color: #111827;
+    color: #111827 !important;
     font-weight: 700;
-    background: #cffafe;
-    border-color: #111827;
+    background: rgba(207, 250, 254, 0.35);
+    border-color: rgba(17, 24, 39, 0.35);
+  }
+
+  .demo-morph-bg-button[data-morph-bg-active="true"] .nav-icon,
+  .demo-morph-bg-button[data-morph-bg-active="true"] .nav-label,
+  .demo-morph-bg-button[aria-current="page"] .nav-icon,
+  .demo-morph-bg-button[aria-current="page"] .nav-label {
+    color: #111827 !important;
   }
 
   @keyframes blur {
@@ -460,6 +503,7 @@ Demo style
     background: #cffafe;
     border-radius: 8px;
     border: 2px solid #111827;
+    box-shadow: 3px 3px 0 #111827;
   }
 
   .nav-bar {
@@ -494,6 +538,14 @@ Demo style
 
   .desktop-nav {
     display: flex;
+    position: relative;
+    padding: 0.5rem;
+    overflow: visible;
+    background: #ffffff;
+    border: 2px solid #111827;
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 #111827;
+    backdrop-filter: blur(12px);
   }
 
   /* Mobile Menu Button Styles */

@@ -45,7 +45,9 @@ export default class MorphBackgroundClass {
 
         // on change route - reset background element position
         window.addEventListener('route-changed', () => {
-            this.setInitialState()
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => this.setInitialState());
+            });
         });
     }
     
@@ -65,12 +67,16 @@ export default class MorphBackgroundClass {
                 return;
             }
         }
+
+        this.defaultIndex = false;
+        this.targetIndex = false;
+        this.element.classList.remove('morph-bg--visible', 'morph-bg--has-transition');
     }
     
     // this is now become optional - on route change the bg will be reset
     initClickEvent() {
         for(let i = 0; i < this.targets.length; i++) {           
-            this.targets[i].addEventListener('click', (event) => {
+            this.targets[i].addEventListener('click', () => {
                 this.setPosition(i);
             })
         }
@@ -78,7 +84,7 @@ export default class MorphBackgroundClass {
     
     initHoverEvent() {
         for(let i = 0; i < this.targets.length; i++) {
-            this.targets[i].addEventListener('mouseenter', (event) => {
+            this.targets[i].addEventListener('mouseenter', () => {
                 this.setPosition(i);
             })
 
