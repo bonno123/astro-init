@@ -9,6 +9,7 @@ const navItems = [
   { label: "Home", route: "/", icon: "home" },
   { label: "Projects", route: "/projects/", icon: "projects" },
   { label: "About", route: "/about/", icon: "about" },
+  { label: "Lab", route: "/lab/", icon: "projects" },
   { label: "Contact", route: "/contact/", icon: "contact" },
 ];
 
@@ -346,7 +347,7 @@ Component
   }
 
   .morph-bg--visible {
-    opacity: 0.28;
+    opacity: 1;
   }
 
   .morph-bg--has-transition {
@@ -373,9 +374,10 @@ Demo style
     gap: 0.25rem;
     overflow: hidden;
     padding: 0.5rem;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    border-radius: 8px;
+    border: 2px solid #111827;
+    box-shadow: 4px 4px 0 #111827;
     backdrop-filter: blur(12px);
   }
 
@@ -397,12 +399,12 @@ Demo style
 
   .demo-morph-bg-button {
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    color: var(--color-slate-600);
+    color: #111827;
     padding: 0.625rem 1rem;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     background: transparent;
     position: relative;
     z-index: 2;
@@ -422,15 +424,16 @@ Demo style
   }
 
   .demo-morph-bg-button:hover {
-    color: var(--color-navy);
-    background: rgba(6, 182, 212, 0.08);
+    color: #111827;
+    background: #fff7df;
+    border-color: #111827;
   }
 
   .demo-morph-bg-button[data-morph-bg-active="true"] {
-    color: var(--color-navy);
+    color: #111827;
     font-weight: 700;
-    background: rgba(6, 182, 212, 0.12);
-    border-color: rgba(6, 182, 212, 0.3);
+    background: #cffafe;
+    border-color: #111827;
   }
 
   @keyframes blur {
@@ -454,9 +457,9 @@ Demo style
 } */
 
   .demo-morph-bg-2 {
-    background: rgba(6, 182, 212, 0.15);
+    background: #cffafe;
     border-radius: 8px;
-    border: 1px solid rgba(6, 182, 212, 0.3);
+    border: 2px solid #111827;
   }
 
   .nav-bar {
@@ -474,16 +477,19 @@ Demo style
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--color-slate-600);
+    border: 2px solid #111827;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 4px 4px 0 #111827;
     transition: all 0.2s ease;
   }
 
   .github-icon-link:hover {
-    color: var(--color-cyan);
-    border-color: rgba(6, 182, 212, 0.3);
-    background: rgba(6, 182, 212, 0.05);
+    color: #111827;
+    border-color: #111827;
+    background: #facc15;
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0 #111827;
   }
 
   .desktop-nav {
@@ -498,9 +504,10 @@ Demo style
     width: 44px;
     height: 44px;
     border-radius: 8px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(255, 255, 255, 0.6);
-    color: var(--color-slate-600);
+    border: 2px solid #111827;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 4px 4px 0 #111827;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
@@ -508,9 +515,9 @@ Demo style
   }
 
   .mobile-menu-btn:hover {
-    border-color: rgba(6, 182, 212, 0.3);
-    color: var(--color-cyan);
-    background: rgba(6, 182, 212, 0.05);
+    border-color: #111827;
+    color: #111827;
+    background: #cffafe;
   }
 
   .menu-line {
@@ -559,7 +566,7 @@ Demo style
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(17, 24, 39, 0.55);
     backdrop-filter: blur(8px);
     z-index: 1000;
     opacity: 0;
@@ -583,11 +590,12 @@ Demo style
     width: min(90%, 360px);
     max-height: 85vh;
     overflow-y: auto;
-    background: rgba(248, 250, 252, 0.98);
+    background: #fff7df;
     backdrop-filter: blur(20px);
-    border-radius: 16px;
+    border-radius: 8px;
     padding: 2rem 1.5rem;
-    border: 1px solid rgba(15, 23, 42, 0.1);
+    border: 3px solid #111827;
+    box-shadow: 10px 10px 0 #111827;
     transform: scale(0.94);
     transition: transform 0.3s ease;
   }
@@ -612,9 +620,9 @@ Demo style
     width: 100%;
     padding: 0.875rem 1rem;
     border-radius: 8px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--color-slate-600);
+    border: 2px solid #111827;
+    background: #ffffff;
+    color: #111827;
     font-size: 0.9375rem;
     font-weight: 600;
     font-family: var(--font-display);
@@ -623,19 +631,15 @@ Demo style
   }
 
   .mobile-nav-item:hover {
-    background: rgba(6, 182, 212, 0.08);
-    border-color: rgba(6, 182, 212, 0.2);
-    color: var(--color-navy);
+    background: #cffafe;
+    border-color: #111827;
+    color: #111827;
   }
 
   .mobile-nav-item[aria-current="page"] {
-    background: linear-gradient(
-      135deg,
-      rgba(6, 182, 212, 0.12),
-      rgba(239, 68, 68, 0.08)
-    );
-    border-color: rgba(6, 182, 212, 0.25);
-    color: var(--color-navy);
+    background: #facc15;
+    border-color: #111827;
+    color: #111827;
     font-weight: 700;
   }
 
@@ -704,8 +708,8 @@ Utilities
     display: inline-flex;
     align-items: center;
     margin-left: 1rem;
-    opacity: 0.6;
-    color: var(--clr-neutral);
+    opacity: 1;
+    color: #111827;
     transition:
       opacity 0.2s ease,
       color 0.2s ease;
@@ -713,6 +717,6 @@ Utilities
 
   .github-icon-link:hover {
     opacity: 1;
-    color: var(--clr-accent);
+    color: #111827;
   }
 </style>

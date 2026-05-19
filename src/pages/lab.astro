@@ -5,8 +5,76 @@ import MDNHelloGlsl from "~/widgets/glsl/MDNHelloGlsl.astro";
 import ShapingFunctions from "~/widgets/glsl/ShapingFunctions.astro";
 ---
 
-<MainLayout title={`Lab`} metaDescription={`Creative coding experiments and GLSL canvases`}>
-	<MDNHelloGlsl />
-	<BOSHelloWorld />
-	<ShapingFunctions />
+<MainLayout
+  title="Lab"
+  metaDescription="Creative coding experiments, GLSL sketches, and shader tests by Avik Banik."
+>
+  <section class="lab-hero">
+    <div class="container">
+      <p class="eyebrow">Lab</p>
+      <h1>Shaders, tests, and other visual decisions made after midnight.</h1>
+      <p>
+        This is where the experiments live. Some are useful, some are notes in
+        public, and some are just here because the browser allowed it.
+      </p>
+    </div>
+  </section>
+
+  <section class="lab-content">
+    <div class="container">
+      <div class="experiment-stack">
+        <MDNHelloGlsl />
+        <BOSHelloWorld />
+        <ShapingFunctions />
+      </div>
+    </div>
+  </section>
 </MainLayout>
+
+<style>
+  :global(body) {
+    background: #fff7df;
+  }
+
+  .lab-hero {
+    padding: 4rem 0 2rem;
+    background:
+      linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+      #fff7df;
+    background-size: 28px 28px;
+  }
+
+  .lab-hero h1 {
+    max-width: 920px;
+    margin-top: 0.5rem;
+    color: #111827;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .lab-hero p:not(.eyebrow) {
+    max-width: 680px;
+    margin-top: 1rem;
+    color: #475569;
+    font-size: 1.12rem;
+    line-height: 1.65;
+  }
+
+  .lab-content {
+    padding: 2rem 0 5rem;
+    background: #fff7df;
+  }
+
+  .experiment-stack {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .experiment-stack :global(section),
+  .experiment-stack :global(article),
+  .experiment-stack :global(.widget) {
+    border-radius: 8px;
+  }
+</style>

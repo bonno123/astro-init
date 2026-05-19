@@ -1,0 +1,25 @@
+---
+import fragmentShader from "~/glsl/cubism-experiment/index.frag?raw";
+---
+
+<canvas class="glslCanvas" id="cubismCanvas" data-fragment={fragmentShader}>
+  Your browser does not support the HTML5 canvas element.
+</canvas>
+
+<script>
+  import GlslCanvas from "glslCanvas";
+
+  let canvas: HTMLCanvasElement | null = null;
+  let sandbox: typeof GlslCanvas | null = null;
+
+  function initializeShader() {
+    canvas = document.getElementById("cubismCanvas") as HTMLCanvasElement;
+    if (canvas) {
+      sandbox = new GlslCanvas(canvas);
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+    }
+  }
+
+  initializeShader();
+</script>

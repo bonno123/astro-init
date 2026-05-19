@@ -7,7 +7,7 @@
                 :class="['tab-button', { active: activeMode === 'booking' }]"
                 @click="activeMode = 'booking'"
             >
-                Schedule a Call
+                Book a Call
             </button>
             <button
                 type="button"
@@ -25,7 +25,7 @@
                     <fieldset class="margin-bottom-2xs">
                         <legend class="form-legend">Request a Call</legend>
                         <p class="fw3-text-sm fw3-color-contrast-medium margin-bottom-md">
-                            Choose a time that works best for you. You'll receive a confirmation email with the meeting link.
+                            Pick a time and add enough context that the call starts useful.
                         </p>
 
                         <div class="grid gap-sm">
@@ -72,7 +72,7 @@
                                     class="form-input width-100"
                                     required
                                 >
-                                    <option value="">Select a topic</option>
+                                    <option value="">Select the main problem</option>
                                     <option value="Website Design">Website Design</option>
                                     <option value="Web Application">Web Application</option>
                                     <option value="Consultation">General Consultation</option>
@@ -139,7 +139,7 @@
                                     v-model="bookingForm.details"
                                     class="form-input width-100" 
                                     rows="4"
-                                    placeholder="Tell us more about your project or goals..."
+                                    placeholder="What are we untangling?"
                                     maxlength="500"
                                 ></textarea>
                                 <p class="fw3-text-xs fw3-color-contrast-medium fw3-margin-top-2xs">
@@ -201,7 +201,7 @@
                     <fieldset class="margin-bottom-2xs">
                         <legend class="form-legend">Send a Message</legend>
                         <p class="fw3-text-sm fw3-color-contrast-medium margin-bottom-md">
-                            Have a question or just want to get in touch? Send us a message and we'll respond as soon as possible.
+                            Send the messy version. We can make it neat later.
                         </p>
 
                         <div class="grid gap-sm">
@@ -246,7 +246,7 @@
                                     type="text" 
                                     class="form-input width-100" 
                                     required
-                                    placeholder="What's this about?"
+                                    placeholder="Dashboard panic, wallet flow, new build..."
                                     maxlength="100"
                                 >
                                 <p class="fw3-text-xs fw3-color-contrast-medium fw3-margin-top-2xs">
@@ -265,7 +265,7 @@
                                     class="form-input width-100" 
                                     rows="6"
                                     required
-                                    placeholder="Tell us what's on your mind..."
+                                    placeholder="What exists, what is broken, and what needs to happen?"
                                     maxlength="2000"
                                 ></textarea>
                                 <p class="fw3-text-xs fw3-color-contrast-medium fw3-margin-top-2xs">
@@ -587,34 +587,37 @@ function resetMessageForm() {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     margin-bottom: 2rem;
-    background: rgba(15, 23, 42, 0.05);
+    background: #fff7df;
     padding: 0.4rem;
     border-radius: 8px;
+    border: 2px solid #111827;
 }
 
 .tab-button {
     padding: 0.875rem 1.5rem;
-    border: none;
-    border-radius: 6px;
+    border: 2px solid transparent;
+    border-radius: 8px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     background: transparent;
-    color: var(--color-slate-600);
+    color: #111827;
     text-align: center;
     user-select: none;
 }
 
 .tab-button:hover:not(.active) {
-    color: var(--color-navy);
-    background: rgba(15, 23, 42, 0.08);
+    color: #111827;
+    background: #ffffff;
+    border-color: #111827;
 }
 
 .tab-button.active {
-    background: var(--color-cyan);
-    color: white;
-    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
+    background: #facc15;
+    color: #111827;
+    border-color: #111827;
+    box-shadow: 3px 3px 0 #111827;
 }
 
 .tab-button:active {
@@ -639,8 +642,8 @@ function resetMessageForm() {
 
 .booking-form-wrapper,
 .message-form-wrapper {
-    background: var(--color-white);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    border: 2px solid #111827;
     border-radius: 8px;
     padding: 2rem;
 }
@@ -654,16 +657,16 @@ function resetMessageForm() {
 
 .form-legend {
     font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-navy);
+    font-weight: 700;
+    color: #111827;
     margin-bottom: 0.5rem;
 }
 
 .form-label {
     display: block;
     font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-navy);
+    font-weight: 700;
+    color: #111827;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-family: var(--font-mono);
@@ -671,23 +674,23 @@ function resetMessageForm() {
 
 .form-input {
     padding: 0.75rem 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    border-radius: 6px;
+    border: 2px solid #111827;
+    border-radius: 8px;
     font-size: 1rem;
     font-family: var(--font-body);
-    background: var(--color-white);
-    color: var(--color-navy);
+    background: #ffffff;
+    color: #111827;
     transition: all 0.2s ease;
 }
 
 .form-input::placeholder {
-    color: var(--color-slate-600);
+    color: #64748b;
 }
 
 .form-input:focus {
     outline: none;
-    border-color: var(--color-cyan);
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+    border-color: #111827;
+    box-shadow: 4px 4px 0 #06b6d4;
 }
 
 .form-input:disabled {
@@ -713,10 +716,10 @@ textarea.form-input {
 /* Buttons */
 .btn {
     padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
+    border: 2px solid #111827;
+    border-radius: 8px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
     text-decoration: none;
@@ -725,37 +728,39 @@ textarea.form-input {
 }
 
 .btn--primary {
-    background: var(--color-red);
-    color: white;
+    background: #ef4444;
+    color: #ffffff;
+    box-shadow: 4px 4px 0 #111827;
 }
 
 .btn--primary:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    opacity: 1;
+    transform: translate(-1px, -1px);
+    box-shadow: 6px 6px 0 #111827;
 }
 
 .btn--secondary {
-    background: rgba(15, 23, 42, 0.05);
-    color: var(--color-navy);
-    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #cffafe;
+    color: #111827;
+    border: 2px solid #111827;
+    box-shadow: 4px 4px 0 #111827;
 }
 
 .btn--secondary:hover:not(:disabled) {
-    background: var(--color-cyan);
-    color: white;
-    border-color: var(--color-cyan);
+    background: #06b6d4;
+    color: #111827;
+    border-color: #111827;
 }
 
 .btn--tertiary {
-    background: transparent;
-    color: var(--color-cyan);
-    border: 1px solid var(--color-cyan);
+    background: #ffffff;
+    color: #111827;
+    border: 2px solid #111827;
 }
 
 .btn--tertiary:hover:not(:disabled) {
-    background: var(--color-cyan);
-    color: white;
+    background: #fff7df;
+    color: #111827;
 }
 
 .btn--sm {
@@ -771,14 +776,14 @@ textarea.form-input {
 /* Alerts */
 .alert {
     padding: 1rem;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.875rem;
 }
 
 .alert--error {
-    background: rgba(239, 68, 68, 0.1);
-    color: var(--color-red);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    background: #fee2e2;
+    color: #991b1b;
+    border: 2px solid #111827;
 }
 
 /* Confirmation Card */
@@ -794,7 +799,7 @@ textarea.form-input {
 
 .confirmation-icon {
     font-size: 3.5rem;
-    color: var(--color-cyan);
+    color: #06b6d4;
     margin-bottom: 1rem;
     animation: scaleIn 0.3s ease;
 }
@@ -812,20 +817,20 @@ textarea.form-input {
 
 .confirmation-card h2 {
     font-size: 1.75rem;
-    color: var(--color-navy);
+    color: #111827;
     margin-bottom: 1rem;
 }
 
 .confirmation-message {
     font-size: 1rem;
-    color: var(--color-navy);
+    color: #111827;
     line-height: 1.6;
     margin-bottom: 1rem;
 }
 
 .confirmation-subtitle {
     font-size: 0.875rem;
-    color: var(--color-slate-600);
+    color: #475569;
     line-height: 1.5;
     margin-bottom: 0.25rem;
 }
@@ -864,7 +869,7 @@ textarea.form-input {
 }
 
 .fw3-color-contrast-medium {
-    color: var(--color-slate-600);
+    color: #475569;
 }
 
 .fw3-margin-top-2xs {
