@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { api } from "~/utils/api";
 
 type Mark = {
@@ -14,17 +14,12 @@ type Mark = {
   status: "pending" | "approved" | "rejected";
 };
 
-const TOKEN_KEY = "ADMIN_API_TOKEN"; // shared with the bookings admin
+/** Kept in memory only: a token in localStorage could be read by any script on the site. */
 const token = ref("");
 const status = ref<Mark["status"]>("pending");
 const marks = ref<Mark[]>([]);
 const error = ref("");
 const loading = ref(false);
-
-onMounted(() => {
-  token.value = localStorage.getItem(TOKEN_KEY) || "";
-  if (token.value) load();
-});
 
 watch(status, () => token.value && load());
 
@@ -34,7 +29,6 @@ async function load() {
   loading.value = true;
   error.value = "";
   try {
-    localStorage.setItem(TOKEN_KEY, token.value);
     const res = await api<{ marks: Mark[] }>(`/api/admin/marks?status=${status.value}`, { headers: auth() });
     marks.value = res.marks;
   } catch (e: any) {
@@ -63,10 +57,12 @@ function pathFor(s: number[]) {
 
 <template>
   <div class="admin">
-    <div class="bar">
-      <input v-model="token" type="password" placeholder="ADMIN_API_TOKEN" aria-label="Admin token" />
-      <button type="button" @click="load" :disabled="!token || loading">{{ loading ? "loading…" : "load" }}</button>
-    </div>
+    <form class="bar" @submit.prevent="load">
+      <!-- lets the browser's password manager save and fill the token; it is never stored by the page -->
+      <input type="text" name="username" value="admin" autocomplete="username" hidden />
+      <input v-model="token" type="password" name="token" autocomplete="current-password" placeholder="ADMIN_API_TOKEN" aria-label="Admin token" />
+      <button type="submit" :disabled="!token || loading">{{ loading ? "loading…" : "load" }}</button>
+    </form>
     <div class="tabs" role="tablist">
       <button
         v-for="s in ['pending', 'approved', 'rejected'] as const"

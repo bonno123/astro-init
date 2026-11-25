@@ -19,7 +19,7 @@ Deploys your worker to Cloudflare.
 ## 3. Execute SQL on Local D1 Database
 
 ```
-wrangler d1 execute portfolio-messages-db --file=migrations/clean_reset_and_seed.sql
+wrangler d1 execute portfolio-messages-db --file=cloudflare/sql/clean_reset_and_seed.sql
 ```
 
 Runs a SQL file on your local D1 database.
@@ -33,7 +33,7 @@ Runs a SQL command on your local D1 database.
 ## 4. Execute SQL on Remote D1 Database
 
 ```
-wrangler d1 execute portfolio-messages-db --remote --file=migrations/clean_reset_and_seed.sql
+wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/sql/clean_reset_and_seed.sql
 ```
 
 Runs a SQL file on your remote (production) D1 database.

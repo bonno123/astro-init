@@ -4,7 +4,7 @@
  * booking form, so this is for reviewing and approving what is already in
  * the database.
  */
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { api } from "~/utils/api";
 
 type Booking = {
@@ -19,17 +19,12 @@ type Booking = {
   status: string;
 };
 
-const TOKEN_KEY = "ADMIN_API_TOKEN"; // shared with the marks admin
+/** Kept in memory only: a token in localStorage could be read by any script on the site. */
 const token = ref("");
 const bookings = ref<Booking[]>([]);
 const loading = ref(false);
 const error = ref("");
 const meetLinks = ref<Record<string, string>>({});
-
-onMounted(() => {
-  token.value = localStorage.getItem(TOKEN_KEY) || "";
-  if (token.value) load();
-});
 
 const auth = () => ({ Authorization: `Bearer ${token.value}` });
 
@@ -47,7 +42,6 @@ async function load() {
   loading.value = true;
   error.value = "";
   try {
-    localStorage.setItem(TOKEN_KEY, token.value);
     bookings.value = await api<Booking[]>("/api/admin/bookings", { headers: auth() });
   } catch (e: any) {
     error.value = e?.message || "Could not load bookings.";
@@ -59,7 +53,6 @@ async function load() {
 function forget() {
   token.value = "";
   bookings.value = [];
-  localStorage.removeItem(TOKEN_KEY);
 }
 
 async function approve(b: Booking) {
@@ -83,11 +76,13 @@ async function approve(b: Booking) {
 <template>
   <div class="admin">
     <h1>Bookings</h1>
-    <div class="bar">
-      <input v-model="token" type="password" placeholder="ADMIN_API_TOKEN" aria-label="Admin token" />
-      <button type="button" @click="load" :disabled="!token || loading">{{ loading ? "loading…" : "load" }}</button>
+    <form class="bar" @submit.prevent="load">
+      <!-- lets the browser's password manager save and fill the token; it is never stored by the page -->
+      <input type="text" name="username" value="admin" autocomplete="username" hidden />
+      <input v-model="token" type="password" name="token" autocomplete="current-password" placeholder="ADMIN_API_TOKEN" aria-label="Admin token" />
+      <button type="submit" :disabled="!token || loading">{{ loading ? "loading…" : "load" }}</button>
       <button type="button" @click="forget" :disabled="!token">forget</button>
-    </div>
+    </form>
     <p v-if="error" class="err" role="alert">{{ error }}</p>
     <p v-else-if="!bookings.length && !loading" class="meta">Nothing here.</p>
     <ul class="list">

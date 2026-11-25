@@ -13,7 +13,7 @@ A web portfolio built with Astro, Vue, and Cloudflare D1.
 
 - `src/` — Astro pages, layouts, components, and Vue chat UI
 - `cloudflare/worker.js` — Cloudflare Worker API and SSE logic
-- `migrations/` — SQL migration and seed scripts for D1
+- `migrations/` — D1 schema migrations (reset and seed scripts are in `cloudflare/sql/`, so `migrations apply` can never run them)
 - `public/` — Static assets (images, models, etc.)
 
 ## Development
@@ -26,7 +26,7 @@ A web portfolio built with Astro, Vue, and Cloudflare D1.
 
 1. Install dependencies: `yarn install`
 2. Run locally: `yarn dev` (Astro) and `wrangler dev` (Worker)
-3. Seed/reset DB: `wrangler d1 execute portfolio-messages-db --file=migrations/clean_reset_and_seed.sql`
+3. Seed/reset DB: `wrangler d1 execute portfolio-messages-db --file=cloudflare/sql/clean_reset_and_seed.sql`
 4. Open your browser at `http://localhost:4321`
 
 ---
