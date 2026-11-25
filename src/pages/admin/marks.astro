@@ -1,0 +1,11 @@
+---
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import AdminMarks from "~/components/quiet/AdminMarks.vue";
+---
+
+<QuietLayout title="Visitors' book · review" metaDescription="Review marks left in the visitors' book.">
+  <meta slot="head" name="robots" content="noindex" />
+  <main id="main">
+    <AdminMarks client:load />
+  </main>
+</QuietLayout>

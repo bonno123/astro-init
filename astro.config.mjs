@@ -6,13 +6,7 @@ export default defineConfig({
   site: 'https://www.avikb.dev',
 
   integrations: [
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: tag => (tag.startsWith('Tres') || tag === 'primitive') && tag !== 'TresCanvas',
-        },
-      },
-    }),
+    vue(),
   ],
 
   build: {
@@ -20,6 +14,19 @@ export default defineConfig({
   },
 
   trailingSlash: 'always',
+
+  // The old multi-page site's URLs, pointed at the matching part of the
+  // one-page home so old links and search results still land somewhere.
+  redirects: {
+    '/about': '/',
+    '/resume': '/#declared',
+    '/services': '/#declared',
+    '/projects': '/#building',
+    '/contact': '/#say-hi',
+    '/lab': '/',
+    '/playground': '/',
+    '/worker': '/',
+  },
 
   security: {
     checkOrigin: false,

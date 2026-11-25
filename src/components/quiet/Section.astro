@@ -1,0 +1,77 @@
+---
+/**
+ * A ledger row: a small mono label (and an optional note) beside the content.
+ * Stacks on phones, sits side by side from 900px.
+ */
+interface Props {
+  id?: string;
+  label: string;
+  note?: string;
+  last?: boolean;
+}
+const { id, label, note, last } = Astro.props;
+const headingId = id ? `${id}-label` : undefined;
+---
+
+<section id={id} class:list={["row", { last }]} aria-labelledby={headingId}>
+  <div class="side">
+    <h2 class="label" id={headingId}>{label}</h2>
+    {note && <span class="meta">{note}</span>}
+  </div>
+  <div class="body">
+    <slot />
+  </div>
+</section>
+
+<style>
+  .row {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 40px var(--pad);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 48px;
+    border-bottom: 1px solid var(--line);
+    scroll-margin-top: 24px;
+  }
+
+  .row.last {
+    border-bottom: 0;
+  }
+
+  .side {
+    flex: 1 1 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  .side h2 {
+    font-weight: 400;
+  }
+
+  .body {
+    flex: 999 1 560px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  @media (min-width: 900px) {
+    .row {
+      padding-block: 72px;
+    }
+
+    .side {
+      flex: 1 1 200px;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 6px;
+      position: sticky;
+      top: 32px;
+      align-self: flex-start;
+    }
+  }
+</style>
