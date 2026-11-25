@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { api } from "~/utils/api";
 
 const props = defineProps<{
@@ -84,6 +84,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.clearInterval(tick);
   window.clearTimeout(saveTimer);
+  mq?.removeEventListener("change", syncPhone);
+  document.removeEventListener("click", onDocClick);
 });
 watch([intent, name, email, message, wantsCall, slots], () => {
   if (state.value === "sent") return;
@@ -166,6 +168,101 @@ async function send() {
   }
 }
 
+/* ---------- phone: contact rows + bottom sheet ---------- */
+// Below 900px the form lives in a <dialog> that slides up. Server HTML is the
+// desktop layout, so without JavaScript the form is simply inline.
+const phone = ref(false);
+const mode = ref<"menu" | "write">("menu");
+const sheetEl = ref<HTMLDialogElement | null>(null);
+let mq: MediaQueryList | undefined;
+const syncPhone = () => {
+  phone.value = !!mq?.matches;
+};
+
+const ICONS: Record<string, string[]> = {
+  mail: ["M3.5 6.5h17v11h-17z", "M3.5 7l8.5 6 8.5-6"],
+  copy: ["M9 9h11v11H9z", "M15 9V4H4v11h5"],
+  pen: ["M4 20l1-4L16 5l3 3L8 19z", "M14 7l3 3"],
+};
+const rows = computed(() => [
+  { id: "email", label: "Email me", sub: "opens your mail app", href: `mailto:${props.contactEmail}`, icon: "mail", arrow: true },
+  { id: "copy", label: copied.value === "email" ? "Copied" : "Copy address", sub: props.contactEmail, icon: "copy", arrow: false },
+  { id: "write", label: "Write it here", sub: `replies within ${props.replyWithinDays} days`, icon: "pen", arrow: true },
+]);
+
+function rowAction(id: string) {
+  if (id === "copy") copy(props.contactEmail, "email");
+  else if (id === "write") openSheet("write");
+}
+
+async function openSheet(m: "menu" | "write") {
+  mode.value = m;
+  await nextTick();
+  const d = sheetEl.value;
+  if (d && !d.open) d.showModal();
+}
+
+function closeSheet() {
+  const d = sheetEl.value;
+  if (!d?.open) return;
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return d.close();
+  d.style.transform = "";
+  d.classList.add("leaving");
+  window.setTimeout(() => {
+    d.classList.remove("leaving");
+    d.close();
+  }, 220);
+}
+
+function onSheetClose() {
+  mode.value = "menu";
+}
+
+// a tap on the dimmed backdrop lands on the dialog itself
+function onSheetClick(e: MouseEvent) {
+  if (phone.value && e.target === sheetEl.value) closeSheet();
+}
+
+// any link marked data-say-hi (dock, hero chip) opens the sheet on a phone
+function onDocClick(e: MouseEvent) {
+  if (!phone.value || e.defaultPrevented) return;
+  if (!(e.target as Element | null)?.closest?.("[data-say-hi]")) return;
+  e.preventDefault();
+  openSheet("menu");
+}
+
+/* drag the sheet's header down to dismiss */
+let dragY0 = 0;
+let dragDy = 0;
+let dragging = false;
+function dragStart(e: PointerEvent) {
+  if ((e.target as Element).closest("button")) return;
+  dragging = true;
+  dragY0 = e.clientY;
+  dragDy = 0;
+  (e.currentTarget as Element).setPointerCapture(e.pointerId);
+  if (sheetEl.value) sheetEl.value.style.transition = "none";
+}
+function dragMove(e: PointerEvent) {
+  if (!dragging || !sheetEl.value) return;
+  dragDy = Math.max(0, e.clientY - dragY0);
+  sheetEl.value.style.transform = `translateY(${dragDy}px)`;
+}
+function dragEnd() {
+  if (!dragging || !sheetEl.value) return;
+  dragging = false;
+  sheetEl.value.style.transition = "";
+  if (dragDy > 90) closeSheet();
+  else sheetEl.value.style.transform = "";
+}
+
+onMounted(() => {
+  mq = matchMedia("(max-width: 899px)");
+  syncPhone();
+  mq.addEventListener("change", syncPhone);
+  document.addEventListener("click", onDocClick);
+});
+
 function writeAnother() {
   message.value = "";
   wantsCall.value = false;
@@ -180,7 +277,16 @@ function writeAnother() {
     <!-- Email first -->
     <div class="email">
       <p class="lead">Email is best.</p>
-      <div class="pill">
+      <ul v-if="phone" class="rows">
+        <li v-for="r in rows" :key="r.id">
+          <component :is="r.href ? 'a' : 'button'" :href="r.href" :type="r.href ? undefined : 'button'" class="row" @click="!r.href && rowAction(r.id)">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path v-for="d in ICONS[r.icon]" :key="d" :d="d" /></svg>
+            <span class="rtext"><span class="rlabel">{{ r.label }}</span><span class="rsub">{{ r.sub }}</span></span>
+            <span v-if="r.arrow" class="rarrow" aria-hidden="true">→</span>
+          </component>
+        </li>
+      </ul>
+      <div v-else class="pill">
         <a :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
         <button type="button" class="ghost" @click="copy(contactEmail, 'email')" :aria-label="`Copy ${contactEmail}`">
           {{ copied === "email" ? "copied" : "copy" }}
@@ -191,6 +297,40 @@ function writeAnother() {
       </p>
     </div>
 
+    <component
+      :is="phone ? 'dialog' : 'div'"
+      ref="sheetEl"
+      :class="{ sheet: phone, write: phone && mode === 'write' }"
+      :data-sheet="phone ? '' : undefined"
+      :aria-labelledby="phone ? 'sayhi-sheet-title' : undefined"
+      @close="onSheetClose"
+      @click="onSheetClick"
+    >
+    <div :class="{ 'sheet-in': phone }">
+    <div v-if="phone" class="sheet-head" @pointerdown="dragStart" @pointermove="dragMove" @pointerup="dragEnd" @pointercancel="dragEnd">
+      <span class="handle" aria-hidden="true"></span>
+      <div class="stitle-row">
+        <h2 id="sayhi-sheet-title" class="stitle">{{ mode === "write" ? "Write it here" : "Say hi" }}</h2>
+        <button type="button" class="x" aria-label="Close" @click="closeSheet">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
+      </div>
+      <p class="meta clock">
+        <span class="up">{{ place }}</span><span v-if="clock">&nbsp;{{ clock }} IST · {{ status }}</span>
+      </p>
+    </div>
+
+    <ul v-if="phone && mode === 'menu'" class="rows">
+      <li v-for="r in rows" :key="r.id">
+        <component :is="r.href ? 'a' : 'button'" :href="r.href" :type="r.href ? undefined : 'button'" class="row" @click="!r.href && rowAction(r.id)">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path v-for="d in ICONS[r.icon]" :key="d" :d="d" /></svg>
+          <span class="rtext"><span class="rlabel">{{ r.label }}</span><span class="rsub">{{ r.sub }}</span></span>
+          <span v-if="r.arrow" class="rarrow" aria-hidden="true">→</span>
+        </component>
+      </li>
+    </ul>
+
+    <template v-else>
     <!-- Receipt -->
     <div v-if="state === 'sent' && receipt" class="receipt" role="status" aria-live="polite">
       <div class="rhead">
@@ -214,7 +354,7 @@ function writeAnother() {
 
     <!-- Form -->
     <form v-else class="form" novalidate @submit.prevent="send">
-      <span class="label">Or write it here</span>
+      <span v-if="!phone" class="label">Or write it here</span>
 
       <fieldset class="chips">
         <legend class="sr-only">What is it about?</legend>
@@ -292,6 +432,9 @@ function writeAnother() {
         <p class="meta">No newsletter. A person reads this.</p>
       </div>
     </form>
+    </template>
+    </div>
+    </component>
   </div>
 </template>
 
@@ -677,5 +820,226 @@ dd {
 
 .link:hover {
   color: var(--accent);
+}
+
+/* ---------- phone: contact rows ---------- */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.rows li {
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 2px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.row:active {
+  background: rgb(236 233 224 / 0.04);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.ico {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rtext {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rlabel {
+  font-size: 17px;
+}
+
+.rsub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rarrow {
+  color: var(--muted);
+}
+
+/* ---------- phone: bottom sheet ---------- */
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  max-height: 88dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line-strong);
+  border-radius: 20px 20px 0 0;
+  background: var(--bg-raised);
+  color: var(--ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition: transform 0.22s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* writing gets nearly the whole screen, so the keyboard never covers the message */
+.sheet.write {
+  height: calc(100dvh - 20px);
+  max-height: none;
+}
+
+.sheet[open] {
+  animation: sheet-up 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sheet.leaving {
+  transform: translateY(100%);
+}
+
+.sheet::backdrop {
+  background: rgb(5 5 4 / 0.62);
+  animation: sheet-fade 0.32s;
+  transition: opacity 0.22s;
+}
+
+.sheet.leaving::backdrop {
+  opacity: 0;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.sheet-in {
+  box-sizing: border-box;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 0 var(--pad) calc(28px + env(safe-area-inset-bottom));
+}
+
+.sheet-in .rows {
+  margin-top: -24px;
+  border-top: 0;
+}
+
+.sheet-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 calc(-1 * var(--pad));
+  padding: 10px var(--pad) 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-raised);
+  touch-action: none;
+  cursor: grab;
+}
+
+.handle {
+  align-self: center;
+  width: 36px;
+  height: 4px;
+  margin-bottom: 8px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.stitle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 300;
+  line-height: 1.2;
+}
+
+.x {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  border: 0;
+  border-radius: 22px;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.x path {
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.x:hover {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet[open],
+  .sheet::backdrop {
+    animation: none;
+    transition: none;
+  }
+}
+</style>
+
+<style>
+/* keep the page still behind the open sheet */
+html:has(dialog[data-sheet][open]) {
+  overflow: hidden;
 }
 </style>

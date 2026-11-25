@@ -44,7 +44,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
       </p>
       <div class="intro-foot">
         {site.availability && (
-          <a class="avail" href="#say-hi"><span class="dot" aria-hidden="true"></span>{site.availability} <span aria-hidden="true">→</span></a>
+          <a class="avail" href="#say-hi" data-say-hi><span class="dot" aria-hidden="true"></span>{site.availability} <span aria-hidden="true">→</span></a>
         )}
         <p class="meta fig">fig. 0 — {site.place}, in contour lines</p>
       </div>
@@ -149,7 +149,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
 
     <Section id="say-hi" label="Say hi" note={`replies within ${site.replyWithinDays} days`}>
       <SayHi
-        client:visible={{ rootMargin: "400px" }}
+        client:idle
         contactEmail={site.email}
         place={site.place}
         timeZone={site.timeZone}
@@ -162,8 +162,29 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     </Section>
   </main>
 
+  <!-- Phone-only section links. Shown once the hero is gone, hidden at the footer. -->
+  <nav class="dock" aria-label="Jump to" data-dock hidden>
+    <a href="#work">work</a>
+    <a href="#building">building</a>
+    <a href="#say-hi" data-say-hi class="hi"><span class="dot" aria-hidden="true"></span>say hi</a>
+  </nav>
+
   <Footer />
 </QuietLayout>
+
+<script>
+  const dock = document.querySelector<HTMLElement>("[data-dock]");
+  const hero = document.querySelector(".field.hero");
+  const foot = document.querySelector("footer");
+  if (dock && hero && "IntersectionObserver" in window) {
+    dock.hidden = false;
+    let pastHero = false;
+    let atFoot = false;
+    const sync = () => dock.classList.toggle("shown", pastHero && !atFoot);
+    new IntersectionObserver(([e]) => ((pastHero = !e.isIntersecting), sync())).observe(hero);
+    if (foot) new IntersectionObserver(([e]) => ((atFoot = e.isIntersecting), sync())).observe(foot);
+  }
+</script>
 
 <style>
   :global(.field.hero) {
@@ -547,5 +568,79 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     display: grid;
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+  /* ---------- phone dock ---------- */
+  .dock {
+    position: fixed;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border: 1px solid var(--line-strong);
+    border-radius: 26px;
+    background: rgb(21 22 15 / 0.82);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, 14px);
+    transition: opacity 0.25s, transform 0.25s, visibility 0s 0.25s;
+  }
+
+  .dock[hidden] {
+    display: none;
+  }
+
+  .dock.shown {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+
+  .dock a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 22px;
+    color: var(--ink-soft);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .dock a:active {
+    background: rgb(236 233 224 / 0.06);
+  }
+
+  .dock .hi {
+    color: var(--accent);
+  }
+
+  .dock .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  @media (min-width: 900px) {
+    .dock {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dock,
+    .dock.shown {
+      transition: none;
+    }
   }
 </style>
