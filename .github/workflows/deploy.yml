@@ -1,20 +1,14 @@
 name: Deploy to GitHub Pages
 
 on:
-  # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch’s name
   push:
     branches: [trunk]
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
 
 env:
-  PUBLIC_SITE_NAME: ${{ vars.PUBLIC_SITE_NAME }}
   PUBLIC_CONTACT_EMAIL: ${{ vars.PUBLIC_CONTACT_EMAIL }}
-  PUBLIC_CONTACT_PHONE: ${{ vars.PUBLIC_CONTACT_PHONE }}
-  PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID: ${{ vars.PUBLIC_GOOGLE_APPS_SCRIPT_DEPLOYMENT_ID }}
   PUBLIC_API_ENDPOINT: ${{ vars.PUBLIC_API_ENDPOINT }}
-  PUBLIC_MAIN_SITE_URL: ${{ vars.PUBLIC_MAIN_SITE_URL }}
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
@@ -42,10 +36,6 @@ jobs:
           # Astro 7 needs Node 22.23.4 or newer. Keep in step with .nvmrc.
           node-version: 24
           package-manager: yarn@
-        # with:
-        #   path: . # The root location of your Astro project inside the repository. (optional)
-        #   node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 18. (optional)
-        #   package-manager: yarn # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
 
   deploy:
     needs: build

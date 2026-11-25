@@ -1,34 +1,41 @@
-# Portfolio Site
+# avikb.dev
 
-A web portfolio built with Astro, Vue, and Cloudflare D1.
+A one-page personal site built with Astro and Vue. A Cloudflare Worker with a D1 database runs the parts that take input.
 
-## Features
+## What's on it
 
-- Real-time chat with Server-Sent Events (SSE)
-- Astro for static site generation and UI
-- Vue components for chat
-- Cloudflare Worker backend for API and SSE
+- **Home** (`src/pages/index.astro`): the page itself. Its copy lives in `src/data/home.ts`.
+- **Visitors' book**: visitors leave a small drawing or a one-line note. Each one waits for review before it shows.
+- **Say hi**: a contact form. The worker stores the message and emails it on.
+- **Admin pages** (`/admin/marks/`, `/admin/bookings/`): review visitors' book entries and old booking requests. They need `ADMIN_API_TOKEN`.
 
-## Project Structure
+Old URLs (`/about`, `/contact`, `/projects`, …) redirect to sections of the home page. See `astro.config.mjs`.
 
-- `src/` — Astro pages, layouts, components, and Vue chat UI
-- `cloudflare/worker.js` — Cloudflare Worker API and SSE logic
-- `migrations/` — D1 schema migrations (reset and seed scripts are in `cloudflare/sql/`, so `migrations apply` can never run them)
-- `public/` — Static assets (images, models, etc.)
+## Layout
 
-## Development
+- `src/`: pages, the quiet layout, components and styles
+- `src/utils/api.ts`: the fetch helper. It calls `PUBLIC_API_ENDPOINT`.
+- `cloudflare/worker.js`: the Worker entry point. It routes `/api/marks*` to `cloudflare/marks.js`.
+- `cloudflare/migrations/`: the schema for the visitors' book (`marks`)
+- `migrations/`: the older D1 schema (messages, bookings, contact messages)
+- `cloudflare/sql/`: reset and seed scripts. They are kept out of `migrations/` so `migrations apply` can never run them.
+- `public/`: favicons and the OG image
 
-- Local dev: `wrangler dev` and `yarn dev`
-- Deploy: `wrangler deploy cloudflare/worker.js`
-- Database: See `WRANGLER_COMMANDS.md` for all D1 commands
+## Develop
 
-## Quick Start
+Needs Node 24 (see `.nvmrc`) and Yarn 4.
 
-1. Install dependencies: `yarn install`
-2. Run locally: `yarn dev` (Astro) and `wrangler dev` (Worker)
-3. Seed/reset DB: `wrangler d1 execute portfolio-messages-db --file=cloudflare/sql/clean_reset_and_seed.sql`
-4. Open your browser at `http://localhost:4321`
+```sh
+yarn install
+yarn dev               # Astro on http://localhost:4321
+npx wrangler dev       # Worker on http://localhost:8787
+```
 
----
+Copy `.env.example` to `.env` and set `PUBLIC_API_ENDPOINT` to the Worker you want to use.
 
-**Built for fun!**
+## Deploy
+
+- **Site**: GitHub Pages, from `.github/workflows/deploy.yml`, on every push to `trunk`. Set `PUBLIC_API_ENDPOINT` and `PUBLIC_CONTACT_EMAIL` as repository variables.
+- **Worker**: `yarn deploy:worker`
+
+See `WRANGLER_COMMANDS.md` for the database commands and the secrets the Worker needs.

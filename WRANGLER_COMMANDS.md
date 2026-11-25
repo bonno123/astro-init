@@ -1,81 +1,50 @@
-# Cloudflare Wrangler Commands Cheat Sheet
+# Wrangler commands
 
-## 1. Local Development
+The Worker is `d1-connect` (`wrangler.toml`). Its D1 database is `portfolio-messages-db`, bound as `DB`.
 
-```
-wrangler dev
-```
+## Run and deploy
 
-Runs your worker locally for development.
-
-## 2. Deploy Worker
-
-```
-wrangler deploy cloudflare/worker.js
+```sh
+npx wrangler dev          # local Worker on http://localhost:8787
+yarn deploy:worker        # deploy cloudflare/worker.js
+npx wrangler tail         # stream logs from the deployed Worker
 ```
 
-Deploys your worker to Cloudflare.
+## Secrets
 
-## 3. Execute SQL on Local D1 Database
+These are set with `npx wrangler secret put <NAME>`. Never put them in `wrangler.toml`.
 
-```
-wrangler d1 execute portfolio-messages-db --file=cloudflare/sql/clean_reset_and_seed.sql
-```
+| Name              | Used for                                                       |
+| ----------------- | -------------------------------------------------------------- |
+| `ADMIN_API_TOKEN` | the `/api/admin/*` routes and the admin pages                  |
+| `MAIL_API_KEY`    | sending mail through `MAIL_API_URL` (Resend)                   |
+| `MARKS_SALT`      | hashing visitor IPs in the visitors' book. Falls back to `ADMIN_API_TOKEN`. |
 
-Runs a SQL file on your local D1 database.
+`ADMIN_EMAIL`, `MAIL_API_URL` and `DEFAULT_TIMEZONE` are plain vars in `wrangler.toml`.
 
-```
-wrangler d1 execute portfolio-messages-db --command "SELECT * FROM messages;"
-```
+## Schema
 
-Runs a SQL command on your local D1 database.
+Each schema file is applied by hand, one at a time:
 
-## 4. Execute SQL on Remote D1 Database
-
-```
-wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/sql/clean_reset_and_seed.sql
+```sh
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0001_marks.sql
 ```
 
-Runs a SQL file on your remote (production) D1 database.
+The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.
 
-```
-wrangler d1 execute portfolio-messages-db --remote --command "SELECT * FROM messages;"
-```
+Leave out `--remote` to run against the local database that `wrangler dev` uses.
 
-Runs a SQL command on your remote (production) D1 database.
+## Queries
 
-## 5. List All D1 Databases
-
-```
-wrangler d1 list
+```sh
+npx wrangler d1 execute portfolio-messages-db --remote --command "SELECT id, status, created_at FROM marks ORDER BY id DESC LIMIT 20;"
+npx wrangler d1 info portfolio-messages-db
 ```
 
-Lists all D1 databases in your account.
+## Reset (destructive)
 
-## 6. Bindings and Info
+`cloudflare/sql/clean_reset_and_seed.sql` deletes the chat tables (messages, threads, users) and reseeds them:
 
+```sh
+npx wrangler d1 execute portfolio-messages-db --file=cloudflare/sql/clean_reset_and_seed.sql
 ```
-wrangler d1 info portfolio-messages-db
-```
-
-Shows info about your D1 database.
-
-## 7. Migrate Database (if using migrations)
-
-```
-wrangler d1 migrations apply portfolio-messages-db
-```
-
-Applies all pending migrations to your D1 database.
-
-## 8. View Logs
-
-```
-wrangler tail
-```
-
-Streams logs from your deployed worker.
-
----
-
-**Tip:** Use `--help` with any command for more options, e.g. `wrangler d1 execute --help`.
