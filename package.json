@@ -12,29 +12,29 @@
     "deploy:worker": "wrangler deploy ./cloudflare/worker.js"
   },
   "dependencies": {
-    "@astrojs/check": "0.9.4",
-    "@astrojs/vue": "5.0.9",
-    "@tailwindcss/vite": "^4.1.6",
-    "@tresjs/cientos": "^3.8.0",
-    "@tresjs/core": "^4.3.3",
-    "astro": "5.6.1",
-    "astro-seo": "^0.8.0",
+    "@astrojs/check": "^0.9.12",
+    "@astrojs/vue": "5.1.4",
+    "@tailwindcss/vite": "^4.3.5",
+    "@tresjs/cientos": "^5.13.0",
+    "@tresjs/core": "^5.12.0",
+    "astro": "5.18.2",
+    "astro-seo": "^1.2.0",
     "glslCanvas": "^0.2.6",
-    "jspdf": "^4.0.0",
-    "tailwindcss": "^4.1.6",
-    "three": "^0.161.0",
-    "tweakpane": "^4.0.3",
-    "vue": "^3.4.0"
+    "jspdf": "^4.2.1",
+    "tailwindcss": "^4.3.5",
+    "three": "^0.187.0",
+    "tweakpane": "^4.0.5",
+    "vue": "^3.5.46"
   },
   "packageManager": "yarn@4.3.0",
   "devDependencies": {
-    "@tweakpane/core": "^2.0.3",
+    "@tweakpane/core": "^2.0.5",
     "@tweakpane/plugin-essentials": "^0.2.1",
-    "@types/sharedworker": "^0.0.115",
-    "@types/three": "^0.161.2",
-    "sass": "^1.71.0",
-    "typescript": "5.7.3",
-    "vite": "^6.4.1",
-    "wrangler": "^4.14.4"
+    "@types/sharedworker": "^0.0.239",
+    "@types/three": "^0.187.0",
+    "sass": "^1.108.2",
+    "typescript": "5.9.3",
+    "vite": "6.4.6",
+    "wrangler": "4.168.0"
   }
 }
