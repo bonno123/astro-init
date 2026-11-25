@@ -40,7 +40,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     </header>
     <div class="intro">
       <p class="kicker">{site.role} · freelance</p>
-      <h1>{site.name}</h1>
+      <h1><span class="name">{site.name}</span></h1>
       <p class="tagline">
         {taglineLines.map((line, i) => <span class:list={["line", { first: i === 0 }]}>{line}</span>)}
       </p>
@@ -297,6 +297,20 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     line-height: 1;
     font-weight: 400;
     letter-spacing: -0.03em;
+  }
+
+  /* The name stands in the field: solid at the cap line, thinning toward the
+     baseline so the contours read through the feet of the letters. The span
+     with box-decoration-break gives each wrapped line its own fade. */
+  @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+    .name {
+      background: linear-gradient(to bottom, var(--ink) 45%, rgb(236 233 224 / 0.28) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
   }
 
   .kicker {
