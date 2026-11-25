@@ -10,7 +10,7 @@
  *  - paused when off screen or when the tab is hidden
  *  - prefers-reduced-motion: a slow drift only (quarter speed, 15 fps, no
  *    pulses, ripple, grain flicker, pointer or scroll parallax)
- *  - quiet mode: one still frame
+ *  - quiet mode: the field winds down to one still frame over about a second
  *  - resolution drops on slow GPUs; a lost GL context is rebuilt
  *  - the CSS gradient underneath is the fallback when WebGL is missing
  *
@@ -362,6 +362,10 @@ void main(){
     let lastDraw = 0;
     let draws = 0;
     let calmNow = false;
+    // How fast time runs: 1 normally, 0.25 for reduced motion, 0 when quiet.
+    // It eases between them, so switching quiet mode slows the field to a stop
+    // instead of freezing it mid-frame.
+    let speed = quietMode() ? 0 : reduced.matches ? 0.25 : 1;
     const mark = [0, 0];
     // pointer: eased position and strength. Leaving fades the strength out
     // where the pointer was, instead of dragging the bump off screen.
@@ -441,7 +445,7 @@ void main(){
       }
       const isStill = still();
       calmNow = calm();
-      if (isStill && !dirty) return;
+      if (isStill && speed === 0 && !dirty) return;
       const since = now - lastDraw;
       // a slow drift doesn't need 30 frames a second
       if (lastDraw && since < 1000 / (calmNow ? 15 : 30) - 2) return;
@@ -459,18 +463,21 @@ void main(){
         } else slow = Math.max(0, slow - 1);
       }
       lastDraw = now;
+      const goal = isStill ? 0 : calmNow ? 0.25 : 1;
+      speed = ease(speed, goal, goal < speed ? 3 : 4, dt);
+      if (Math.abs(speed - goal) < 0.01) speed = goal;
+      // A fixed, pleasant frame rather than t = 0.
+      if (isStill && t === 0) t = 12;
+      t += dt * speed;
       if (isStill) {
-        // A fixed, pleasant frame rather than t = 0.
-        if (t === 0) t = 12;
-        pull = 0;
-        scroll = 0;
+        // settle with the field rather than snapping
+        pull = speed ? ease(pull, 0, 3, dt) : 0;
+        scroll = speed ? ease(scroll, 0, 3, dt) : 0;
       } else if (calmNow) {
-        // quarter speed, and nothing follows the pointer or the scroll
-        t += dt * 0.25;
+        // nothing follows the pointer or the scroll
         pull = 0;
         scroll = 0;
       } else {
-        t += dt;
         pull = ease(pull, pullTarget, pullTarget > pull ? 4 : 1.6, dt);
         mouse[0] = ease(mouse[0], target[0], 5, dt);
         mouse[1] = ease(mouse[1], target[1], 5, dt);

@@ -34,7 +34,9 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
         <a href="#building">building</a>
         <a href="#say-hi">say hi</a>
       </nav>
-      <span class="bn dhire" lang="bn" title="dheere — slowly">ধীরে</span>
+      <button type="button" class="dhire" data-quiet-toggle aria-pressed="false" aria-label="Quiet mode" title="dheere — slowly · tap to still the page">
+        <span class="bn" lang="bn">ধীরে</span>
+      </button>
     </header>
     <div class="intro">
       <p class="kicker">{site.role} · freelance</p>
@@ -240,9 +242,45 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     }
   }
 
+  /* ধীরে, "slowly": the quiet-mode switch. Amber while the page is still. */
   .dhire {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
     font-size: 15px;
+    line-height: 1;
     color: #b9b6ac;
+    cursor: pointer;
+    text-decoration: underline dotted transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    transition:
+      color 0.6s ease,
+      text-decoration-color 0.2s ease;
+  }
+
+  /* a 44px touch target without moving the header */
+  .dhire::after {
+    content: "";
+    position: absolute;
+    inset: -14px -12px;
+  }
+
+  .dhire:hover,
+  .dhire:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  .dhire:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 6px;
+    border-radius: 3px;
+  }
+
+  .dhire[aria-pressed="true"] {
+    color: var(--accent);
   }
 
   .intro {

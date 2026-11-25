@@ -10,10 +10,7 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
     West Bengal ·
     <span data-touched={built.toISOString()}>updated {builtLabel}</span>
   </span>
-  <span class="right">
-    <button type="button" class="quiet" data-quiet-toggle aria-pressed="false">quiet mode</button>
-    <span class="bn" lang="bn">ধীরে</span>
-  </span>
+  <button type="button" class="quiet" data-quiet-toggle aria-pressed="false">quiet mode</button>
 </footer>
 
 <style>
@@ -27,12 +24,6 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
     align-items: center;
     gap: 16px;
     border-top: 1px solid var(--line);
-  }
-
-  .right {
-    display: inline-flex;
-    align-items: center;
-    gap: 16px;
   }
 
   .quiet {
@@ -52,11 +43,6 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
     color: var(--accent);
     border-color: var(--accent);
   }
-
-  .bn {
-    font-size: 14px;
-    color: var(--muted);
-  }
 </style>
 
 <script>
@@ -68,10 +54,15 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
   });
 
   // Quiet mode: stops the shader and all motion, remembered on this device.
+  // Every [data-quiet-toggle] (the header's ধীরে, this footer button) is one switch.
   const root = document.documentElement;
-  document.querySelectorAll<HTMLButtonElement>("[data-quiet-toggle]").forEach((btn) => {
-    const sync = () => btn.setAttribute("aria-pressed", String(root.hasAttribute("data-quiet")));
-    sync();
+  const toggles = document.querySelectorAll<HTMLButtonElement>("[data-quiet-toggle]");
+  const sync = () => {
+    const on = String(root.hasAttribute("data-quiet"));
+    toggles.forEach((btn) => btn.setAttribute("aria-pressed", on));
+  };
+  sync();
+  toggles.forEach((btn) =>
     btn.addEventListener("click", () => {
       const on = !root.hasAttribute("data-quiet");
       if (on) root.setAttribute("data-quiet", "");
@@ -81,6 +72,6 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
       } catch {}
       sync();
       document.dispatchEvent(new Event("quietchange"));
-    });
-  });
+    }),
+  );
 </script>
