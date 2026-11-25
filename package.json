@@ -14,25 +14,12 @@
   "dependencies": {
     "@astrojs/check": "^0.9.12",
     "@astrojs/vue": "5.1.4",
-    "@tailwindcss/vite": "^4.3.5",
-    "@tresjs/cientos": "^5.13.0",
-    "@tresjs/core": "^5.12.0",
     "astro": "5.18.2",
     "astro-seo": "^1.2.0",
-    "glslCanvas": "^0.2.6",
-    "jspdf": "^4.2.1",
-    "tailwindcss": "^4.3.5",
-    "three": "^0.187.0",
-    "tweakpane": "^4.0.5",
     "vue": "^3.5.46"
   },
   "packageManager": "yarn@4.3.0",
   "devDependencies": {
-    "@tweakpane/core": "^2.0.5",
-    "@tweakpane/plugin-essentials": "^0.2.1",
-    "@types/sharedworker": "^0.0.239",
-    "@types/three": "^0.187.0",
-    "sass": "^1.108.2",
     "typescript": "5.9.3",
     "vite": "6.4.6",
     "wrangler": "4.168.0"

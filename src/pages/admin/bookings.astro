@@ -1,10 +1,11 @@
 ---
-import MainLayout from "~/layouts/MainLayout.astro";
-import AdminBookings from "~/components/vue-components/AdminBookings.vue";
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import AdminBookings from "~/components/quiet/AdminBookings.vue";
 ---
 
-<MainLayout title="Admin Bookings">
-  <section class="page-container margin-block-500">
+<QuietLayout title="Bookings · review" metaDescription="Review call bookings.">
+  <meta slot="head" name="robots" content="noindex" />
+  <main id="main">
     <AdminBookings client:load />
-  </section>
-</MainLayout>
+  </main>
+</QuietLayout>

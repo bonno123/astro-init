@@ -12,6 +12,8 @@ interface Props {
 const { title, metaDescription, bare } = Astro.props;
 const fullTitle = bare ? title : `${title} · Avik Banik`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// 1200x630, rendered from the hero shader. Regenerate if the hero changes.
+const ogImage = new URL("/og.jpg", Astro.site).href;
 ---
 
 <!doctype html>
@@ -26,16 +28,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       description={metaDescription}
       canonical={canonical}
       openGraph={{
-        // TODO: replace with a 1200x630 card in the new style (this is the old site's image).
-        basic: {
-          title: fullTitle,
-          type: "website",
-          image: "https://raw.githubusercontent.com/bonno123/astro-init/b31272c3ad24b9e7c46ef4ce97e424ddb8ccdef4/code_20231222_181000_via_10015_io.png",
-          url: canonical.href,
-        },
+        basic: { title: fullTitle, type: "website", image: ogImage, url: canonical.href },
+        image: { width: 1200, height: 630, alt: "Avik Banik, over contour lines centred on Bardhaman" },
         optional: { description: metaDescription, locale: "en" },
       }}
-      twitter={{ card: "summary", creator: "@AvikBanik1", title: fullTitle, description: metaDescription }}
+      twitter={{
+        card: "summary_large_image",
+        creator: "@AvikBanik1",
+        title: fullTitle,
+        description: metaDescription,
+        image: ogImage,
+      }}
       extend={{
         link: [{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
         meta: [{ name: "google-site-verification", content: "EdyNLS3IiOR2mQtxpM3M9itZfLqehGXkHUdav6MbDY4" }],

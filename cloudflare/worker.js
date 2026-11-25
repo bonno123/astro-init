@@ -1,5 +1,20 @@
 import { handleMarks } from "./marks.js";
 
+/** Escape text that visitors typed before it goes into email HTML. */
+function esc(v) {
+    return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+/** Only http(s) links go into emails. */
+function safeLink(v) {
+    try {
+        const u = new URL(String(v || ""));
+        return u.protocol === "https:" || u.protocol === "http:" ? u.href : "";
+    } catch {
+        return "";
+    }
+}
+
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -344,12 +359,12 @@ export default {
                                     subject: `New Message: ${subject}`,
                                     html: `
                                         <h2>New Message from Contact Form</h2>
-                                        <p><strong>From:</strong> ${name}</p>
-                                        <p><strong>Email:</strong> ${email}</p>
-                                        <p><strong>Subject:</strong> ${subject}</p>
+                                        <p><strong>From:</strong> ${esc(name)}</p>
+                                        <p><strong>Email:</strong> ${esc(email)}</p>
+                                        <p><strong>Subject:</strong> ${esc(subject)}</p>
                                         <hr>
                                         <h3>Message:</h3>
-                                        <p>${message.replace(/\n/g, '<br>')}</p>
+                                        <p>${esc(message).replace(/\n/g, '<br>')}</p>
                                         <hr>
                                         <p><small>Submitted at: ${new Date().toISOString()}</small></p>
                                     `
@@ -374,9 +389,9 @@ export default {
                                     to: email,
                                     subject: `We received your message - ${subject}`,
                                     html: `
-                                        <p>Hi ${name},</p>
+                                        <p>Hi ${esc(name)},</p>
                                         <p>Thank you for reaching out! We've received your message and will get back to you as soon as possible.</p>
-                                        <p><strong>Your message subject:</strong> ${subject}</p>
+                                        <p><strong>Your message subject:</strong> ${esc(subject)}</p>
                                         <p>Best regards,<br>Avik</p>
                                     `
                                 })
@@ -477,15 +492,15 @@ export default {
                                     subject: `New call booking request from ${name}`,
                                     html: `
                                         <h2>New Call Booking Request</h2>
-                                        <p><strong>Name:</strong> ${name}</p>
-                                        <p><strong>Email:</strong> ${email}</p>
-                                        <p><strong>Topic:</strong> ${topic}</p>
-                                        <p><strong>Requested Time:</strong> ${startDateLocal} (${userTimeZone})</p>
+                                        <p><strong>Name:</strong> ${esc(name)}</p>
+                                        <p><strong>Email:</strong> ${esc(email)}</p>
+                                        <p><strong>Topic:</strong> ${esc(topic)}</p>
+                                        <p><strong>Requested Time:</strong> ${startDateLocal} (${esc(userTimeZone)})</p>
                                         <p><strong>In IST:</strong> ${startDateIST}</p>
                                         <p><strong>In UTC:</strong> ${startDateUTC}</p>
                                         <p><strong>Duration:</strong> ${duration_minutes} minutes</p>
-                                        <p><strong>Details:</strong> ${details || 'None'}</p>
-                                        <p><strong>Requester Timezone:</strong> ${userTimeZone}</p>
+                                        <p><strong>Details:</strong> ${esc(details || 'None')}</p>
+                                        <p><strong>Requester Timezone:</strong> ${esc(userTimeZone)}</p>
                                         <p><a href="https://avikb.dev/admin/bookings">View in Admin Dashboard</a></p>
                                     `
                                 })
@@ -588,7 +603,8 @@ export default {
                 const authHeader = request.headers.get('Authorization');
                 const token = authHeader?.replace('Bearer ', '');
                 
-                if (token !== env.ADMIN_API_TOKEN) {
+                // No secret configured means nobody gets in, not everybody.
+                if (!env.ADMIN_API_TOKEN || token !== env.ADMIN_API_TOKEN) {
                     return new Response(JSON.stringify({ error: "Unauthorized" }), { 
                         status: 401,
                         headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -619,7 +635,8 @@ export default {
                 const authHeader = request.headers.get('Authorization');
                 const token = authHeader?.replace('Bearer ', '');
                 
-                if (token !== env.ADMIN_API_TOKEN) {
+                // No secret configured means nobody gets in, not everybody.
+                if (!env.ADMIN_API_TOKEN || token !== env.ADMIN_API_TOKEN) {
                     return new Response(JSON.stringify({ error: "Unauthorized" }), { 
                         status: 401,
                         headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -668,13 +685,13 @@ export default {
                                     subject: `Call Confirmed - ${booking.topic}`,
                                     html: `
                                         <h2>Your Call is Confirmed!</h2>
-                                        <p>Hi ${booking.name},</p>
-                                        <p>Your call request for <strong>${booking.topic}</strong> has been approved.</p>
-                                        <p><strong>When:</strong> ${startDateLocal} (${bookingTz})</p>
+                                        <p>Hi ${esc(booking.name)},</p>
+                                        <p>Your call request for <strong>${esc(booking.topic)}</strong> has been approved.</p>
+                                        <p><strong>When:</strong> ${startDateLocal} (${esc(bookingTz)})</p>
                                         <p><strong>In IST:</strong> ${startDateIST}</p>
                                         <p><strong>In UTC:</strong> ${startDateUTC}</p>
                                         <p><strong>Duration:</strong> ${booking.duration_minutes} minutes</p>
-                                        ${meetLink ? `<p><strong>Join:</strong> <a href="${meetLink}">${meetLink}</a></p>` : ''}
+                                        ${safeLink(meetLink) ? `<p><strong>Join:</strong> <a href="${esc(safeLink(meetLink))}">${esc(safeLink(meetLink))}</a></p>` : ''}
                                         <p>Looking forward to speaking with you!</p>
                                     `
                                 })
