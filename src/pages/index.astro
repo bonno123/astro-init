@@ -10,25 +10,21 @@ import {
   currently,
   visibleMoney as vm,
   bardhamanConnect as bc,
-  essays,
-  alsoMade,
-  people,
-  life,
+  sketches,
+  toolbox,
   asks,
   declared,
-  photo,
 } from "~/data/home";
 
-const [latest, ...restEssays] = essays;
 const [before, after] = currently.text.split("{bc}");
-const lifeRows = life.filter((l) => l.v);
+const taglineLines = site.tagline.split(/(?<=\.)\s+/);
 const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURIComponent(subject)}`;
 ---
 
 <QuietLayout
   bare
-  title="Avik Banik"
-  metaDescription="Avik Banik, frontend engineer in West Bengal. Five years on VisibleMoney, now building Bardhaman Connect."
+  title={`${site.name} · ${site.role.toLowerCase()}`}
+  metaDescription={`${site.name}, ${site.role.toLowerCase()} in Bardhaman, West Bengal. Frontend by habit, the rest by need, now with AI. On VisibleMoney since 2021.`}
 >
   <ContourField class="hero" place={site.place} coords={site.coords} timeZone={site.timeZone}>
     <header class="top">
@@ -36,15 +32,22 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
       <nav aria-label="Sections" class="nav">
         <a href="#work">work</a>
         <a href="#building">building</a>
-        <a href="#writing">writing</a>
         <a href="#say-hi">say hi</a>
       </nav>
       <span class="bn dhire" lang="bn" title="dheere — slowly">ধীরে</span>
     </header>
     <div class="intro">
+      <p class="kicker">{site.role} · freelance</p>
       <h1>{site.name}</h1>
-      <p class="tagline">{site.tagline}</p>
-      <p class="meta fig">fig. 0 — {site.place}, in contour lines</p>
+      <p class="tagline">
+        {taglineLines.map((line, i) => <span class:list={["line", { first: i === 0 }]}>{line}</span>)}
+      </p>
+      <div class="intro-foot">
+        {site.availability && (
+          <a class="avail" href="#say-hi"><span class="dot" aria-hidden="true"></span>{site.availability} <span aria-hidden="true">→</span></a>
+        )}
+        <p class="meta fig">fig. 0 — {site.place}, in contour lines</p>
+      </div>
     </div>
   </ContourField>
 
@@ -100,77 +103,29 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
       <span class="meta">{bc.stack}</span>
     </Section>
 
-    <Section id="writing" label="Writing" note="essays, slowly">
-      <div class="writing">
-        <a class="latest" href={latest.href}>
-          <span class="meta accent">{latest.n} · latest</span>
-          <span class="latest-title">{latest.title}</span>
-          <span class="latest-dek">{latest.dek}</span>
-          <span class="meta">{latest.meta} · read →</span>
-        </a>
-        <div class="essay-list">
-          {restEssays.map((e) =>
-            e.href ? (
-              <a class="essay" href={e.href}>
-                <span class="meta">{e.n}</span>
-                <span class="essay-title">{e.title}</span>
-                <span class="meta">{e.meta} →</span>
-              </a>
-            ) : (
-              <div class="essay soon">
-                <span class="meta">{e.n}</span>
-                <span class="essay-title">{e.title}</span>
-                <span class="meta">{e.meta}</span>
-              </div>
-            ),
-          )}
-        </div>
-      </div>
+    <Section id="toolbox" label="Toolbox" note="grouped, not ranked">
+      <dl class="kv">
+        {toolbox.map((t) => (
+          <div>
+            <dt class="meta">{t.k}</dt>
+            <dd>{t.v}</dd>
+          </div>
+        ))}
+      </dl>
     </Section>
 
-    <Section label="Also made" note="side things, listed honestly">
+    <Section label="Sketches" note="as they are">
+      <p class="body-text small">Small things I tried when I had the time. Most are as finished as they'll get.</p>
       <ul class="index">
-        {alsoMade.map((m) => (
+        {sketches.map((m) => (
           <li class="index-row">
             <span class="meta">{m.year}</span>
             <span class="index-name">{m.name}</span>
             <span class="index-line">{m.line}</span>
-            <span class:list={["meta", "status", { live: m.status === "alive", ongoing: m.status === "ongoing" }]}>
-              {m.status}
-            </span>
           </li>
         ))}
       </ul>
     </Section>
-
-    <Section id="with" label="With" note="people I've made things with">
-      <ul class="kv">
-        {people.map((p) => (
-          <li>
-            <span class="meta">{p.role}</span>
-            <span>
-              {p.name}
-              {p.quote && <q class="pq">{p.quote}</q>}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Section>
-
-    {
-      lifeRows.length > 0 && (
-        <Section id="life" label="Off the clock" note="changes often">
-          <ul class="kv">
-            {lifeRows.map((l) => (
-              <li>
-                <span class="meta">{l.k}</span>
-                <span>{l.v}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )
-    }
 
     <Section id="ask" label="Ask me about">
       <div class="asks">
@@ -180,8 +135,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     </Section>
 
     <Section id="declared" label="Declared" note="full transparency">
-      <div class:list={["declared", { "has-photo": photo }]}>
-        {photo && <img class="photo" src={photo.src} alt={photo.alt} width="96" height="128" loading="lazy" />}
+      <div class="declared">
         <dl class="kv">
           {declared.map((d) => (
             <div>
@@ -191,7 +145,6 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
           ))}
         </dl>
       </div>
-      <p class="stay">I tend to stay.</p>
     </Section>
 
     <Section id="say-hi" label="Say hi" note={`replies within ${site.replyWithinDays} days`}>
@@ -287,16 +240,87 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     letter-spacing: -0.03em;
   }
 
+  .kicker {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
   .tagline {
-    max-width: 22ch;
-    font-size: clamp(22px, 2.6vw, 30px);
+    display: flex;
+    flex-direction: column;
+    max-width: 36ch;
+    font-size: clamp(19px, 2.4vw, 28px);
     line-height: 1.35;
     font-weight: 300;
     color: var(--ink-soft);
   }
 
+  .tagline .line {
+    text-wrap: balance;
+  }
+
+  .tagline .first {
+    color: var(--ink);
+  }
+
+  .intro-foot {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+  }
+
+  .avail {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    background: rgb(15 16 13 / 0.6);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .avail:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgb(224 168 69 / 0.5);
+    animation: ping 2.4s ease-out infinite;
+  }
+
+  @keyframes ping {
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px rgb(224 168 69 / 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
+  }
+
+  :global(html[data-quiet]) .dot {
+    animation: none;
+  }
+
   .fig {
-    margin-top: 8px;
     letter-spacing: 0.04em;
   }
 
@@ -423,72 +447,6 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     font-size: 14px;
   }
 
-  .writing {
-    display: grid;
-    gap: 32px;
-  }
-
-  @media (min-width: 900px) {
-    .writing {
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: 48px;
-    }
-  }
-
-  .latest {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    text-decoration: none;
-  }
-
-  .latest-title {
-    font-family: var(--font-serif);
-    font-size: clamp(30px, 3.2vw, 40px);
-    line-height: 1.1;
-  }
-
-  .latest-dek {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: 18px;
-    line-height: 1.5;
-    font-weight: 300;
-    color: var(--ink-body);
-  }
-
-  .latest:hover .latest-title {
-    color: var(--accent);
-  }
-
-  .essay-list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .essay {
-    display: grid;
-    grid-template-columns: 32px minmax(0, 1fr) auto;
-    column-gap: 14px;
-    padding: 18px 0;
-    border-top: 1px solid var(--line);
-    align-items: baseline;
-    text-decoration: none;
-  }
-
-  .essay:last-child {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .essay-title {
-    font-family: var(--font-serif);
-    font-size: 19px;
-  }
-
-  .essay.soon .essay-title {
-    color: var(--muted);
-  }
-
   .index,
   .kv {
     list-style: none;
@@ -498,7 +456,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
 
   .index-row {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr);
     column-gap: 12px;
     row-gap: 2px;
     padding: 14px 0;
@@ -515,31 +473,20 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
   }
 
   .index-line {
-    grid-column: 2 / 4;
+    grid-column: 2;
     grid-row: 2;
     font-size: 14px;
     color: var(--muted);
   }
 
-  .status.live {
-    color: var(--accent);
-  }
-
-  .status.ongoing {
-    color: var(--ink);
-  }
-
   @media (min-width: 900px) {
     .index-row {
-      grid-template-columns: 56px minmax(0, 1.1fr) minmax(0, 2fr) 88px;
+      grid-template-columns: 56px minmax(0, 1fr) minmax(0, 2fr);
       column-gap: 20px;
     }
     .index-line {
       grid-column: auto;
       grid-row: auto;
-    }
-    .status {
-      text-align: right;
     }
   }
 
@@ -574,14 +521,6 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     }
   }
 
-  .pq {
-    display: block;
-    margin-top: 6px;
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--ink-body);
-  }
-
   .asks {
     display: flex;
     flex-wrap: wrap;
@@ -608,29 +547,5 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
     display: grid;
     grid-template-columns: 1fr;
     gap: 24px;
-  }
-
-  @media (min-width: 640px) {
-    .declared.has-photo {
-      grid-template-columns: 96px minmax(0, 1fr);
-      gap: 32px;
-      align-items: start;
-    }
-  }
-
-  .photo {
-    width: 96px;
-    height: 128px;
-    border-radius: 4px;
-    border: 1px solid var(--line-strong);
-    object-fit: cover;
-    filter: grayscale(0.3);
-  }
-
-  .stay {
-    font-family: var(--font-serif);
-    font-style: italic;
-    font-size: 22px;
-    color: var(--ink-soft);
   }
 </style>
