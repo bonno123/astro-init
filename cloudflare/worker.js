@@ -1,3 +1,5 @@
+import { handleMarks } from "./marks.js";
+
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -14,7 +16,9 @@ export default {
         const origin = request.headers.get("Origin");
         
         const corsHeaders = {
-            "Access-Control-Allow-Origin": allowedOrigins.includes(origin) ? origin : "https://avikb.dev",
+            // Any localhost port is fine for local development.
+            "Access-Control-Allow-Origin":
+                allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin || "") ? origin : "https://avikb.dev",
             "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization"
         };
@@ -26,6 +30,12 @@ export default {
         
         // API endpoints
         try {
+            // Visitors' book
+            if (url.pathname === "/api/marks" || url.pathname.startsWith("/api/admin/marks")) {
+                const res = await handleMarks(request, env, url, corsHeaders);
+                if (res) return res;
+            }
+
             // Test endpoint to check API connectivity
             if (url.pathname === "/api/test") {
                 return new Response(JSON.stringify({ 

@@ -1,0 +1,507 @@
+---
+/**
+ * Hero background: slow topographic contour lines, every fifth line in the
+ * accent. Bardhaman sits on a low hill, so the lines ring it, and a signal
+ * pulses out from it. An HTML tag beside the hill names the place.
+ *
+ * Raw WebGL (2, or 1 as a fallback), one full-screen triangle, one fragment
+ * shader. No three.js. Add ?gl to the URL for a diagnostic overlay.
+ *  - pixel ratio capped at 1.5, 30 fps cap
+ *  - paused when off screen or when the tab is hidden
+ *  - prefers-reduced-motion: a slow drift only (quarter speed, 15 fps, no
+ *    pulses, ripple, grain flicker, pointer or scroll parallax)
+ *  - quiet mode: one still frame
+ *  - resolution drops on slow GPUs; a lost GL context is rebuilt
+ *  - the CSS gradient underneath is the fallback when WebGL is missing
+ *
+ * Motion: the field drifts and slowly re-forms on its own. A mouse (or a
+ * finger) raises the ground under it and eases back when it leaves.
+ * Scrolling moves the terrain a little slower than the page.
+ */
+interface Props {
+  class?: string;
+  place: string;
+  coords: string;
+  timeZone: string;
+}
+const { class: className, place, coords, timeZone } = Astro.props;
+---
+
+<div class:list={["field", className]} data-contour data-tz={timeZone}>
+  <canvas aria-hidden="true"></canvas>
+  <div class="mark" aria-hidden="true">
+    <span class="tag">
+      <span class="name">{place}</span>
+      <span class="coords">{coords}</span>
+      <span class="clock" data-clock></span>
+    </span>
+  </div>
+  <slot />
+</div>
+
+<style>
+  .field {
+    /* Where Bardhaman sits, as a share of the hero. The shader reads these. */
+    --mx: 80%;
+    --my: 34%;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    /* The no-WebGL fallback, and what shows before the shader fades in. */
+    background:
+      linear-gradient(to bottom, transparent 65%, var(--bg) 100%),
+      radial-gradient(circle at var(--mx) var(--my), rgb(224 168 69 / 0.9) 0 4px, transparent 5px),
+      repeating-radial-gradient(circle at var(--mx) var(--my), transparent 0 21px, rgb(224 168 69 / 0.1) 21px 22px),
+      repeating-radial-gradient(ellipse 80% 110% at 10% 105%, transparent 0 29px, rgb(236 233 224 / 0.05) 29px 30px),
+      var(--bg);
+  }
+
+  @media (min-width: 900px) {
+    .field {
+      --mx: 74%;
+      --my: 32%;
+    }
+  }
+
+  canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+
+  canvas.on {
+    opacity: 1;
+  }
+
+  /* The place tag. Left of the hill on phones, right of it on wide screens. */
+  .mark {
+    position: absolute;
+    left: var(--mx);
+    top: var(--my);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* a short leader from the dot to the tag, like a map label */
+  .mark::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 12px;
+    width: 30px;
+    border-top: 1px solid rgb(224 168 69 / 0.45);
+  }
+
+  .tag {
+    position: absolute;
+    top: 0;
+    right: 50px;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.35;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--muted);
+    text-shadow: 0 0 6px var(--bg), 0 0 2px var(--bg);
+  }
+
+  .name {
+    color: var(--accent);
+    letter-spacing: 0.12em;
+  }
+
+  .clock:empty {
+    display: none;
+  }
+
+  @media (min-width: 900px) {
+    .mark::before {
+      right: auto;
+      left: 12px;
+      width: 40px;
+    }
+
+    .tag {
+      right: auto;
+      left: 60px;
+      align-items: flex-start;
+      font-size: 11px;
+    }
+  }
+</style>
+
+<script>
+  // One shader, two dialects: WebGL2 where it exists, WebGL1 everywhere
+  // else (older Android GPUs, some Linux drivers), like the old site.
+  const VS2 = `#version 300 es
+in vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }`;
+  const VS1 = `attribute vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }`;
+  const HEAD2 = `#version 300 es
+precision highp float;
+out vec4 o;
+#define FRAG o
+`;
+  const HEAD1 = `#extension GL_OES_standard_derivatives : enable
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+#define FRAG gl_FragColor
+`;
+
+  const FS = `
+uniform vec2 uRes; uniform float uTime; uniform vec3 uAccent; uniform float uDpr;
+uniform vec2 uMouse; uniform float uPull; uniform vec2 uMark; uniform float uScroll;
+// 1 when the visitor asked for reduced motion: drift only, nothing pulses
+uniform float uCalm;
+const vec3 BG = vec3(15., 16., 13.) / 255.;
+const vec3 INK = vec3(236., 233., 224.) / 255.;
+float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float noise(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f * f * (3. - 2. * f);
+  return mix(mix(hash(i), hash(i + vec2(1., 0.)), u.x), mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), u.x), u.y); }
+float fbm(vec2 p){ float v = 0., a = .5; mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+  for (int i = 0; i < 4; i++) { v += a * noise(p); p = m * p; a *= .5; } return v; }
+// a cheap two-octave noise, only used to bend the main field
+float warp(vec2 p){ return .65 * noise(p) + .35 * noise(p * 2.03 + 7.1); }
+// keeps the bottom-left, where the hero text sits, quieter
+float quiet(){ vec2 s = gl_FragCoord.xy / uRes; return smoothstep(.05, .95, s.x * .55 + s.y * .75); }
+void main(){
+  vec2 p = gl_FragCoord.xy / uRes.y;
+  float t = uTime;
+  // the terrain scrolls a little slower than the page
+  vec2 sp = p + vec2(0., uScroll);
+  // slow domain warp: the land re-forms instead of only sliding
+  vec2 w = vec2(warp(sp * 1.3 + vec2(0., t * .045)), warp(sp * 1.3 + vec2(5.2, -t * .038))) - .5;
+  // narrow screens show less land, so draw it a little denser there
+  float k = mix(2.8, 2.1, smoothstep(.6, 1.2, uRes.x / uRes.y));
+  float h = fbm(sp * k + w * .9 + vec2(t * .028, -t * .02));
+  // Bardhaman: a low hill, so the lines close in rings around it
+  vec2 dm = p - uMark; float bd = length(dm);
+  h += .30 * exp(-bd * bd * 38.);
+  // a slow signal travelling out from it, bending the nearest lines
+  h += .012 * (1. - uCalm) * sin(bd * 62. - t * 1.4) * exp(-bd * 5.);
+  // the pointer raises the ground under it
+  vec2 d = p - uMouse; h += .2 * uPull * exp(-38. * dot(d, d));
+  float x = h * 15.;
+  float fw = fwidth(x);
+  float f = fract(x); float dl = min(f, 1. - f);
+  float l = 1. - smoothstep(0., fw * uDpr * .9, dl);
+  float major = step(mod(floor(x + .5), 5.), .5);
+  // the pointer also carries a soft light that brings the lines up under it
+  float lamp = uPull * exp(-dot(d, d) * 30.);
+  float q = max(quiet(), lamp);
+  float near = exp(-bd * bd * 22.);
+  vec3 c = BG;
+  c = mix(c, INK, l * (.10 + .08 * near + .22 * lamp) * (1. - major) * (.4 + .6 * q));
+  c = mix(c, uAccent, l * (.55 + .3 * near + .3 * lamp) * major * (.3 + .7 * q));
+  // the dot, a soft glow, and two staggered pulse rings
+  float core = 1. - smoothstep(.0055, .0085, bd);
+  float glow = exp(-bd * bd * 900.) * .35;
+  float r1 = fract(t * .2), r2 = fract(t * .2 + .5);
+  float ring = (1. - smoothstep(0., .003, abs(bd - r1 * .075))) * (1. - r1)
+             + (1. - smoothstep(0., .003, abs(bd - r2 * .075))) * (1. - r2);
+  c = mix(c, uAccent, clamp(max(core, ring * .55 * (1. - uCalm)) + glow, 0., 1.));
+  c += (hash(gl_FragCoord.xy + fract(t * 7.) * 100. * (1. - uCalm)) - .5) * .045;
+  // fade to the page colour at the bottom edge
+  c = mix(BG, c, smoothstep(0., .35, gl_FragCoord.y / uRes.y));
+  FRAG = vec4(c, 1.);
+}`;
+
+  const UNIFORMS = ["uRes", "uTime", "uAccent", "uDpr", "uMouse", "uPull", "uMark", "uScroll", "uCalm"] as const;
+
+  function accentRGB(el: Element): [number, number, number] {
+    const v = getComputedStyle(el).getPropertyValue("--accent").trim() || "#e0a845";
+    const h = v.replace("#", "");
+    const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16);
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+
+  /** Frame-rate independent easing: move `rate` of the way per second, roughly. */
+  const ease = (from: number, to: number, rate: number, dt: number) =>
+    from + (to - from) * (1 - Math.exp(-rate * dt));
+
+  function startClock(root: HTMLElement) {
+    const el = root.querySelector<HTMLElement>("[data-clock]");
+    if (!el) return;
+    const fmt = new Intl.DateTimeFormat("en-GB", {
+      timeZone: root.dataset.tz || "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+    const tick = () => (el.textContent = `${fmt.format(new Date())} IST`);
+    tick();
+    setInterval(tick, 20_000);
+  }
+
+  /**
+   * Add ?gl to the URL to see what the field is doing on a given device:
+   * which WebGL it got, the GPU, the frame rate, and why it is slowed or still.
+   * Nothing leaves the page.
+   */
+  function debugPanel(root: HTMLElement) {
+    if (!new URLSearchParams(location.search).has("gl")) return null;
+    const el = document.createElement("pre");
+    el.style.cssText =
+      "position:absolute;left:8px;top:8px;z-index:5;margin:0;padding:8px 10px;max-width:calc(100% - 16px);" +
+      "white-space:pre-wrap;font:11px/1.45 ui-monospace,monospace;color:#ece9e0;background:rgb(0 0 0/.75);border-radius:4px";
+    root.append(el);
+    const info: Record<string, string> = {};
+    return (k: string, v: string) => {
+      info[k] = v;
+      el.textContent = Object.entries(info).map(([a, b]) => `${a}: ${b}`).join("\n");
+    };
+  }
+
+  function mount(root: HTMLElement) {
+    startClock(root);
+    const report = debugPanel(root);
+
+    const canvas = root.querySelector("canvas")!;
+    const opts: WebGLContextAttributes = { antialias: false, alpha: false, powerPreference: "low-power" };
+    let gl = canvas.getContext("webgl2", opts) as WebGLRenderingContext | null;
+    const v2 = !!gl;
+    if (!gl) gl = canvas.getContext("webgl", opts) as WebGLRenderingContext | null;
+    if (!gl) {
+      report?.("webgl", "none (showing the CSS fallback)");
+      return; // the CSS gradient stays
+    }
+    const g = gl;
+    report?.("webgl", v2 ? "2" : "1 (no WebGL2 here)");
+    if (report) {
+      const ext = g.getExtension("WEBGL_debug_renderer_info");
+      report("gpu", String(g.getParameter(ext ? ext.UNMASKED_RENDERER_WEBGL : g.RENDERER)));
+    }
+
+    let U = {} as Record<(typeof UNIFORMS)[number], WebGLUniformLocation | null>;
+
+    /** Compile, link and upload everything. Run again after a lost context. */
+    const setup = () => {
+      if (!v2 && !g.getExtension("OES_standard_derivatives")) {
+        report?.("error", "no OES_standard_derivatives");
+        return false;
+      }
+      const compile = (type: number, src: string) => {
+        const s = g.createShader(type)!;
+        g.shaderSource(s, src);
+        g.compileShader(s);
+        if (!g.getShaderParameter(s, g.COMPILE_STATUS) && !g.isContextLost()) {
+          const log = g.getShaderInfoLog(s) || "compile failed";
+          console.warn("[contour]", log);
+          report?.("error", log);
+          return null;
+        }
+        return s;
+      };
+      const vs = compile(g.VERTEX_SHADER, v2 ? VS2 : VS1);
+      const fs = compile(g.FRAGMENT_SHADER, (v2 ? HEAD2 : HEAD1) + FS);
+      if (!vs || !fs) return false;
+      const prog = g.createProgram()!;
+      g.attachShader(prog, vs);
+      g.attachShader(prog, fs);
+      g.bindAttribLocation(prog, 0, "a");
+      g.linkProgram(prog);
+      if (!g.getProgramParameter(prog, g.LINK_STATUS)) {
+        report?.("error", g.getProgramInfoLog(prog) || "link failed");
+        return false;
+      }
+      g.useProgram(prog);
+      U = Object.fromEntries(UNIFORMS.map((n) => [n, g.getUniformLocation(prog, n)])) as typeof U;
+      g.bindBuffer(g.ARRAY_BUFFER, g.createBuffer());
+      g.bufferData(g.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), g.STATIC_DRAW);
+      g.enableVertexAttribArray(0);
+      g.vertexAttribPointer(0, 2, g.FLOAT, false, 0, 0);
+      g.uniform3fv(U.uAccent, accentRGB(root));
+      g.viewport(0, 0, canvas.width, canvas.height);
+      return true;
+    };
+    let ready = setup();
+    if (!ready) return;
+
+    // Phones and browsers can drop the GL context (memory pressure, GPU reset).
+    // Ask for it back and rebuild, instead of freezing on the last frame.
+    canvas.addEventListener("webglcontextlost", (e) => {
+      e.preventDefault();
+      ready = false;
+      report?.("context", "lost, waiting");
+    });
+    canvas.addEventListener("webglcontextrestored", () => {
+      ready = setup();
+      dirty = true;
+      report?.("context", ready ? "restored" : "restore failed");
+    });
+
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+    const quietMode = () => document.documentElement.hasAttribute("data-quiet");
+    // Quiet mode stops the field; reduced motion only slows it right down.
+    const still = quietMode;
+    const calm = () => reduced.matches;
+
+    let dpr = 1;
+    // Drops when frames are slow (software rendering, weak GPUs), so the field
+    // keeps moving at a lower resolution rather than stuttering.
+    let quality = 1;
+    let slow = 0;
+    let w = 1, h = 1; // CSS px
+    let visible = true;
+    let dirty = true;
+    let t = 0;
+    let lastDraw = 0;
+    let draws = 0;
+    let calmNow = false;
+    const mark = [0, 0];
+    // pointer: eased position and strength. Leaving fades the strength out
+    // where the pointer was, instead of dragging the bump off screen.
+    const mouse = [0.5, 0.5], target = [0.5, 0.5];
+    let pull = 0, pullTarget = 0;
+    let scroll = 0;
+
+    const resize = () => {
+      const r = root.getBoundingClientRect();
+      w = Math.max(1, r.width);
+      h = Math.max(1, r.height);
+      dpr = Math.min(1.5, window.devicePixelRatio || 1) * quality;
+      canvas.width = Math.max(1, Math.round(w * dpr));
+      canvas.height = Math.max(1, Math.round(h * dpr));
+      g.viewport(0, 0, canvas.width, canvas.height);
+      const cs = getComputedStyle(root);
+      const fx = parseFloat(cs.getPropertyValue("--mx")) / 100 || 0.8;
+      const fy = parseFloat(cs.getPropertyValue("--my")) / 100 || 0.34;
+      mark[0] = (fx * w) / h;
+      mark[1] = 1 - fy;
+      dirty = true;
+    };
+    new ResizeObserver(resize).observe(root);
+    new IntersectionObserver((e) => (visible = e[0].isIntersecting)).observe(root);
+
+    const aim = (clientX: number, clientY: number) => {
+      const r = root.getBoundingClientRect();
+      target[0] = (clientX - r.left) / r.height;
+      target[1] = (r.bottom - clientY) / r.height;
+      if (pull < 0.02) {
+        // arriving from outside: start where the pointer is
+        mouse[0] = target[0];
+        mouse[1] = target[1];
+      }
+      pullTarget = 1;
+    };
+
+    root.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "touch") aim(e.clientX, e.clientY);
+    });
+    root.addEventListener("pointerleave", (e) => {
+      if (e.pointerType !== "touch") pullTarget = 0;
+    });
+    // Touch: the ground follows the finger, scrolling included.
+    const onTouch = (e: TouchEvent) => {
+      const p = e.touches[0];
+      if (p) aim(p.clientX, p.clientY);
+    };
+    root.addEventListener("touchstart", onTouch, { passive: true });
+    root.addEventListener("touchmove", onTouch, { passive: true });
+    const release = () => (pullTarget = 0);
+    root.addEventListener("touchend", release, { passive: true });
+    root.addEventListener("touchcancel", release, { passive: true });
+
+    const redraw = () => (dirty = true);
+    reduced.addEventListener("change", redraw);
+    document.addEventListener("quietchange", redraw);
+
+    const draw = () => {
+      g.uniform2f(U.uRes, canvas.width, canvas.height);
+      g.uniform1f(U.uTime, t);
+      g.uniform1f(U.uDpr, dpr);
+      g.uniform2f(U.uMouse, mouse[0], mouse[1]);
+      g.uniform1f(U.uPull, pull);
+      g.uniform2f(U.uMark, mark[0], mark[1]);
+      g.uniform1f(U.uScroll, scroll);
+      g.uniform1f(U.uCalm, calmNow ? 1 : 0);
+      g.drawArrays(g.TRIANGLES, 0, 3);
+      draws++;
+    };
+
+    const frame = (now: number) => {
+      requestAnimationFrame(frame);
+      if (!ready || !visible || document.hidden) {
+        lastDraw = 0; // no jump in time when we come back
+        return;
+      }
+      const isStill = still();
+      calmNow = calm();
+      if (isStill && !dirty) return;
+      const since = now - lastDraw;
+      // a slow drift doesn't need 30 frames a second
+      if (lastDraw && since < 1000 / (calmNow ? 15 : 30) - 2) return;
+      // Time between drawn frames, not between rAF ticks, so the speed is
+      // the same at 60 Hz and 120 Hz.
+      const dt = lastDraw ? Math.min(0.1, since / 1000) : 1 / 30;
+      if (lastDraw && !isStill && !calmNow && t > 2) {
+        // ~20 slow frames in a row (under ~18 fps): render fewer pixels.
+        if (since > 55) {
+          if (++slow > 20 && quality > 0.5) {
+            quality = Math.max(0.5, quality * 0.75);
+            slow = 0;
+            resize();
+          }
+        } else slow = Math.max(0, slow - 1);
+      }
+      lastDraw = now;
+      if (isStill) {
+        // A fixed, pleasant frame rather than t = 0.
+        if (t === 0) t = 12;
+        pull = 0;
+        scroll = 0;
+      } else if (calmNow) {
+        // quarter speed, and nothing follows the pointer or the scroll
+        t += dt * 0.25;
+        pull = 0;
+        scroll = 0;
+      } else {
+        t += dt;
+        pull = ease(pull, pullTarget, pullTarget > pull ? 4 : 1.6, dt);
+        mouse[0] = ease(mouse[0], target[0], 5, dt);
+        mouse[1] = ease(mouse[1], target[1], 5, dt);
+        scroll = ease(scroll, (Math.min(window.scrollY, h) / h) * 0.35, 8, dt);
+      }
+      draw();
+      dirty = false;
+      canvas.classList.add("on");
+    };
+
+    if (report) {
+      setInterval(() => {
+        report(
+          "motion",
+          quietMode()
+            ? "still: quiet mode is on"
+            : !visible || document.hidden
+              ? "paused (off screen)"
+              : reduced.matches
+                ? "slow drift: this device asks for reduced motion"
+                : "running",
+        );
+        report("fps", String(draws));
+        report("resolution", `${canvas.width}x${canvas.height} (dpr ${dpr.toFixed(2)})`);
+        draws = 0;
+      }, 1000);
+    }
+
+    resize();
+    requestAnimationFrame(frame);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-contour]").forEach(mount);
+</script>

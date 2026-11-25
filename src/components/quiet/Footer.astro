@@ -1,0 +1,86 @@
+---
+
+// The site is rebuilt on every push, so the build time is "last touched".
+const built = new Date();
+const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "numeric" }).format(built);
+---
+
+<footer class="foot">
+  <span class="meta">
+    West Bengal ·
+    <span data-touched={built.toISOString()}>updated {builtLabel}</span>
+  </span>
+  <span class="right">
+    <button type="button" class="quiet" data-quiet-toggle aria-pressed="false">quiet mode</button>
+    <span class="bn" lang="bn">ধীরে</span>
+  </span>
+</footer>
+
+<style>
+  .foot {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 32px var(--pad) 48px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .right {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .quiet {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    background: none;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .quiet:hover,
+  .quiet[aria-pressed="true"] {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .bn {
+    font-size: 14px;
+    color: var(--muted);
+  }
+</style>
+
+<script>
+  // "last touched N days ago"
+  document.querySelectorAll<HTMLElement>("[data-touched]").forEach((el) => {
+    const days = Math.floor((Date.now() - new Date(el.dataset.touched!).getTime()) / 86_400_000);
+    el.textContent =
+      days <= 0 ? "last touched today" : days === 1 ? "last touched yesterday" : `last touched ${days} days ago`;
+  });
+
+  // Quiet mode: stops the shader and all motion, remembered on this device.
+  const root = document.documentElement;
+  document.querySelectorAll<HTMLButtonElement>("[data-quiet-toggle]").forEach((btn) => {
+    const sync = () => btn.setAttribute("aria-pressed", String(root.hasAttribute("data-quiet")));
+    sync();
+    btn.addEventListener("click", () => {
+      const on = !root.hasAttribute("data-quiet");
+      if (on) root.setAttribute("data-quiet", "");
+      else root.removeAttribute("data-quiet");
+      try {
+        localStorage.setItem("quiet", on ? "1" : "0");
+      } catch {}
+      sync();
+      document.dispatchEvent(new Event("quietchange"));
+    });
+  });
+</script>

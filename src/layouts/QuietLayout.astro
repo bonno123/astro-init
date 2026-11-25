@@ -1,0 +1,76 @@
+---
+import { SEO } from "astro-seo";
+import "~/styles/quiet.css";
+
+interface Props {
+  /** Page title. The home page passes the bare name; others get " · Avik Banik". */
+  title: string;
+  metaDescription: string;
+  bare?: boolean;
+}
+
+const { title, metaDescription, bare } = Astro.props;
+const fullTitle = bare ? title : `${title} · Avik Banik`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0F100D" />
+    <meta name="generator" content={Astro.generator} />
+    <SEO
+      title={fullTitle}
+      description={metaDescription}
+      canonical={canonical}
+      openGraph={{
+        // TODO: replace with a 1200x630 card in the new style (this is the old site's image).
+        basic: {
+          title: fullTitle,
+          type: "website",
+          image: "https://raw.githubusercontent.com/bonno123/astro-init/b31272c3ad24b9e7c46ef4ce97e424ddb8ccdef4/code_20231222_181000_via_10015_io.png",
+          url: canonical.href,
+        },
+        optional: { description: metaDescription, locale: "en" },
+      }}
+      twitter={{ card: "summary", creator: "@AvikBanik1", title: fullTitle, description: metaDescription }}
+      extend={{
+        link: [{ rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
+        meta: [{ name: "google-site-verification", content: "EdyNLS3IiOR2mQtxpM3M9itZfLqehGXkHUdav6MbDY4" }],
+      }}
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=Tiro+Bangla&display=swap"
+    />
+
+    <slot name="head" />
+
+    <!-- Apply quiet mode before first paint so nothing flickers. -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem("quiet") === "1") document.documentElement.dataset.quiet = "";
+      } catch (e) {}
+    </script>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-GDKJFDWKW7");
+    </script>
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <slot />
+  </body>
+</html>

@@ -1,0 +1,155 @@
+---
+/**
+ * Essay template. The opening below is a DRAFT written during the design
+ * pass, not Avik's own words yet: replace it before this goes live.
+ */
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import Footer from "~/components/quiet/Footer.astro";
+import { site } from "~/data/home";
+
+const title = "On staying";
+const dek = "Most freelance work lasts a few weeks. One project has lasted five years.";
+---
+
+<QuietLayout title={title} metaDescription={dek}>
+  <header class="bar">
+    <a href="/#writing" class="mono back">← {site.domain}</a>
+    <span class="bn" lang="bn">ধীরে</span>
+  </header>
+
+  <main id="main">
+    <article>
+      <header class="head">
+        <span class="meta accent">WRITING · 01</span>
+        <h1>{title}</h1>
+        <p class="dek">{dek}</p>
+        <p class="meta byline">{site.name} · Nov 2026 · 4 min</p>
+      </header>
+
+      <div class="prose">
+        <p>
+          When people ask what I do, I say frontend. When they ask for whom, the answer has been the same for five
+          years. It sounds like a lack of ambition. I've started to think it's the opposite.
+        </p>
+        <p>
+          A product you stay with stops being a portfolio piece and becomes a place. You learn where the floor
+          creaks. You fix the same screen three times, and the third time you understand why it was wrong the first
+          two.
+        </p>
+        <blockquote>Staying is a skill nobody puts on a CV.</blockquote>
+      </div>
+
+      <aside class="reply">
+        <p class="reply-title">If this made you think of something, write back.</p>
+        <p class="meta">I read every reply. Some become the next essay.</p>
+        <a class="pill" href={`mailto:${site.email}?subject=${encodeURIComponent(`On staying`)}`}>reply to “{title}”</a>
+      </aside>
+    </article>
+  </main>
+
+  <Footer />
+</QuietLayout>
+
+<style>
+  .bar {
+    max-width: 720px;
+    margin: 0 auto;
+    height: 56px;
+    padding: 0 var(--pad);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+  }
+
+  .back {
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .bn {
+    font-size: 15px;
+    color: #b9b6ac;
+  }
+
+  article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 var(--pad) 64px;
+  }
+
+  .head {
+    padding: 48px 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(40px, 6vw, 64px);
+    line-height: 1.08;
+    font-weight: 400;
+  }
+
+  .dek {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(19px, 2.2vw, 24px);
+    line-height: 1.45;
+    color: var(--ink-body);
+  }
+
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    font-family: var(--font-serif);
+    font-size: clamp(19px, 1.6vw, 21px);
+    line-height: 1.7;
+    font-weight: 300;
+    color: #dad7cd;
+    max-width: 64ch;
+  }
+
+  blockquote {
+    margin: 8px 0;
+    padding: 4px 0 4px 18px;
+    border-left: 2px solid var(--accent);
+    font-size: 1.25em;
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .reply {
+    margin-top: 40px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+  }
+
+  .reply-title {
+    font-family: var(--font-serif);
+    font-size: 21px;
+    line-height: 1.35;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--accent);
+    border-radius: 22px;
+    color: var(--accent);
+    font-size: 15px;
+    text-decoration: none;
+  }
+</style>
