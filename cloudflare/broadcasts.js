@@ -30,6 +30,18 @@ function authorised(request, env) {
   return Boolean(env.ADMIN_API_TOKEN) && token === env.ADMIN_API_TOKEN;
 }
 
+/** An https URL, or null for empty. Throws on anything else. */
+function httpsOrNull(v, what) {
+  if (v == null || (typeof v === "string" && !v.trim())) return null;
+  try {
+    const u = new URL(String(v).trim());
+    if (u.protocol === "https:" && u.href.length <= 600) return u.href;
+  } catch {
+    /* falls through */
+  }
+  throw new Error(`${what} must be an https:// link.`);
+}
+
 /** ISO 8601 UTC, or null for empty. Throws on a date that doesn't parse. */
 function isoOrNull(v) {
   if (v == null || v === "") return null;
@@ -51,6 +63,17 @@ const KINDS = {
       ? p.colors.filter((c) => typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c)).slice(0, 6)
       : [];
     return { title, subtitle, effect, colors };
+  },
+  video(p) {
+    const src = httpsOrNull(p?.src, "The video");
+    if (!src) throw new Error("A video needs a link to the file.");
+    return {
+      src,
+      poster: httpsOrNull(p?.poster, "The poster"),
+      caption: clean(p?.caption, 120),
+      fit: p?.fit === "contain" ? "contain" : "cover",
+      loop: p?.loop === true,
+    };
   },
 };
 
@@ -116,7 +139,7 @@ export async function handleBroadcasts(request, env, url, cors) {
       const dismiss = Number(data.dismissAfterMs);
       b = {
         id: typeof data.id === "string" && data.id ? data.id : null,
-        label: clean(data.label, MAX_LABEL) || payload.title || data.kind,
+        label: clean(data.label, MAX_LABEL) || payload.title || payload.caption || data.kind,
         kind: data.kind,
         payload: JSON.stringify(payload),
         enabled: data.enabled === false ? 0 : 1,

@@ -29,3 +29,14 @@ export type RenderContext = {
  * Returns a cleanup that stops anything it started.
  */
 export type Renderer = (stage: HTMLElement, payload: any, ctx: RenderContext) => void | (() => void);
+
+export type VideoPayload = {
+  /** https link to an .mp4 or .webm (R2, a CDN, ...). */
+  src: string;
+  /** Shown before it plays, and instead of it when motion is off. */
+  poster?: string | null;
+  caption?: string | null;
+  fit?: "cover" | "contain";
+  /** Otherwise the overlay closes when the video ends. */
+  loop?: boolean;
+};

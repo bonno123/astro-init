@@ -8,6 +8,7 @@ import type { Broadcast, Renderer } from "./types";
 // One entry per kind. Each loads only when a broadcast of that kind is shown.
 const RENDERERS: Record<string, () => Promise<{ default: Renderer }>> = {
   greeting: () => import("./greeting"),
+  video: () => import("./video"),
 };
 
 export const KINDS = Object.keys(RENDERERS);

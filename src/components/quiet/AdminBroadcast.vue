@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { api } from "~/utils/api";
-import type { GreetingPayload } from "~/broadcast/types";
+import type { GreetingPayload, VideoPayload } from "~/broadcast/types";
+
+type Kind = "greeting" | "video";
 
 type Row = {
   id: string;
   label: string;
-  kind: string;
-  payload: GreetingPayload;
+  kind: Kind;
+  payload: GreetingPayload & VideoPayload; // whichever fields its kind has
   enabled: boolean;
   startsAt: string | null;
   endsAt: string | null;
@@ -31,18 +33,26 @@ const error = ref("");
 const note = ref("");
 const confirmDelete = ref<string | null>(null);
 
-const blank = () => ({
+const blank = (kind: Kind = "greeting") => ({
   id: null as string | null,
   label: "",
-  kind: "greeting",
+  kind,
+  // greeting
   title: "",
   subtitle: "",
   effect: "confetti" as "confetti" | "none",
   colors: [...DEFAULT_COLORS],
+  // video
+  src: "",
+  poster: "",
+  caption: "",
+  fit: "cover" as "cover" | "contain",
+  loop: false,
+  // both
   startsAt: "",
   endsAt: "",
   frequency: "once" as Row["frequency"],
-  seconds: 8,
+  seconds: kind === "video" ? 0 : 8, // a video closes when it ends
   enabled: true,
 });
 const form = reactive(blank());
@@ -86,21 +96,26 @@ async function load() {
   }
 }
 
-function startNew() {
-  Object.assign(form, blank());
+function startNew(kind: Kind) {
+  Object.assign(form, blank(kind));
   editing.value = true;
   note.value = "";
 }
 
 function edit(r: Row) {
-  Object.assign(form, {
+  const p = r.payload;
+  Object.assign(form, blank(r.kind), {
     id: r.id,
     label: r.label,
-    kind: r.kind,
-    title: r.payload.title ?? "",
-    subtitle: r.payload.subtitle ?? "",
-    effect: r.payload.effect ?? "confetti",
-    colors: r.payload.colors?.length ? [...r.payload.colors] : [...DEFAULT_COLORS],
+    title: p.title ?? "",
+    subtitle: p.subtitle ?? "",
+    effect: p.effect ?? "confetti",
+    colors: p.colors?.length ? [...p.colors] : [...DEFAULT_COLORS],
+    src: p.src ?? "",
+    poster: p.poster ?? "",
+    caption: p.caption ?? "",
+    fit: p.fit ?? "cover",
+    loop: p.loop === true,
     startsAt: toLocalInput(r.startsAt),
     endsAt: toLocalInput(r.endsAt),
     frequency: r.frequency,
@@ -112,12 +127,31 @@ function edit(r: Row) {
   scrollTo({ top: 0, behavior: "smooth" });
 }
 
-const payload = computed<GreetingPayload>(() => ({
-  title: form.title.trim(),
-  subtitle: form.subtitle.trim() || null,
-  effect: form.effect,
-  colors: form.colors,
-}));
+const payload = computed<GreetingPayload | VideoPayload>(() =>
+  form.kind === "video"
+    ? {
+        src: form.src.trim(),
+        poster: form.poster.trim() || null,
+        caption: form.caption.trim() || null,
+        fit: form.fit,
+        loop: form.loop,
+      }
+    : {
+        title: form.title.trim(),
+        subtitle: form.subtitle.trim() || null,
+        effect: form.effect,
+        colors: form.colors,
+      },
+);
+
+const https = (v: string) => /^https:\/\/\S+$/i.test(v.trim());
+const ready = computed(() =>
+  form.kind === "video" ? https(form.src) && (!form.poster.trim() || https(form.poster)) : Boolean(form.title.trim()),
+);
+
+/** What a row is called in the list, after its label. */
+const summary = (r: Row) =>
+  r.kind === "video" ? r.payload.caption || decodeURIComponent(r.payload.src?.split("/").pop() || "video") : r.payload.title;
 
 function body(r?: Row) {
   if (r)
@@ -210,34 +244,60 @@ async function preview(r?: Row) {
     <p v-if="note" class="ok" role="status">{{ note }}</p>
 
     <template v-if="loaded">
-      <button v-if="!editing" class="primary" @click="startNew">new greeting</button>
+      <div v-if="!editing" class="acts">
+        <button class="primary" @click="startNew('greeting')">new greeting</button>
+        <button class="primary" @click="startNew('video')">new video</button>
+      </div>
 
       <form v-else class="edit" @submit.prevent="save">
-        <h2>{{ form.id ? "Edit" : "New greeting" }}</h2>
+        <h2>{{ form.id ? "Edit" : "New" }} {{ form.kind }}</h2>
 
-        <label>
-          <span>Title</span>
-          <input v-model="form.title" required maxlength="80" placeholder="Happy New Year 2027" />
-        </label>
-        <label>
-          <span>Smaller line <em>optional</em></span>
-          <input v-model="form.subtitle" maxlength="200" placeholder="Thanks for stopping by this year." />
-        </label>
+        <template v-if="form.kind === 'video'">
+          <label>
+            <span>Video link <em>https, .mp4 or .webm</em></span>
+            <input v-model="form.src" type="url" inputmode="url" required placeholder="https://…/diwali.mp4" />
+          </label>
+          <label>
+            <span>Poster image <em>optional, shown before it plays</em></span>
+            <input v-model="form.poster" type="url" inputmode="url" placeholder="https://…/diwali.jpg" />
+          </label>
+          <label>
+            <span>Caption <em>optional</em></span>
+            <input v-model="form.caption" maxlength="120" placeholder="Happy Diwali" />
+          </label>
+          <fieldset>
+            <legend>Fit</legend>
+            <label class="inline"><input v-model="form.fit" type="radio" value="cover" /> fill the screen</label>
+            <label class="inline"><input v-model="form.fit" type="radio" value="contain" /> show it whole</label>
+          </fieldset>
+          <label class="inline"><input v-model="form.loop" type="checkbox" /> loop <em>otherwise it closes when the video ends</em></label>
+        </template>
 
-        <fieldset>
-          <legend>Effect</legend>
-          <label class="inline"><input v-model="form.effect" type="radio" value="confetti" /> confetti</label>
-          <label class="inline"><input v-model="form.effect" type="radio" value="none" /> just the words</label>
-        </fieldset>
+        <template v-else>
+          <label>
+            <span>Title</span>
+            <input v-model="form.title" required maxlength="80" placeholder="Happy New Year 2027" />
+          </label>
+          <label>
+            <span>Smaller line <em>optional</em></span>
+            <input v-model="form.subtitle" maxlength="200" placeholder="Thanks for stopping by this year." />
+          </label>
 
-        <fieldset v-if="form.effect === 'confetti'" class="colors">
-          <legend>Confetti colours</legend>
-          <span v-for="(c, i) in form.colors" :key="i" class="swatch">
-            <input v-model="form.colors[i]" type="color" :aria-label="`Colour ${i + 1}`" />
-            <button v-if="form.colors.length > 1" type="button" class="x" :aria-label="`Remove colour ${i + 1}`" @click="form.colors.splice(i, 1)">×</button>
-          </span>
-          <button v-if="form.colors.length < 6" type="button" @click="form.colors.push('#ffffff')">+ colour</button>
-        </fieldset>
+          <fieldset>
+            <legend>Effect</legend>
+            <label class="inline"><input v-model="form.effect" type="radio" value="confetti" /> confetti</label>
+            <label class="inline"><input v-model="form.effect" type="radio" value="none" /> just the words</label>
+          </fieldset>
+
+          <fieldset v-if="form.effect === 'confetti'" class="colors">
+            <legend>Confetti colours</legend>
+            <span v-for="(c, i) in form.colors" :key="i" class="swatch">
+              <input v-model="form.colors[i]" type="color" :aria-label="`Colour ${i + 1}`" />
+              <button v-if="form.colors.length > 1" type="button" class="x" :aria-label="`Remove colour ${i + 1}`" @click="form.colors.splice(i, 1)">×</button>
+            </span>
+            <button v-if="form.colors.length < 6" type="button" @click="form.colors.push('#ffffff')">+ colour</button>
+          </fieldset>
+        </template>
 
         <div class="two">
           <label>
@@ -260,7 +320,7 @@ async function preview(r?: Row) {
             </select>
           </label>
           <label>
-            <span>Closes after <em>seconds, 0 = never</em></span>
+            <span>Closes after <em>seconds, 0 = {{ form.kind === "video" && !form.loop ? "when it ends" : "never" }}</em></span>
             <input v-model.number="form.seconds" type="number" min="0" max="120" inputmode="numeric" />
           </label>
         </div>
@@ -273,8 +333,8 @@ async function preview(r?: Row) {
         <input v-model="form.label" maxlength="60" placeholder="Name in this list (optional)" aria-label="Name in this list" />
 
         <div class="acts">
-          <button type="button" :disabled="!form.title.trim()" @click="preview()">preview</button>
-          <button type="submit" class="primary" :disabled="saving || !form.title.trim()">{{ saving ? "saving…" : "save" }}</button>
+          <button type="button" :disabled="!ready" @click="preview()">preview</button>
+          <button type="submit" class="primary" :disabled="saving || !ready">{{ saving ? "saving…" : "save" }}</button>
           <button type="button" @click="editing = false">cancel</button>
         </div>
       </form>
@@ -286,7 +346,7 @@ async function preview(r?: Row) {
             <strong>{{ r.label }}</strong>
             <span class="badge" :class="status(r).replace(' ', '-')">{{ status(r) }}</span>
           </div>
-          <p class="title">{{ r.payload.title }}</p>
+          <p class="title"><span class="kind">{{ r.kind }}</span> {{ summary(r) }}</p>
           <p class="meta">
             {{ r.startsAt ? fmt(r.startsAt) : "from saving" }} → {{ r.endsAt ? fmt(r.endsAt) : "until off" }}
             · {{ { once: "once per visitor", session: "once per visit", always: "every load" }[r.frequency] }}
@@ -493,6 +553,12 @@ input[type="color"]::-webkit-color-swatch {
 .title {
   font-family: var(--font-serif), var(--font-bangla);
   font-size: 20px;
+}
+.kind {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+  vertical-align: middle;
 }
 .badge {
   padding: 2px 8px;
