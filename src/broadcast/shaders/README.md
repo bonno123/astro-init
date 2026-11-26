@@ -86,8 +86,16 @@ artwork or characters brings their rights too, not only the shader author's.
 
 ## On the visitor's device
 
+- It draws at most 60 frames a second, even on a 90 or 120 Hz screen: a
+  shader moves like film, and the extra frames would only double the GPU's
+  work, and the fan and the battery with it.
 - It renders at most 1920×1080 pixels, and drops the resolution, down to 35%,
   when frames go under about 40 a second. It climbs back when there's room.
+- A heavy one can still lag a slow phone before that kicks in. Measure it
+  (`night-ride` takes about 13 ms a frame at 2560×1440 on the laptop it was
+  made on) and look for the usual wins: loops over fewer lights, shorter
+  marches for reflections, stopping rays that can't hit anything, long strides
+  through empty space. Or set `scale`.
 - It compiles in the background where the browser can, so the page doesn't
   freeze, and fades in once it's ready.
 - No WebGL2, no float buffers, a compile error or a lost GPU context closes

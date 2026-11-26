@@ -31,6 +31,7 @@ float gKick;
 float gChorus; // 1 through the chorus
 float gFlash; // lightning, when the chorus lands
 float gSecs; // seconds into the song
+bool gMirror; // shading something seen in the wet road: near enough is good enough
 
 // --- hashes and noise (integer hashes: sin() ones break on phones) ---
 
@@ -161,8 +162,11 @@ vec2 city(vec3 p) {
   float h = 7.0 + 26.0 * pow(hashf(bl.x), 1.5);
   float front = 8.0 + 1.6 * hashf(bl.x + 500.0);
   float d = sdBox(vec3(lx - front - 10.0, p.y - h * 0.5, bl.y), vec3(10.0, h * 0.5, P * 0.5 - 0.4));
-  // the next one along may be taller: never step past this one's end
-  d = min(d, P * 0.5 - abs(bl.y) + 0.4);
+  // The next one along may be taller, so don't step past this one's end, unless
+  // the point is out in the street short of any frontage (8 m), or above every
+  // roof (33 m): then nothing nearer is possible either way. Rays down the
+  // street take long strides that way, not one per building.
+  d = min(d, max(P * 0.5 - abs(bl.y) + 0.4, max(8.0 - lx, p.y - 33.0)));
   vec2 r = vec2(d, 6.0);
 
   // a streetlight in the middle of each, its arm out over the road
@@ -237,7 +241,8 @@ void lampsAt(vec3 p, vec3 n, vec3 v, float shin, out vec3 dif, out vec3 spe) {
   dif = vec3(0.0);
   spe = vec3(0.0);
   float k0 = floor((p.z + gD) / P);
-  for (int j = -1; j <= 2; j++) {
+  int last = gMirror ? 1 : 2;
+  for (int j = gMirror ? 0 : -1; j <= last; j++) {
     float zc = (k0 + float(j) + 0.5) * P - gD;
     for (int s = 0; s < 2; s++) {
       vec3 L = vec3(s == 0 ? -LAMP_X : LAMP_X, LAMP_Y - 0.1, zc) - p;
@@ -255,12 +260,13 @@ void lampsAt(vec3 p, vec3 n, vec3 v, float shin, out vec3 dif, out vec3 spe) {
 /**
  * The haze lit by each streetlight along a ray, to tmax: a faint wide part (the
  * integral of 1/distance² along the ray) and a tight bright core round the bulb,
- * if nothing's in front of it. soft widens both, for blurry reflections.
+ * if nothing's in front of it. soft widens both, for blurry reflections. count
+ * is how many lights ahead to add up: past about 80 m (7) the fog has them.
  */
-vec3 glow(vec3 ro, vec3 rd, float tmax, float soft) {
+vec3 glow(vec3 ro, vec3 rd, float tmax, float soft, int count) {
   float acc = 0.0;
   float k0 = floor((ro.z + gD) / P);
-  for (int j = -1; j < 14; j++) {
+  for (int j = -1; j < count; j++) {
     float zc = (k0 + float(j) + 0.5) * P - gD;
     for (int s = 0; s < 2; s++) {
       vec3 oc = vec3(s == 0 ? -LAMP_X : LAMP_X, LAMP_Y - 0.12, zc) - ro;
@@ -286,7 +292,7 @@ vec3 streaks(vec3 p, vec3 r, float rough, float tmax) {
   float k0 = floor((p.z + gD) / P);
   float sx = mix(0.006, 0.045, rough); // how wide, and how long, in radians
   float sy = mix(0.04, 0.6, rough);
-  for (int j = -1; j < 10; j++) {
+  for (int j = -1; j < 5; j++) {
     float zc = (k0 + float(j) + 0.5) * P - gD;
     for (int s = 0; s < 2; s++) {
       vec3 L = vec3(s == 0 ? -LAMP_X : LAMP_X, LAMP_Y - 0.12, zc) - p;
@@ -420,7 +426,7 @@ vec3 shade(vec3 p, vec3 n, vec3 rd, float m) {
   return c;
 }
 
-vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd) {
+vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd, vec3 eye) {
   vec3 v = -rd;
   float wz = p.z + gD;
   vec2 g = vec2(p.x, wz);
@@ -464,14 +470,17 @@ vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd) {
   vec3 rn = normalize(n + vec3(slope.x, 0.0, slope.y) * 0.06 * (1.0 - puddle) + vec3(rip.x, 0.0, rip.y) * 0.25);
   vec3 r = reflect(rd, rn);
   vec3 ro = p + n * 0.01;
-  vec2 h = march(ro, r, 90.0, 48);
+  float far = length(p - eye);
+  vec2 h = far < 50.0 ? march(ro, r, 45.0, 24) : vec2(45.0, -1.0);
   vec3 rc;
   if (h.y > 0.0) {
     vec3 q = ro + r * h.x;
+    gMirror = true;
     rc = shade(q, normalAt(q), r, h.y);
+    gMirror = false;
   } else rc = sky(r);
   rc = mix(rc, FOG, 1.0 - exp(-h.x * 0.02));
-  rc += glow(ro, r, h.x, 0.5) * 0.3 + streaks(p, r, 1.0 - puddle, h.x);
+  rc += glow(ro, r, h.x, 0.5, 4) * 0.3 + streaks(p, r, 1.0 - puddle, h.x);
   rc += vec3(1.0, 0.05, 0.08) * pointGlow(ro, r, tl, h.x, mix(0.02, 0.002, puddle));
   float fr = 0.04 + 0.96 * pow(1.0 - max(dot(rn, v), 0.0), 5.0);
   float wet = (kind < 0.5 ? mix(0.5, 1.0, puddle) : 0.3) * (1.0 - 0.6 * paint);
@@ -553,7 +562,7 @@ float rain(vec2 s, float zoom, vec3 V, vec3 ro, vec3 cu, vec3 cv, vec3 cw, out v
   float acc = 0.0;
   light = vec3(0.0);
   float px = 2.0 / iResolution.y;
-  for (int k = 0; k < 4; k++) {
+  for (int k = 0; k < 3; k++) {
     float fk = float(k);
     float span = 3.0 + 3.0 * fk;
     float near = 1.2 + 1.5 * fk;
@@ -561,19 +570,28 @@ float rain(vec2 s, float zoom, vec3 V, vec3 ro, vec3 cu, vec3 cv, vec3 cw, out v
     float cyc = floor(c);
     float qz = near + span * (1.0 - fract(c));
     float fade = smoothstep(0.0, 0.25, fract(c)) * smoothstep(1.0, 0.8, fract(c));
-    float cellm = 0.28 + 0.1 * fk;
+    // A drop to some cells of a grid, kept to the middle of its cell, its streak
+    // no longer than a fifth of one: then only the 2x2 cells nearest the pixel
+    // can reach it. Cells three times taller than wide, since rain falls, and
+    // bigger, with more of them filled, the faster the camera goes.
+    float grow = 1.0 + 0.03 * abs(V.z);
+    vec2 cellm = vec2(1.0, 3.0) * (0.28 + 0.1 * fk) * grow;
+    float fill = min(0.24 * 3.0 * grow * grow, 0.9);
     vec2 u = s * qz / zoom - V.xy * gSecs; // where the pixel looks, in the drops' own frame
-    vec2 gi = floor(u / cellm);
+    vec2 g = u / cellm;
+    vec2 gi = floor(g) + step(0.5, fract(g)) - 1.0;
+    vec2 most = 0.2 * cellm * zoom / qz; // that fifth, on screen
     float a = 0.0;
-    for (int i = -1; i <= 1; i++) {
-      for (int j = -1; j <= 1; j++) {
-        vec2 id = gi + vec2(float(i), float(j));
-        float h = hashv(id + vec2(cyc * 131.0 + fk * 17.0, cyc * 7.0 + fk * 3.0));
-        if (h > 0.24) continue;
-        vec2 Q = (id + vec2(fract(h * 23.0), fract(h * 71.0))) * cellm + V.xy * gSecs;
+    for (int i = 0; i < 4; i++) {
+      vec2 id = gi + vec2(float(i & 1), float(i >> 1));
+      float h = hashv(id + vec2(cyc * 131.0 + fk * 17.0, cyc * 7.0 + fk * 3.0));
+      if (h < fill) {
+        h /= fill;
+        vec2 Q = (id + 0.2 + 0.6 * vec2(fract(h * 23.0), fract(h * 71.0))) * cellm + V.xy * gSecs;
         vec2 sd = zoom * Q / qz;
         vec2 vel = zoom * (V.xy * qz - Q * V.z) / (qz * qz);
         vec2 tail = vel * 0.02;
+        tail *= min(1.0, min(most.x / max(abs(tail.x), 1e-6), most.y / max(abs(tail.y), 1e-6)));
         vec2 pa = s - sd;
         float t = clamp(dot(pa, -tail) / max(dot(tail, tail), 1e-9), 0.0, 1.0);
         float d = length(pa + tail * t);
@@ -582,22 +600,25 @@ float rain(vec2 s, float zoom, vec3 V, vec3 ro, vec3 cu, vec3 cv, vec3 cw, out v
       }
     }
     a *= fade * (0.5 + 0.5 * fract(cyc * 0.618 + fk * 0.3));
-    // lit by the nearest streetlight either side of where this sheet is
-    vec3 W = ro + (cu * s.x + cv * s.y + cw * zoom) * (qz / zoom);
-    float zc = (floor((W.z + gD) / P) + 0.5) * P - gD;
-    float lit = 0.0;
-    for (int sd2 = 0; sd2 < 2; sd2++) {
-      vec3 L = vec3(sd2 == 0 ? -LAMP_X : LAMP_X, LAMP_Y, zc) - W;
-      lit += 1.0 / (1.0 + dot(L, L) * 0.08);
+    if (a > 0.0) {
+      // lit by the nearest streetlight either side of where this sheet is
+      vec3 W = ro + (cu * s.x + cv * s.y + cw * zoom) * (qz / zoom);
+      float zc = (floor((W.z + gD) / P) + 0.5) * P - gD;
+      float lit = 0.0;
+      for (int sd2 = 0; sd2 < 2; sd2++) {
+        vec3 L = vec3(sd2 == 0 ? -LAMP_X : LAMP_X, LAMP_Y, zc) - W;
+        lit += 1.0 / (1.0 + dot(L, L) * 0.08);
+      }
+      light += a * (LAMP * 0.007 * lit + vec3(0.035, 0.04, 0.07));
+      acc += a;
     }
-    light += a * (LAMP * 0.007 * lit + vec3(0.035, 0.04, 0.07));
-    acc += a;
   }
   return acc;
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float b = songBeat(iTime);
+  gMirror = false;
   gSecs = b * BEAT;
   gD = travel(b);
   gKick = exp(-sinceKick(b) * 4.0);
@@ -621,20 +642,22 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec3 gn;
   float kind;
   float tg = ground(ro, rd, gn, kind);
-  float tmax = min(tg, 160.0);
-  vec2 h = march(ro, rd, tmax, 110);
+  float tmax = min(tg, 140.0);
+  if (rd.y > 0.0) tmax = min(tmax, max(34.0 - ro.y, 0.0) / rd.y);
+  vec2 h = march(ro, rd, tmax, 90);
   vec3 col;
   float t = h.x;
   if (h.y > 0.0) {
     vec3 p = ro + rd * t;
     col = shade(p, normalAt(p), rd, h.y);
-  } else if (tg < 160.0) {
-    col = shadeGround(ro + rd * tg, gn, kind, rd);
+  } else if (tg < tmax + 0.001) {
+    col = shadeGround(ro + rd * tg, gn, kind, rd, ro);
   } else {
     col = sky(rd);
+    t = 160.0;
   }
   col = mix(col, FOG + vec3(0.1, 0.11, 0.18) * gFlash, 1.0 - exp(-t * 0.02));
-  col += glow(ro, rd, t, 0.015);
+  col += glow(ro, rd, t, 0.015, 7);
   col += vec3(1.0, 0.05, 0.08) * pointGlow(ro, rd, fromBike(vec3(0.0, 0.9, -0.86)), t, 0.0002);
   // the headlight, blinding when it points at the camera
   vec3 hl = fromBike(vec3(0.0, 0.95, 0.76));

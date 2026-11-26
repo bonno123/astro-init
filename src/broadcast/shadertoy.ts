@@ -16,7 +16,8 @@
 // Not yet: texture, keyboard, cubemap and volume inputs and passes.
 //
 // It also looks after the things a full-screen shader on a visitor's phone
-// needs: it renders at a lower resolution when frames get slow, compiles
+// needs: it draws at most 60 frames a second, renders at a lower resolution
+// when frames get slow, compiles
 // without freezing the page where the browser allows, keeps time across a
 // hidden tab, and frees the GPU the moment it's destroyed.
 
@@ -63,6 +64,8 @@ export type ToyAudio = {
 const MAX_PIXELS = 1920 * 1080;
 /** How far it will drop the resolution to keep up. */
 const MIN_QUALITY = 0.35;
+/** The fastest it draws: one frame in this many ms. */
+const FRAME = 1000 / 60;
 /** Shadertoy's sample rate. The browser resamples to the device's. */
 const SAMPLE_RATE = 44100;
 /** The song is rendered this many samples at a time, one block a frame: 65,536, about 1.5 s of audio. */
@@ -418,7 +421,9 @@ async function build(
   // ---- the loop, and keeping up: measure 30 frames at a time, and trade resolution for speed ----
 
   let raf = 0;
-  let last = 0;
+  let last = 0; // when the last frame was drawn
+  let seen = 0; // when the browser last offered one
+  let owed = 0; // ms of frames due at 60 a second, not yet drawn
   let mode: "idle" | "playing" | "still" = "idle";
   let stillAt = 0;
   let windowN = 0;
@@ -458,6 +463,14 @@ async function build(
 
   function tick(now: number) {
     raf = requestAnimationFrame(tick);
+    // At most 60 frames a second. A 90 or 120 Hz screen offers more, and drawing
+    // them all would double the GPU's work (and the fan, and the battery) for a
+    // picture that moves like film anyway. Keeping count, rather than just
+    // skipping every other one, gets 60 out of a 90 Hz screen too, not 45.
+    owed = Math.min(owed + (seen ? now - seen : FRAME), FRAME);
+    seen = now;
+    if (owed < FRAME - 2) return;
+    owed -= FRAME;
     // A hidden tab gets no frames; when it's back, time carries on instead of jumping.
     const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
     last = now;
@@ -697,6 +710,8 @@ async function build(
       if (destroyed || isLost() || mode === "playing") return;
       mode = "playing";
       last = 0;
+      seen = 0;
+      owed = 0;
       raf = requestAnimationFrame(tick);
       prepare(); // so the sound is ready by the time someone asks for it
     },
