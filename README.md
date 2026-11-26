@@ -41,3 +41,17 @@ Copy `.env.example` to `.env` and set `PUBLIC_API_ENDPOINT` to the Worker you wa
 - **Worker**: `yarn deploy:worker`
 
 See `WRANGLER_COMMANDS.md` for the database commands and the secrets the Worker needs.
+
+## Broadcast videos
+
+A video broadcast plays an MP4 from an https link (an R2 public bucket works). The browser streams it with range requests and starts within a second or two; it doesn't wait for the whole file. There is one quality, though, unlike YouTube's adaptive streaming (HLS/DASH), which switches between several qualities to suit the connection.
+
+- Use H.264 `.mp4`. Older iPhones don't play `.webm`.
+- Save it with **faststart** (the index at the front), or the browser has to fetch the end of the file before it can play. HandBrake calls this "Web Optimized". With ffmpeg:
+
+  ```sh
+  ffmpeg -i input.mov -vf "scale=-2:1080" -c:v libx264 -crf 24 -preset slow \
+    -c:a aac -b:a 128k -movflags +faststart greeting.mp4
+  ```
+
+- Keep greetings to 10–30 s and a few MB. For longer videos, or uploads straight from a phone, use Cloudflare Stream: it encodes to HLS. The video renderer would then need to accept `.m3u8` links and load hls.js only for those.
