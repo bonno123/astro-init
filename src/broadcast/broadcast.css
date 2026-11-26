@@ -398,6 +398,58 @@ html[data-quiet] .bc-timer {
   opacity: 1;
 }
 
+.bc-drag canvas {
+  cursor: grab;
+}
+
+.bc-drag canvas:active {
+  cursor: grabbing;
+}
+
+/* "drag to look around": once per visitor, top middle, clear of the caption,
+   the credit and the buttons down the right. */
+.bc-hint {
+  position: absolute;
+  top: max(22px, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 14px 8px 11px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 999px;
+  background: rgb(15 16 13 / 0.6);
+  color: var(--ink, #ece9e0);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -6px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.bc-hint.on {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.bc-hint svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.bc-hint svg .s {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .bc-credit {
   position: absolute;
   left: max(16px, env(safe-area-inset-left));
@@ -415,7 +467,12 @@ a.bc-credit:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bc-shader canvas {
+  .bc-shader canvas,
+  .bc-hint {
     transition: none;
+  }
+
+  .bc-hint {
+    transform: translate(-50%, 0);
   }
 }

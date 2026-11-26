@@ -4,11 +4,16 @@
 // With motion off it shows one still frame and waits for a tap to play.
 // One with a Sound tab starts silent, with a button for sound: browsers only
 // allow sound after a tap, and a song nobody asked for would be rude anyway.
+// One that answers to dragging shows a grab cursor, and tells a first-time
+// visitor once: it looks like a video otherwise.
 
 import { ICON } from "./icons";
 import { createToy, PASSES, type Channel, type Toy, type ToyProgram } from "./shadertoy";
 import { SHADERS, type ShaderDef } from "./shaders";
 import type { Renderer, ShaderPayload } from "./types";
+
+/** Set once a visitor has been told they can drag a shader. */
+const HINT_SEEN = "bc-drag-hint";
 
 // Each shader's code is its own chunk, fetched only when that one is shown.
 const SOURCES = import.meta.glob<string>("./shaders/*/*.glsl", { query: "?raw", import: "default" });
@@ -44,7 +49,13 @@ async function load(slug: string, def: ShaderDef): Promise<ToyProgram> {
   const seconds = def.sound?.seconds ?? (from ? SHADERS[from].sound?.seconds : undefined) ?? 180;
   return {
     common: codes.slice(0, 2).filter(Boolean).join("\n"),
-    passes: names.map((name, i) => ({ name, code: codes[i + 2], channels: channels(name) })),
+    passes: names.map((name, i) => ({
+      name,
+      code: codes[i + 2],
+      channels: channels(name),
+      optional: name !== "image" && Boolean(def.optional?.includes(name)),
+      size: name !== "image" ? def.sizes?.[name] : undefined,
+    })),
     sound: def.sound ? { code: soundCode, seconds } : null,
   };
 }
@@ -106,6 +117,32 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
   let toy: Toy | null = null;
   let gone = false;
 
+  // Once per visitor, the first time a shader they can drag is on: say so, then
+  // get out of the way on the first touch, or after a few seconds.
+  const hint = () => {
+    try {
+      if (localStorage.getItem(HINT_SEEN)) return;
+      localStorage.setItem(HINT_SEEN, "1");
+    } catch {
+      // storage is off: show it anyway, every time
+    }
+    const el = document.createElement("p");
+    el.className = "bc-hint";
+    el.setAttribute("aria-hidden", "true");
+    el.innerHTML = `${ICON.orbit}<span>drag to look around</span>`;
+    wrap.append(el);
+    const done = () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+      canvas.removeEventListener("pointerdown", done);
+      el.classList.remove("on");
+      setTimeout(() => el.remove(), 600);
+    };
+    const show = setTimeout(() => el.classList.add("on"), 1200); // once the picture has faded in
+    const hide = setTimeout(done, 6500);
+    canvas.addEventListener("pointerdown", done);
+  };
+
   play.addEventListener("click", () => {
     play.hidden = true;
     toy?.play();
@@ -129,9 +166,16 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
     try {
       const program = await load(p.shader, def);
       if (gone) return;
-      const made = await createToy(canvas, program, { scale: def.scale, onLost: () => ctx.close() });
+      // Leaning with the mouse is parallax, the motion reduced motion asks to be spared.
+      const hover = Boolean(def.hover) && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const made = await createToy(canvas, program, { scale: def.scale, drag: def.drag, hover, onLost: () => ctx.close() });
       if (gone) return made.destroy();
       toy = made;
+      // Without its optional buffers (no float rendering here) a shader may not answer to dragging; don't offer it.
+      if (def.drag && !toy.missing.length) {
+        wrap.classList.add("bc-drag");
+        hint();
+      }
       if (ctx.still) {
         toy.still(def.stillAt ?? 0);
         play.hidden = false;

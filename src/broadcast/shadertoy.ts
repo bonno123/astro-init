@@ -15,6 +15,13 @@
 //
 // Not yet: texture, keyboard, cubemap and volume inputs and passes.
 //
+// Beyond Shadertoy: a buffer can be optional (left out where float buffers
+// can't be rendered) or a fixed small size (for state: a few numbers, not a
+// picture); a shader that answers to dragging can be dragged while it's a still
+// picture; and iHover follows a mouse resting over the picture, eased (xy -1..1
+// across and up from the middle, z how much it's there, 0..1), for a shader
+// that leans toward it. Shadertoy has no hover: iMouse moves only while pressed.
+//
 // It also looks after the things a full-screen shader on a visitor's phone
 // needs: it draws at most 60 frames a second, renders at a lower resolution
 // when frames get slow, compiles
@@ -26,7 +33,19 @@ export type PassName = (typeof PASSES)[number];
 export type BufferName = Exclude<PassName, "image">;
 
 export type Channel = { src: BufferName; filter: "linear" | "nearest"; wrap: "clamp" | "repeat" };
-export type ToyPass = { name: PassName; code: string; channels: (Channel | null)[] };
+export type ToyPass = {
+  name: PassName;
+  code: string;
+  channels: (Channel | null)[];
+  /** A buffer the shader can do without: where float buffers can't be rendered it's left out, and what reads it gets black. */
+  optional?: boolean;
+  /**
+   * A buffer this many pixels, not the picture's size, for one that only keeps a
+   * few numbers (a camera, a score). It's never resized. iResolution in it is
+   * still the picture's; iChannelResolution says its own.
+   */
+  size?: [number, number];
+};
 /** The Sound tab's code, and how long the song is before it loops (at most 180 s, Shadertoy's length). */
 export type ToySound = { code: string; seconds: number };
 /** Passes in run order, Image last. */
@@ -35,6 +54,10 @@ export type ToyProgram = { common: string; passes: ToyPass[]; sound?: ToySound |
 export type ToyOptions = {
   /** At most this fraction of the screen's pixels, for heavy shaders. Default 1. */
   scale?: number;
+  /** It answers to dragging: a still picture is redrawn, at the same moment, while it's dragged and for 2 s after. */
+  drag?: boolean;
+  /** Feed iHover: where a mouse resting over it is, eased. Off, it stays at zero. */
+  hover?: boolean;
   /** The GPU dropped the context (driver reset, too much memory). Nothing more will draw. */
   onLost: () => void;
 };
@@ -48,6 +71,8 @@ export type Toy = {
   destroy(): void;
   /** Null when the shader has no Sound tab, or this device can't render one. */
   sound: ToyAudio | null;
+  /** Optional buffers left out, because this device can't render float buffers. */
+  missing: BufferName[];
 };
 
 export type ToyAudio = {
@@ -88,6 +113,7 @@ uniform float iTimeDelta;
 uniform float iFrameRate;
 uniform int iFrame;
 uniform vec4 iMouse;
+uniform vec4 iHover;
 uniform vec4 iDate;
 uniform float iSampleRate;
 uniform float iChannelTime[4];
@@ -129,6 +155,7 @@ const UNIFORMS = [
   "iFrameRate",
   "iFrame",
   "iMouse",
+  "iHover",
   "iDate",
   "iSampleRate",
   "iChannelTime",
@@ -136,7 +163,7 @@ const UNIFORMS = [
 ] as const;
 
 type Built = { pass: ToyPass; prog: WebGLProgram; fs: WebGLShader; u: Record<(typeof UNIFORMS)[number], WebGLUniformLocation | null> };
-type Target = { tex: WebGLTexture[]; fbo: WebGLFramebuffer[]; read: number };
+type Target = { tex: WebGLTexture[]; fbo: WebGLFramebuffer[]; read: number; w: number; h: number };
 
 const nextFrame = () => new Promise<number>((r) => requestAnimationFrame(r));
 
@@ -179,14 +206,17 @@ async function build(
   isLost: () => boolean,
   release: () => void,
 ): Promise<Toy> {
-  const buffers = program.passes.filter((p): p is ToyPass & { name: BufferName } => p.name !== "image");
-  // Shadertoy's buffers are 32-bit float. Without linear filtering for those, 16-bit, which always filters.
-  let format: number = gl.RGBA32F;
+  // Shadertoy's buffers are 32-bit float. Without linear filtering for those, 16-bit, which always filters;
+  // and 16-bit where the GPU can render only those (EXT_color_buffer_half_float, older phones).
   const floats = Boolean(gl.getExtension("EXT_color_buffer_float"));
-  if (buffers.length) {
-    if (!floats) throw new Error("This GPU can't render to float buffers.");
-    if (!gl.getExtension("OES_texture_float_linear")) format = gl.RGBA16F;
-  }
+  const halves = floats || Boolean(gl.getExtension("EXT_color_buffer_half_float"));
+  const format: number = floats && gl.getExtension("OES_texture_float_linear") ? gl.RGBA32F : gl.RGBA16F;
+  // With neither, the optional buffers are left out (what reads them gets black), and any other means it can't run.
+  const wanted = program.passes.filter((p) => p.name !== "image");
+  if (!halves && wanted.some((p) => !p.optional)) throw new Error("This GPU can't render to float buffers.");
+  const passes = halves ? program.passes : program.passes.filter((p) => p.name === "image");
+  const missing = halves ? [] : wanted.map((p) => p.name as BufferName);
+  const buffers = passes.filter((p): p is ToyPass & { name: BufferName } => p.name !== "image");
   // The song is read back as floats too. Without them it plays silent rather than not at all.
   const song = program.sound && floats && typeof AudioBuffer === "function" ? program.sound : null;
 
@@ -201,7 +231,7 @@ async function build(
     return s;
   };
   const vs = compile(gl.VERTEX_SHADER, VERT);
-  const built: Built[] = program.passes.map((pass) => {
+  const built: Built[] = passes.map((pass) => {
     const fs = compile(gl.FRAGMENT_SHADER, fragment(program.common, pass));
     const prog = gl.createProgram()!;
     gl.attachShader(prog, vs);
@@ -321,6 +351,10 @@ async function build(
     canvas.width = w;
     canvas.height = h;
     for (const b of buffers) {
+      if (b.size) {
+        if (!targets.has(b.name)) targets.set(b.name, { ...pair(b.size[0], b.size[1]), read: 0, w: b.size[0], h: b.size[1] });
+        continue; // its own size, whatever the picture's
+      }
       const next = pair(w, h);
       const old = targets.get(b.name);
       if (old) {
@@ -332,7 +366,7 @@ async function build(
         gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
         drop(old);
       }
-      targets.set(b.name, { ...next, read: 0 });
+      targets.set(b.name, { ...next, read: 0, w, h });
     }
     W = w;
     H = h;
@@ -342,32 +376,85 @@ async function build(
 
   // ---- iMouse, as Shadertoy has it: xy while down, zw where it went down; z < 0 once up, w > 0 on the first frame only ----
 
+  // A quick tap, or the two of a double tap, can come and go between two frames.
+  // So presses and releases wait in a queue and reach the shader one a frame
+  // (nextPress, at the start of each), and the shader sees every one.
+
   const mouse = [0, 0, 0, 0];
   let fresh = false;
+  let held = false; // the pointer, now, whatever the shader has seen yet
+  let pos = [0, 0]; // where it is now, while held
+  const presses: ([number, number] | null)[] = []; // a press where it went down, or null for a release
   const at = (e: PointerEvent) => {
     const r = canvas.getBoundingClientRect();
     return [((e.clientX - r.left) * W) / r.width, ((r.bottom - e.clientY) * H) / r.height];
   };
+  const queue = (p: [number, number] | null) => {
+    presses.push(p);
+    if (presses.length > 8) presses.splice(0, 2); // nobody's drawing (a hidden tab): keep the last few
+  };
   const onDown = (e: PointerEvent) => {
     const [x, y] = at(e);
-    mouse.splice(0, 4, x, y, x, y);
-    fresh = true;
+    held = true;
+    pos = [x, y];
+    queue([x, y]);
     canvas.setPointerCapture?.(e.pointerId);
+    stillDrag();
   };
   const onMove = (e: PointerEvent) => {
-    if (mouse[2] <= 0) return;
-    const [x, y] = at(e);
-    mouse[0] = x;
-    mouse[1] = y;
+    if (!held) return;
+    pos = at(e);
+    if (mouse[2] > 0 && !presses.length) [mouse[0], mouse[1]] = pos;
   };
   const onUp = () => {
-    mouse[2] = -Math.abs(mouse[2]);
-    mouse[3] = -Math.abs(mouse[3]);
+    if (!held) return;
+    held = false;
+    queue(null);
+    stillUntil = performance.now() + 2000;
+    stillDrag();
   };
+  function nextPress() {
+    const p = presses.shift();
+    if (p === undefined) return;
+    if (p) {
+      mouse.splice(0, 4, p[0], p[1], p[0], p[1]);
+      fresh = true;
+      if (!presses.length && held) [mouse[0], mouse[1]] = pos; // it has moved since
+    } else {
+      mouse[2] = -Math.abs(mouse[2]);
+      mouse[3] = -Math.abs(mouse[3]);
+    }
+  }
   canvas.addEventListener("pointerdown", onDown);
   canvas.addEventListener("pointermove", onMove);
   canvas.addEventListener("pointerup", onUp);
   canvas.addEventListener("pointercancel", onUp);
+
+  // ---- iHover: a mouse over the picture, not pressed, eased so a shader can lean toward it ----
+  // xy -1..1 from the middle (x right, y up), z how much it's there (0..1). Touch has no hover.
+
+  const hover = [0, 0, 0];
+  const hoverGoal = [0, 0, 0];
+  const onHover = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    const r = canvas.getBoundingClientRect();
+    hoverGoal[0] = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
+    hoverGoal[1] = Math.max(-1, Math.min(1, 1 - ((e.clientY - r.top) / r.height) * 2));
+    hoverGoal[2] = e.buttons ? 0 : 1; // pressed, it's a drag: the lean lets go
+  };
+  const onHoverOut = () => {
+    hoverGoal[2] = 0;
+  };
+  if (opts.hover) {
+    canvas.addEventListener("pointermove", onHover);
+    canvas.addEventListener("pointerdown", onHover);
+    canvas.addEventListener("pointerup", onHover);
+    canvas.addEventListener("pointerleave", onHoverOut);
+  }
+  function easeHover(dt: number) {
+    const k = 1 - Math.exp(-dt * 4); // most of the way in about half a second
+    for (let i = 0; i < 3; i++) hover[i] += (hoverGoal[i] - hover[i]) * k;
+  }
 
   // ---- one frame: every pass in order ----
 
@@ -378,13 +465,15 @@ async function build(
   const chTime = new Float32Array(4);
 
   function draw(t: number, dt: number) {
+    nextPress();
+    easeHover(dt);
     const d = new Date();
     const secs = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
     chTime.fill(t);
     for (const b of built) {
       const target = b.pass.name === "image" ? null : targets.get(b.pass.name)!;
       gl.bindFramebuffer(gl.FRAMEBUFFER, target ? target.fbo[1 - target.read] : null);
-      gl.viewport(0, 0, W, H);
+      gl.viewport(0, 0, target ? target.w : W, target ? target.h : H);
       gl.useProgram(b.prog);
       for (let i = 0; i < 4; i++) {
         const c = b.pass.channels[i];
@@ -393,7 +482,7 @@ async function build(
         if (c && src) {
           gl.bindTexture(gl.TEXTURE_2D, src.tex[src.read]);
           gl.bindSampler(i, sampler(c));
-          res.set([W, H, 1], i * 3);
+          res.set([src.w, src.h, 1], i * 3);
         } else {
           gl.bindTexture(gl.TEXTURE_2D, blank);
           gl.bindSampler(i, null);
@@ -407,6 +496,7 @@ async function build(
       gl.uniform1f(u.iFrameRate, fps);
       gl.uniform1i(u.iFrame, frame);
       gl.uniform4f(u.iMouse, mouse[0], mouse[1], mouse[2], fresh ? mouse[3] : -Math.abs(mouse[3]));
+      gl.uniform4f(u.iHover, hover[0], hover[1], hover[2], 0);
       gl.uniform4f(u.iDate, d.getFullYear(), d.getMonth(), d.getDate(), secs);
       gl.uniform1f(u.iSampleRate, 44100);
       gl.uniform1fv(u.iChannelTime, chTime);
@@ -434,7 +524,7 @@ async function build(
   function resized() {
     if (!fit()) return;
     settle = 10;
-    if (mode === "still") renderStill(); // a resize clears the canvas
+    if (mode === "still") draw(stillAt, 0); // a resize clears the canvas; the buffers were kept
   }
 
   function adapt(dt: number) {
@@ -484,6 +574,22 @@ async function build(
     }
     draw(time, Math.min(0.1, Math.max(0, time - was)));
     adapt(dt);
+  }
+
+  // A still picture that answers to dragging (opts.drag): redrawn at the same
+  // moment while it's held and for a little after, so the shader can show the
+  // drag and finish what it does on a release. Time doesn't move.
+  let stillUntil = 0;
+  let stillRaf = 0;
+  function stillDrag() {
+    if (!opts.drag || mode !== "still" || stillRaf || destroyed) return;
+    const step = (now: number) => {
+      stillRaf = 0;
+      if (mode !== "still" || destroyed) return;
+      draw(stillAt, 1 / 60);
+      if (held || presses.length || now < stillUntil) stillRaf = requestAnimationFrame(step);
+    };
+    stillRaf = requestAnimationFrame(step);
   }
 
   function renderStill() {
@@ -706,8 +812,11 @@ async function build(
   }
   return {
     sound: audio,
+    missing,
     play() {
       if (destroyed || isLost() || mode === "playing") return;
+      cancelAnimationFrame(stillRaf);
+      stillRaf = 0;
       mode = "playing";
       last = 0;
       seen = 0;
@@ -726,11 +835,16 @@ async function build(
       if (destroyed) return;
       destroyed = true;
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(stillRaf);
       ro.disconnect();
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
       canvas.removeEventListener("pointercancel", onUp);
+      canvas.removeEventListener("pointermove", onHover);
+      canvas.removeEventListener("pointerdown", onHover);
+      canvas.removeEventListener("pointerup", onHover);
+      canvas.removeEventListener("pointerleave", onHoverOut);
       if (!isLost()) {
         targets.forEach(drop);
         samplers.forEach((s) => gl.deleteSampler(s));

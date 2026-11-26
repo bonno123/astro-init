@@ -26,6 +26,10 @@ shadertoy.com can be pasted in unchanged.
      stillAt: 12,            // the frame shown when motion is off
      scale: 0.75,            // optional: render at most 75% of the pixels, for a heavy one
      sound: { seconds: 48 }, // optional: it has sound.glsl, and the song loops after 48 s
+     drag: true,             // optional: it answers to dragging (iMouse); see Dragging below
+     hover: true,            // optional: it leans toward a resting mouse (iHover); see Dragging below
+     optional: ["buffer-a"], // optional: buffers it can do without where float buffers can't render
+     sizes: { "buffer-a": [4, 1] }, // optional: a buffer this many pixels, for a few numbers of state
      passes: {
        "buffer-a": { iChannel0: "buffer-a" },                        // reads its own last frame
        image: { iChannel0: "buffer-a", iChannel1: { src: "buffer-a", filter: "nearest" } },
@@ -47,10 +51,53 @@ itself included), with linear or nearest filtering and clamp or repeat
 wrapping per input; and the Sound tab. All the usual uniforms are there,
 including iMouse (click and drag) and iDate.
 
+Beyond Shadertoy, two things for buffers. `sizes` gives one a fixed size in
+pixels instead of the picture's, for a buffer that keeps state (a camera, a
+score) rather than an image: a few pixels cost nothing, where a screen-sized
+float buffer is about 1 ms a frame at 1440p and tens of MB of GPU memory. It's never
+resized, so read it with `texelFetch` at fixed pixels; `iResolution` in it is
+still the picture's. And `optional` names buffers the shader can do without:
+on a device that can't render float buffers they're left out, and what reads
+one gets black, instead of the shader not showing at all.
+
 Not yet: texture, keyboard, webcam, music and video inputs; Cubemap and
 Volume passes. A shader that uses any of these won't look
 right until it's added to the runner. If the shader is too heavy or needs
 those, record it and use a `video` broadcast instead.
+
+## Dragging
+
+`iMouse` follows a mouse or a finger on the picture (the page doesn't scroll
+under it). Every press and release reaches the shader, one a frame, so a quick
+tap or a double tap isn't lost between two frames. Set `drag: true` on a shader
+that does something with it, and:
+
+- the cursor over it is a grab hand, and a first-time visitor sees "drag to
+  look around" for a few seconds (once, remembered in localStorage);
+- with motion off, the still frame can be dragged too: the runner redraws that
+  same moment while it's held and for 2 s after, and nothing else moves.
+
+`night-ride` swings its camera round the bike. `buffer-a.glsl` keeps that
+camera in a 4×1 buffer: the angles, a flick's momentum, how long since it was
+let go. A tap does nothing, a double tap or 4 s alone hands it back to the
+director's cuts, and on a still frame it stays where it's left. Without float
+buffers the buffer is left out and it's the director's cuts alone, no cursor
+and no hint.
+
+Measure a drag from where it began (`iMouse.zw`), not frame to frame, or a
+device with 16-bit buffers rounds its way into a slow drift.
+
+### Hover
+
+Shadertoy has no hover: `iMouse` only moves while a button is down. Set
+`hover: true` and the runner fills `iHover`, a mouse resting over the picture,
+eased over about half a second: `xy` from -1 to 1 across and up from the
+middle, `z` how much it's there (0 to 1: it fades in when the mouse arrives,
+and out when it leaves or presses to drag). `night-ride` slides its camera up
+to 45 cm toward it, still looking at the same point, so the bike shifts
+against the street behind it, like moving your head at a window. A mouse only (touch has no
+hover), and off with reduced motion: that's parallax, the kind of motion it
+asks to be spared. It needs no buffer, so it works on every device.
 
 ## Sound
 
@@ -93,13 +140,14 @@ artwork or characters brings their rights too, not only the shader author's.
   when frames go under about 40 a second. It climbs back when there's room.
 - A heavy one can still lag a slow phone before that kicks in. Measure it
   (`night-ride` takes about 13 ms a frame at 2560×1440 on the laptop it was
-  made on) and look for the usual wins: loops over fewer lights, shorter
+  made on, dragged or not) and look for the usual wins: loops over fewer lights, shorter
   marches for reflections, stopping rays that can't hit anything, long strides
   through empty space. Or set `scale`.
 - It compiles in the background where the browser can, so the page doesn't
   freeze, and fades in once it's ready.
-- No WebGL2, no float buffers, a compile error or a lost GPU context closes
-  the overlay quietly.
+- No WebGL2, a compile error or a lost GPU context closes the overlay quietly;
+  so does no float rendering, for a shader with a buffer that isn't
+  `optional`. Where only 16-bit float rendering is there, buffers are 16-bit.
 - With reduced motion or the site's quiet mode, it shows the frame at
   `stillAt` with a play button.
 - Time stops while the tab is hidden and carries on when it's back.

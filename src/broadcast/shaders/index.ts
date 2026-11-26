@@ -18,6 +18,28 @@ export type ShaderDef = {
   passes: Partial<Record<Exclude<PassName, "image">, PassDef>> & { image: PassDef };
   /** The moment shown when motion is off, in seconds. Default 0. */
   stillAt?: number;
+  /**
+   * It answers to dragging (iMouse): the cursor over it is a hand that can grab,
+   * a first-time visitor gets a hint, and it can be dragged while it's a still picture.
+   */
+  drag?: boolean;
+  /**
+   * Buffers it can do without. A device that can't render float buffers leaves
+   * these out (what reads one gets black) and still shows the rest, instead of nothing.
+   */
+  optional?: BufferName[];
+  /**
+   * It leans toward a mouse resting over it (iHover: xy -1..1 from the middle, z
+   * how much it's there), as a window does when you move your head. A mouse only:
+   * touch has no hover. Off with reduced motion, where it stays at zero.
+   */
+  hover?: boolean;
+  /**
+   * Buffers of a fixed size in pixels, [width, height], instead of the picture's:
+   * for one that keeps a few numbers rather than an image. Never resized, so a
+   * value stays at its pixel. iResolution in it is still the picture's.
+   */
+  sizes?: Partial<Record<BufferName, [number, number]>>;
   /** At most this fraction of the screen's pixels, for heavy shaders (0.5 = half). Default 1. */
   scale?: number;
   /**
@@ -49,7 +71,17 @@ export const SHADERS: Record<string, ShaderDef> = {
     stillAt: 31,
     // Neon Drive's song, and its clock: a streetlight passes on every beat
     sound: { from: "neon-drive" },
-    passes: { image: {} },
+    // drag to swing the camera round the bike; buffer-a keeps that camera,
+    // and without it, it's the director's cuts alone
+    drag: true,
+    // and the camera leans a little toward a mouse resting over it
+    hover: true,
+    optional: ["buffer-a"],
+    sizes: { "buffer-a": [4, 1] }, // four slots of camera state, not a picture
+    passes: {
+      "buffer-a": { iChannel0: "buffer-a" },
+      image: { iChannel0: "buffer-a" },
+    },
   },
   embers: {
     title: "Embers",

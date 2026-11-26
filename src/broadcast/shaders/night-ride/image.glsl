@@ -11,11 +11,11 @@
 // (glow). Everything repeats along the street with a period that divides one lap
 // of the song, so the loop has no seam.
 //
-// Metres. x across the street (right is +), y up, z forward. The bike stays near
-// z = 0 and the city slides past it.
+// Drag on it and the camera swings round the bike; let it be and the director
+// takes it back (buffer-a.glsl keeps that camera, iChannel0 here). A mouse
+// resting over it leans the camera a little its way (iHover). The ride and
+// the cuts are in common.glsl, which both passes share.
 
-const float P = 12.0; // metres between streetlights, and the width of a building
-const float LAP = 129.0; // streetlights passed in one lap of the song (see travel)
 const float KERB = 4.5; // half the road's width
 const float LAMP_X = 3.85; // where a streetlight's head hangs, either side
 const float LAMP_Y = 5.36;
@@ -23,11 +23,8 @@ const vec3 LAMP = vec3(1.0, 0.52, 0.2) * 70.0; // sodium orange
 const vec3 PINK = vec3(1.0, 0.18, 0.55);
 const vec3 CYAN = vec3(0.15, 0.75, 1.0);
 const vec3 FOG = vec3(0.012, 0.009, 0.02);
+const vec2 LEAN = vec2(0.45, 0.25); // metres the camera leans, across and up, toward a mouse at the picture's edge
 
-float gD; // how far the bike has gone this lap
-vec3 gBike; // where it is
-float gLean; // and how far it leans, radians
-float gKick;
 float gChorus; // 1 through the chorus
 float gFlash; // lightning, when the chorus lands
 float gSecs; // seconds into the song
@@ -58,23 +55,6 @@ float vnoise(vec2 x, float per) {
   float d = hashv(vec2(i.x + 1.0, y1));
   return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
-
-// --- the ride ---
-
-// Eases from 0 to a slope of 1 over x = 0..1: the integral of smoothstep.
-float ramp(float x) {
-  x = max(x, 0.0);
-  return x < 1.0 ? x * x * x - 0.5 * x * x * x * x : x - 0.5;
-}
-
-// Metres gone at beat b: one streetlight a beat, two a beat through the chorus
-// (easing up over the beat before it and back down after). 129 lights a lap, a
-// whole number, so the street is back where it started when the song loops.
-// The half-light offset puts a light right over the bike on each beat.
-float travel(float b) { return P * (b + ramp(b - 47.0) - ramp(b - 80.0) + 0.5); }
-
-/** How fast that is, in metres a second. */
-float speed(float b) { return P * (1.0 + smoothstep(47.0, 48.0, b) - smoothstep(80.0, 81.0, b)) / BEAT; }
 
 // --- distance functions ---
 
@@ -261,13 +241,15 @@ void lampsAt(vec3 p, vec3 n, vec3 v, float shin, out vec3 dif, out vec3 spe) {
  * The haze lit by each streetlight along a ray, to tmax: a faint wide part (the
  * integral of 1/distance² along the ray) and a tight bright core round the bulb,
  * if nothing's in front of it. soft widens both, for blurry reflections. count
- * is how many lights ahead to add up: past about 80 m (7) the fog has them.
+ * is how many lights ahead to add up (ahead the way the ray goes, behind the bike
+ * too): past about 80 m (7) the fog has them.
  */
 vec3 glow(vec3 ro, vec3 rd, float tmax, float soft, int count) {
   float acc = 0.0;
   float k0 = floor((ro.z + gD) / P);
+  float ahead = rd.z < 0.0 ? -1.0 : 1.0; // the way the ray goes along the street
   for (int j = -1; j < count; j++) {
-    float zc = (k0 + float(j) + 0.5) * P - gD;
+    float zc = (k0 + ahead * float(j) + 0.5) * P - gD;
     for (int s = 0; s < 2; s++) {
       vec3 oc = vec3(s == 0 ? -LAMP_X : LAMP_X, LAMP_Y - 0.12, zc) - ro;
       float tc = dot(oc, rd);
@@ -292,8 +274,9 @@ vec3 streaks(vec3 p, vec3 r, float rough, float tmax) {
   float k0 = floor((p.z + gD) / P);
   float sx = mix(0.006, 0.045, rough); // how wide, and how long, in radians
   float sy = mix(0.04, 0.6, rough);
+  float ahead = r.z < 0.0 ? -1.0 : 1.0;
   for (int j = -1; j < 5; j++) {
-    float zc = (k0 + float(j) + 0.5) * P - gD;
+    float zc = (k0 + ahead * float(j) + 0.5) * P - gD;
     for (int s = 0; s < 2; s++) {
       vec3 L = vec3(s == 0 ? -LAMP_X : LAMP_X, LAMP_Y - 0.12, zc) - p;
       float d2 = dot(L, L);
@@ -490,67 +473,6 @@ vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd, vec3 eye) {
 vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
 
 /**
- * Where the camera is, cut on the bar lines: down from above in the intro, then
- * behind, beside the wheel and in front through the verse; low and fast, from
- * overhead and round the side in the chorus; and in the outro it stops and the
- * bike rides off. vel is how fast the camera goes through the city (for the rain).
- */
-void shot(float b, out vec3 ro, out vec3 ta, out vec3 up, out float zoom, out float vel) {
-  vec3 k = gBike;
-  float bar = floor(b / 4.0);
-  up = vec3(0.0, 1.0, 0.0);
-  zoom = 1.7;
-  vel = speed(b);
-  if (bar < 4.0) {
-    // the intro: high over the street, coming down behind the rider
-    float s = smoothstep(0.0, 1.0, b / 16.0);
-    ro = vec3(0.8, mix(18.0, 2.2, s), mix(-26.0, -6.0, s));
-    ta = vec3(k.x * 0.6, 0.8, mix(18.0, 4.0, s));
-    zoom = 1.6;
-  } else if (bar < 8.0) {
-    // behind, the drums come in
-    ro = vec3(0.7 + k.x * 0.6, 1.3 + 0.006 * gKick, -3.8);
-    ta = vec3(0.2 + k.x * 0.85, 0.85, 2.5);
-  } else if (bar < 10.0) {
-    // low beside it on the left, the wheel close and the street rushing behind
-    float s = (b - 32.0) / 8.0;
-    ro = k + vec3(-1.7, 0.4, mix(1.4, -0.5, s));
-    ta = k + vec3(0.0, 0.65, 0.3);
-    zoom = 1.35;
-  } else if (bar < 12.0) {
-    // in front, looking back into the headlight
-    float s = (b - 40.0) / 8.0;
-    ro = k + vec3(0.5 - 1.0 * s, 1.05, 4.6 - 1.2 * s);
-    ta = k + vec3(0.0, 0.85, 0.0);
-    zoom = 1.9;
-  } else if (bar < 16.0) {
-    // the chorus: low and close behind, wide, shaken by the kick
-    ro = k + vec3(0.4, 0.55 + 0.02 * gKick, -2.3);
-    ta = k + vec3(-0.1, 0.75, 4.0);
-    zoom = 1.2;
-  } else if (bar < 18.0) {
-    // straight down from above, rising
-    float s = (b - 64.0) / 8.0;
-    ro = k + vec3(0.0, 4.0 + 2.0 * s, -0.3);
-    ta = k + vec3(0.0, 0.0, 0.2);
-    up = vec3(0.0, 0.0, 1.0);
-    zoom = 2.2;
-  } else if (bar < 20.0) {
-    // round the right-hand side to the front
-    float a = mix(-0.9, 1.1, (b - 72.0) / 8.0);
-    ro = k + vec3(2.3 * cos(a), 0.9, 2.3 * sin(a));
-    ta = k + vec3(0.0, 0.75, 0.2);
-    zoom = 1.6;
-  } else {
-    // the outro: the camera stops in the street, and the bike rides off into the night
-    float z = -4.0 - (gD - travel(80.0));
-    ro = vec3(0.4, 1.5, z);
-    ta = vec3(1.0, 1.1, z + 30.0);
-    vel = 0.0;
-  }
-}
-
-/**
  * Rain: drops on four sheets in front of the camera, each sheet sweeping toward
  * it (or away) as the camera moves and starting over. Each drop is drawn as the
  * short streak it makes across the screen in a fiftieth of a second. s is the
@@ -616,27 +538,51 @@ float rain(vec2 s, float zoom, vec3 V, vec3 ro, vec3 cu, vec3 cv, vec3 cw, out v
   return acc;
 }
 
+/** The camera's axes: right, up and forward, looking from ro at ta. */
+void lens(vec3 ro, vec3 ta, vec3 up, out vec3 cu, out vec3 cv, out vec3 cw) {
+  cw = normalize(ta - ro);
+  vec3 side = cross(up, cw);
+  cu = dot(side, side) > 1e-6 ? normalize(side) : vec3(1.0, 0.0, 0.0);
+  cv = cross(cw, cu);
+}
+
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float b = songBeat(iTime);
   gMirror = false;
   gSecs = b * BEAT;
-  gD = travel(b);
-  gKick = exp(-sinceKick(b) * 4.0);
+  ride(b);
   gChorus = smoothstep(47.0, 48.0, b) * (1.0 - smoothstep(79.0, 81.0, b));
   // lightning when the chorus lands: a flash, a flicker after it
   float fl = b - 48.0;
   gFlash = fl > 0.0 && fl < 3.0 ? exp(-fl * 5.0) + 0.6 * exp(-abs(fl - 0.35) * 25.0) : 0.0;
-  float w = b * PI / 8.0; // a slow weave across the lane, four bars each way
-  gBike = vec3(1.7 + 0.5 * sin(w), 0.0, 0.0);
-  gLean = 0.12 * sin(w);
 
   vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
   vec3 ro, ta, up;
   float zoom, vel;
   shot(b, ro, ta, up, zoom, vel);
-  vec3 cw = normalize(ta - ro);
-  vec3 cu = normalize(cross(up, cw));
-  vec3 cv = cross(cw, cu);
+  // The camera you drag, as much as it's yours: on the way between, it swings
+  // round the bike rather than cutting through it.
+  vec4 cam = cameraSlot(iChannel0, 0); // how much it's yours, yaw, pitch, distance
+  float mine = smoothstep(0.0, 1.0, cam.x);
+  if (mine > 0.0) {
+    vec3 a = toOrbit(ro - pivot());
+    vec3 o = vec3(a.x + wrapAngle(cam.y - a.x), cam.zw);
+    ro = fromOrbit(mix(a, o, mine));
+    ta = mix(ta, pivot(), mine);
+    up = normalize(mix(up, vec3(0.0, 1.0, 0.0), mine));
+    zoom = mix(zoom, ORBIT_ZOOM, mine);
+    vel = mix(vel, speed(b), mine); // it rides along with the bike
+  }
+  vec3 cu, cv, cw;
+  lens(ro, ta, up, cu, cv, cw);
+  // Lean toward a mouse resting over the picture, as you'd move your head at a
+  // window: the camera slides a little, still looking at the same point, so
+  // what's near shifts against what's far.
+  if (iHover.z > 0.001) {
+    ro += (cu * iHover.x * LEAN.x + cv * iHover.y * LEAN.y) * iHover.z;
+    ro.y = max(ro.y, 0.2);
+    lens(ro, ta, up, cu, cv, cw);
+  }
   vec3 rd = normalize(uv.x * cu + uv.y * cv + zoom * cw);
 
   vec3 gn;
