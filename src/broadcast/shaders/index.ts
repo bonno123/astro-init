@@ -20,12 +20,24 @@ export type ShaderDef = {
   stillAt?: number;
   /** At most this fraction of the screen's pixels, for heavy shaders (0.5 = half). Default 1. */
   scale?: number;
+  /**
+   * It has a Sound tab, sound.glsl, and the song loops after this many seconds (default 180, at most 180).
+   * Make it the same length the picture loops at, so the two stay together lap after lap.
+   */
+  sound?: { seconds?: number };
 };
 
 export const SHADERS: Record<string, ShaderDef> = {
   aurora: {
     title: "Aurora",
     stillAt: 42,
+    passes: { image: {} },
+  },
+  "neon-drive": {
+    title: "Neon Drive",
+    stillAt: 31,
+    // 24 bars of 4 beats at 110 bpm: SONG in common.glsl
+    sound: { seconds: (24 * 4 * 60) / 110 },
     passes: { image: {} },
   },
   embers: {

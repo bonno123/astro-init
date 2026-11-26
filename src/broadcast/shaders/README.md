@@ -12,7 +12,8 @@ shadertoy.com can be pasted in unchanged.
 
 1. Make a folder named for it: lowercase letters, digits and dashes (`new-year-2027`).
 2. Put each tab in its own file there, named for the tab:
-   `image.glsl` (required), `common.glsl`, `buffer-a.glsl` … `buffer-d.glsl`.
+   `image.glsl` (required), `common.glsl`, `buffer-a.glsl` … `buffer-d.glsl`,
+   `sound.glsl`.
    Paste each tab's code as it is, `mainImage` and all.
 3. Add an entry to `SHADERS` in `index.ts`: its title, its passes, and what
    each pass's `iChannel0..3` reads. On Shadertoy that's the row of inputs
@@ -24,6 +25,7 @@ shadertoy.com can be pasted in unchanged.
      credit: { by: "Someone", link: "https://www.shadertoy.com/view/XXXXXX", licence: "CC BY-NC-SA 3.0" },
      stillAt: 12,            // the frame shown when motion is off
      scale: 0.75,            // optional: render at most 75% of the pixels, for a heavy one
+     sound: { seconds: 48 }, // optional: it has sound.glsl, and the song loops after 48 s
      passes: {
        "buffer-a": { iChannel0: "buffer-a" },                        // reads its own last frame
        image: { iChannel0: "buffer-a", iChannel1: { src: "buffer-a", filter: "nearest" } },
@@ -42,13 +44,34 @@ deploy, not a Worker one.
 
 Supported: Image, Common and Buffers A–D (float, each readable by any pass,
 itself included), with linear or nearest filtering and clamp or repeat
-wrapping per input. All the usual uniforms are there, including iMouse
-(click and drag) and iDate.
+wrapping per input; and the Sound tab. All the usual uniforms are there,
+including iMouse (click and drag) and iDate.
 
 Not yet: texture, keyboard, webcam, music and video inputs; Cubemap and
-Volume passes; and the Sound tab. A shader that uses any of these won't look
+Volume passes. A shader that uses any of these won't look
 right until it's added to the runner. If the shader is too heavy or needs
 those, record it and use a `video` broadcast instead.
+
+## Sound
+
+`sound.glsl` is Shadertoy's Sound tab: `vec2 mainSound(int samp, float time)`
+(or the older `mainSound(float time)`) returns left and right, -1 to 1, at
+44.1 kHz, with Common in front of it like every pass. The whole song is
+rendered on the GPU once, ahead, a block a frame (`neon-drive`'s 52 s took
+about half a second on a laptop), then loops through Web Audio.
+
+- It starts silent, with a "sound on" button. Browsers only allow sound after
+  a tap, and a song nobody asked for would be rude anyway. With motion off,
+  the button shows once they press play.
+- While it plays, the picture's iTime follows the audio, latency included, so
+  the two stay together. Put the tempo and the song's plan in `common.glsl`
+  and have both read it: then the picture can hit the kick (`neon-drive` does).
+- Set `sound.seconds` to the length the picture loops at, so they stay
+  together lap after lap.
+- A Sound tab that doesn't compile costs the sound, not the picture: the
+  console says why. No float rendering on the device: no sound button.
+- Make a song for here, or one you have the rights to. A recreation of
+  someone's song is their song.
 
 ## Taking a shader from Shadertoy
 

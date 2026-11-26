@@ -2,15 +2,16 @@
 // named by the broadcast; the code ships with the site and is never stored.
 // It fades in once compiled, and closes quietly if this device can't run it.
 // With motion off it shows one still frame and waits for a tap to play.
+// One with a Sound tab starts silent, with a button for sound: browsers only
+// allow sound after a tap, and a song nobody asked for would be rude anyway.
 
+import { ICON } from "./icons";
 import { createToy, PASSES, type Channel, type Toy, type ToyProgram } from "./shadertoy";
 import { SHADERS, type ShaderDef } from "./shaders";
 import type { Renderer, ShaderPayload } from "./types";
 
 // Each shader's code is its own chunk, fetched only when that one is shown.
 const SOURCES = import.meta.glob<string>("./shaders/*/*.glsl", { query: "?raw", import: "default" });
-
-const PLAY = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>`;
 
 async function load(slug: string, def: ShaderDef): Promise<ToyProgram> {
   const file = (name: string) => SOURCES[`./shaders/${slug}/${name}.glsl`];
@@ -31,8 +32,18 @@ async function load(slug: string, def: ShaderDef): Promise<ToyProgram> {
     return f;
   });
   const common = file("common");
-  const [commonCode, ...codes] = await Promise.all([common ? common() : "", ...loaders.map((f) => f())]);
-  return { common: commonCode, passes: names.map((name, i) => ({ name, code: codes[i], channels: channels(name) })) };
+  const sound = def.sound ? file("sound") : undefined;
+  if (def.sound && !sound) throw new Error(`${slug}: sound.glsl is missing.`);
+  const [commonCode, soundCode, ...codes] = await Promise.all([
+    common ? common() : "",
+    sound ? sound() : "",
+    ...loaders.map((f) => f()),
+  ]);
+  return {
+    common: commonCode,
+    passes: names.map((name, i) => ({ name, code: codes[i], channels: channels(name) })),
+    sound: def.sound ? { code: soundCode, seconds: def.sound.seconds ?? 180 } : null,
+  };
 }
 
 const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
@@ -69,9 +80,21 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
   play.type = "button";
   play.className = "bc-play";
   play.setAttribute("aria-label", "Play");
-  play.innerHTML = PLAY;
+  play.innerHTML = ICON.play;
   play.hidden = true;
   wrap.append(play);
+
+  const sound = document.createElement("button");
+  sound.type = "button";
+  sound.className = "bc-btn bc-sound";
+  sound.hidden = true;
+  let heard = false;
+  const syncSound = () => {
+    sound.innerHTML = `${heard ? ICON.sound : ICON.muted}<span>${heard ? "sound off" : "sound on"}</span>`;
+    sound.setAttribute("aria-pressed", String(heard));
+  };
+  syncSound();
+  wrap.append(sound);
 
   stage.append(wrap);
 
@@ -81,6 +104,20 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
   play.addEventListener("click", () => {
     play.hidden = true;
     toy?.play();
+    if (toy?.sound) sound.hidden = false;
+  });
+  sound.addEventListener("click", () => {
+    const s = toy?.sound;
+    if (!s) return;
+    heard = !heard;
+    syncSound();
+    if (!heard) return s.stop();
+    s.start().catch((e) => {
+      console.error(`broadcast shader "${p.shader}" sound`, e);
+      heard = false;
+      syncSound();
+      sound.hidden = true; // it won't work here; don't keep offering
+    });
   });
 
   (async () => {
@@ -93,7 +130,10 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
       if (ctx.still) {
         toy.still(def.stillAt ?? 0);
         play.hidden = false;
-      } else toy.play();
+      } else {
+        toy.play();
+        if (toy.sound) sound.hidden = false;
+      }
       wrap.classList.add("ready");
     } catch (e) {
       // No WebGL2, no float buffers, or it didn't compile: go away rather than show a black screen.

@@ -6,7 +6,7 @@ import { SHADERS, shaderTitle } from "~/broadcast/shaders";
 
 type Kind = "greeting" | "video" | "shader";
 
-const SHADER_LIST = Object.entries(SHADERS).map(([slug, d]) => ({ slug, title: d.title, by: d.credit?.by }));
+const SHADER_LIST = Object.entries(SHADERS).map(([slug, d]) => ({ slug, title: d.title, by: d.credit?.by, sound: Boolean(d.sound) }));
 
 type Row = {
   id: string;
@@ -301,7 +301,7 @@ async function preview(r?: Row) {
           <label>
             <span>Shader <em>from src/broadcast/shaders/; add one there to see it here</em></span>
             <select v-model="form.shader" required>
-              <option v-for="s in SHADER_LIST" :key="s.slug" :value="s.slug">{{ s.title }}{{ s.by ? ` · by ${s.by}` : "" }}</option>
+              <option v-for="s in SHADER_LIST" :key="s.slug" :value="s.slug">{{ s.title }}{{ s.sound ? " · with sound" : "" }}{{ s.by ? ` · by ${s.by}` : "" }}</option>
             </select>
           </label>
           <label>
