@@ -20,6 +20,11 @@ dialog.bc {
   animation: bc-in 0.4s ease both;
 }
 
+/* A pinned one focuses the dialog itself, which needs no ring. */
+dialog.bc:focus {
+  outline: none;
+}
+
 dialog.bc::backdrop {
   background: transparent;
 }
@@ -125,7 +130,6 @@ dialog.bc.held .bc-timer {
   gap: 18px;
   padding: 72px var(--pad, 24px);
   text-align: center;
-  cursor: pointer;
 }
 
 .bc-greeting h2 {

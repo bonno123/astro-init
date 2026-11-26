@@ -17,8 +17,6 @@ const greeting: Renderer = (stage, p: GreetingPayload, ctx) => {
     sub.textContent = p.subtitle;
     wrap.append(sub);
   }
-  // Nothing to interact with, so a tap anywhere closes it.
-  wrap.addEventListener("click", ctx.close);
   stage.append(wrap);
 
   if (p.effect === "none" || ctx.still) return;

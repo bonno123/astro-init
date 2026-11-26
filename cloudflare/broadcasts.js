@@ -1,6 +1,7 @@
 // Broadcasts: a full-screen overlay on the home page, set from /admin/broadcast/.
 //
-//   GET  /api/broadcast                  the one live now, or { broadcast: null }. Cached 60s.
+//   GET  /api/broadcast                  the one live now, or { broadcast: null }
+//   GET  /api/broadcast/live             a WebSocket that gets the same, now and on every change (hub.js)
 //   GET  /api/admin/broadcasts           all of them, newest first, plus the id being served now
 //   POST /api/admin/broadcasts           create (no id) or replace (with id)
 //   POST /api/admin/broadcasts/delete    { id }
@@ -8,6 +9,9 @@
 // A broadcast is only data: a kind and a JSON payload. The site has one renderer
 // per kind (src/broadcast/). Nothing here is ever run as script or HTML on the
 // site, so a leaked admin token can change the words, not run code.
+//
+// A pinned one has no close button and no timer and shows on every visit, so
+// it must have an end time. Turning it off takes it down on every open page.
 
 const MAX_BODY = 8_000;
 const MAX_LABEL = 60;
@@ -77,7 +81,7 @@ const KINDS = {
   },
 };
 
-const LIVE_SQL = `
+export const LIVE_SQL = `
   SELECT * FROM broadcasts
   WHERE enabled = 1
     AND (starts_at IS NULL OR starts_at <= ?1)
@@ -85,12 +89,15 @@ const LIVE_SQL = `
   ORDER BY (starts_at IS NULL), starts_at DESC, updated_at DESC
   LIMIT 1`;
 
-const toPublic = (r) => ({
+export const toPublic = (r) => ({
   id: r.id,
   kind: r.kind,
   payload: JSON.parse(r.payload),
   frequency: r.frequency,
   dismissAfterMs: r.dismiss_after_ms,
+  pinned: Boolean(r.pinned),
+  // changes on every save, so an open page redraws an edited one
+  version: r.updated_at,
 });
 
 const toAdmin = (r) => ({
@@ -103,6 +110,27 @@ const toAdmin = (r) => ({
   updatedAt: r.updated_at,
 });
 
+/** The one hub (hub.js), or null when this deployment has no binding for it. */
+const hub = (env) => (env.HUB ? env.HUB.get(env.HUB.idFromName("live")) : null);
+
+/** Tells every open page. A failure here never fails the save: pages still get it on their next load. */
+async function publish(env) {
+  try {
+    return (await hub(env)?.publish()) ?? null;
+  } catch (e) {
+    console.error("broadcast publish failed", e);
+    return null;
+  }
+}
+
+async function watching(env) {
+  try {
+    return (await hub(env)?.watching()) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** Returns a Response for broadcast routes, or null when the path is not ours. */
 export async function handleBroadcasts(request, env, url, cors) {
   const path = url.pathname;
@@ -111,8 +139,15 @@ export async function handleBroadcasts(request, env, url, cors) {
 
   if (path === "/api/broadcast" && request.method === "GET") {
     const row = await db.prepare(LIVE_SQL).bind(now).first();
-    // Turning one off reaches every visitor within a minute.
-    return json({ broadcast: row ? toPublic(row) : null }, 200, cors, { "Cache-Control": "public, max-age=60" });
+    // Not cached: this is the fallback when the live feed can't connect, and a stale answer would undo it.
+    return json({ broadcast: row ? toPublic(row) : null }, 200, cors, { "Cache-Control": "no-store" });
+  }
+
+  if (path === "/api/broadcast/live" && request.method === "GET") {
+    const h = hub(env);
+    if (!h) return json({ error: "No live feed here." }, 404, cors);
+    if (request.headers.get("Upgrade") !== "websocket") return json({ error: "Expected a WebSocket." }, 426, cors);
+    return h.fetch(request);
   }
 
   if (!path.startsWith("/api/admin/broadcasts")) return null;
@@ -121,7 +156,11 @@ export async function handleBroadcasts(request, env, url, cors) {
   if (path === "/api/admin/broadcasts" && request.method === "GET") {
     const rows = await db.prepare("SELECT * FROM broadcasts ORDER BY updated_at DESC LIMIT 100").all();
     const live = await db.prepare(LIVE_SQL).bind(now).first();
-    return json({ broadcasts: rows.results.map(toAdmin), liveId: live?.id ?? null, now }, 200, cors);
+    return json(
+      { broadcasts: rows.results.map(toAdmin), liveId: live?.id ?? null, now, watching: await watching(env) },
+      200,
+      cors,
+    );
   }
 
   if (path === "/api/admin/broadcasts" && request.method === "POST") {
@@ -137,6 +176,8 @@ export async function handleBroadcasts(request, env, url, cors) {
       const endsAt = isoOrNull(data.endsAt);
       if (startsAt && endsAt && endsAt <= startsAt) throw new Error("It ends before it starts.");
       const dismiss = Number(data.dismissAfterMs);
+      const pinned = data.pinned === true;
+      if (pinned && !endsAt) throw new Error("A pinned one needs an end time, so it can't block the site for good.");
       b = {
         id: typeof data.id === "string" && data.id ? data.id : null,
         label: clean(data.label, MAX_LABEL) || payload.title || payload.caption || data.kind,
@@ -145,9 +186,12 @@ export async function handleBroadcasts(request, env, url, cors) {
         enabled: data.enabled === false ? 0 : 1,
         startsAt,
         endsAt,
-        frequency: FREQUENCIES.includes(data.frequency) ? data.frequency : "once",
+        // pinned: on every visit, and no timer
+        frequency: pinned ? "always" : FREQUENCIES.includes(data.frequency) ? data.frequency : "once",
         // 0, or between 2 seconds and 2 minutes
-        dismiss: Number.isFinite(dismiss) && dismiss > 0 ? Math.min(120_000, Math.max(2_000, Math.round(dismiss))) : 0,
+        dismiss:
+          !pinned && Number.isFinite(dismiss) && dismiss > 0 ? Math.min(120_000, Math.max(2_000, Math.round(dismiss))) : 0,
+        pinned: pinned ? 1 : 0,
       };
     } catch (e) {
       return json({ error: e instanceof SyntaxError ? "Could not read that." : e.message }, 400, cors);
@@ -157,21 +201,21 @@ export async function handleBroadcasts(request, env, url, cors) {
       row = await db
         .prepare(
           `UPDATE broadcasts SET label = ?, kind = ?, payload = ?, enabled = ?, starts_at = ?, ends_at = ?,
-             frequency = ?, dismiss_after_ms = ?, updated_at = ? WHERE id = ? RETURNING *`,
+             frequency = ?, dismiss_after_ms = ?, pinned = ?, updated_at = ? WHERE id = ? RETURNING *`,
         )
-        .bind(b.label, b.kind, b.payload, b.enabled, b.startsAt, b.endsAt, b.frequency, b.dismiss, now, b.id)
+        .bind(b.label, b.kind, b.payload, b.enabled, b.startsAt, b.endsAt, b.frequency, b.dismiss, b.pinned, now, b.id)
         .first();
       if (!row) return json({ error: "No such broadcast." }, 404, cors);
     } else {
       row = await db
         .prepare(
           `INSERT INTO broadcasts (id, label, kind, payload, enabled, starts_at, ends_at, frequency,
-             dismiss_after_ms, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
+             dismiss_after_ms, pinned, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING *`,
         )
-        .bind(crypto.randomUUID(), b.label, b.kind, b.payload, b.enabled, b.startsAt, b.endsAt, b.frequency, b.dismiss, now, now)
+        .bind(crypto.randomUUID(), b.label, b.kind, b.payload, b.enabled, b.startsAt, b.endsAt, b.frequency, b.dismiss, b.pinned, now, now)
         .first();
     }
-    return json({ success: true, broadcast: toAdmin(row) }, 200, cors);
+    return json({ success: true, broadcast: toAdmin(row), watching: await publish(env) }, 200, cors);
   }
 
   if (path === "/api/admin/broadcasts/delete" && request.method === "POST") {
@@ -184,7 +228,7 @@ export async function handleBroadcasts(request, env, url, cors) {
     if (typeof id !== "string" || !id) return json({ error: "Need an id." }, 400, cors);
     const r = await db.prepare("DELETE FROM broadcasts WHERE id = ?").bind(id).run();
     if (!r.meta?.changes) return json({ error: "No such broadcast." }, 404, cors);
-    return json({ success: true }, 200, cors);
+    return json({ success: true, watching: await publish(env) }, 200, cors);
   }
 
   return null;

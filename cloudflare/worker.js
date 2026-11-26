@@ -1,6 +1,9 @@
 import { handleMarks } from "./marks.js";
 import { handleBroadcasts } from "./broadcasts.js";
 
+// Durable Object classes have to be exported from the Worker's main module.
+export { BroadcastHub } from "./hub.js";
+
 /** Escape text that visitors typed before it goes into email HTML. */
 function esc(v) {
     return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -66,7 +69,7 @@ export default {
             }
 
             // Full-screen greeting on the home page
-            if (url.pathname === "/api/broadcast" || url.pathname.startsWith("/api/admin/broadcasts")) {
+            if (url.pathname.startsWith("/api/broadcast") || url.pathname.startsWith("/api/admin/broadcasts")) {
                 const res = await handleBroadcasts(request, env, url, corsHeaders);
                 if (res) return res;
             }

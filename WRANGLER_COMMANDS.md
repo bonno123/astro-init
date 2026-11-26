@@ -29,11 +29,16 @@ Each schema file is applied by hand, one at a time:
 ```sh
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0001_marks.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0002_broadcasts.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0003_broadcast_pinned.sql
 ```
 
 The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.
 
 Leave out `--remote` to run against the local database that `wrangler dev` uses.
+
+## Live feed (Durable Object)
+
+`BroadcastHub` (`cloudflare/hub.js`) holds the WebSockets of open home pages. Its `[[migrations]]` block in `wrangler.toml` is applied by `wrangler deploy` itself, not by `d1 execute`. Renaming or removing the class needs a new migration tag (`renamed_classes` or `deleted_classes`); editing the old one doesn't work. The free plan only allows SQLite-backed classes (`new_sqlite_classes`). Over the free daily limit, connections fail until midnight UTC and pages fall back to one plain request; nothing is billed.
 
 ## Queries
 

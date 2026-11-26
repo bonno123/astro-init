@@ -6,6 +6,18 @@ export type Broadcast = {
   frequency: "once" | "session" | "always";
   /** 0 means it stays until closed. */
   dismissAfterMs: number;
+  /** No close button, no Esc, no timer. It goes when it's turned off or ends. */
+  pinned: boolean;
+  /** Changes on every save, so an open page knows to redraw it. */
+  version: string;
+};
+
+/** What showBroadcast hands back once the overlay is on screen. */
+export type Shown = {
+  /** Takes it down, pinned or not. */
+  close: () => void;
+  /** Resolves when it's gone, however it went. */
+  closed: Promise<void>;
 };
 
 export type GreetingPayload = {
@@ -18,8 +30,10 @@ export type GreetingPayload = {
 export type RenderContext = {
   /** No motion: reduced-motion is set, or the site's quiet mode is on. */
   still: boolean;
-  /** Close the overlay (same as the close button). */
+  /** Close the overlay (same as the close button). Works when pinned too. */
   close: () => void;
+  /** The visitor can't close it, so don't let it end on its own either. */
+  pinned: boolean;
   /** Put this id on the renderer's heading; the dialog is labelled by it. */
   labelId: string;
 };

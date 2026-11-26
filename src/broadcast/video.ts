@@ -1,6 +1,6 @@
 // kind: video. A full-screen video, muted so browsers let it start on its own,
-// with a button for sound. It closes when the video ends (unless it loops)
-// and quietly if the file won't load. With motion off or Data Saver on it
+// with a button for sound. It closes when the video ends (unless it loops; a
+// pinned one always loops) and quietly if the file won't load. With motion off or Data Saver on it
 // waits on the poster for a tap instead of playing.
 
 import type { Renderer, VideoPayload } from "./types";
@@ -21,7 +21,7 @@ const video: Renderer = (stage, p: VideoPayload, ctx) => {
   v.defaultMuted = true;
   v.playsInline = true;
   v.setAttribute("playsinline", "");
-  v.loop = p.loop === true;
+  v.loop = p.loop === true || ctx.pinned;
   v.disablePictureInPicture = true;
   v.style.objectFit = p.fit === "contain" ? "contain" : "cover";
   if (p.poster) v.poster = p.poster;

@@ -15,6 +15,7 @@ type Row = {
   endsAt: string | null;
   frequency: "once" | "session" | "always";
   dismissAfterMs: number;
+  pinned: boolean;
   updatedAt: string;
 };
 
@@ -26,6 +27,8 @@ const token = ref("");
 const rows = ref<Row[]>([]);
 const liveId = ref<string | null>(null);
 const serverNow = ref("");
+/** Home pages open right now, connected to the live feed. null when the feed is unavailable. */
+const watching = ref<number | null>(null);
 const loaded = ref(false);
 const loading = ref(false);
 const saving = ref(false);
@@ -54,6 +57,7 @@ const blank = (kind: Kind = "greeting") => ({
   frequency: "once" as Row["frequency"],
   seconds: kind === "video" ? 0 : 8, // a video closes when it ends
   enabled: true,
+  pinned: false,
 });
 const form = reactive(blank());
 const editing = ref(false);
@@ -82,12 +86,14 @@ async function load() {
   loading.value = true;
   error.value = "";
   try {
-    const res = await api<{ broadcasts: Row[]; liveId: string | null; now: string }>("/api/admin/broadcasts", {
-      headers: auth(),
-    });
+    const res = await api<{ broadcasts: Row[]; liveId: string | null; now: string; watching: number | null }>(
+      "/api/admin/broadcasts",
+      { headers: auth() },
+    );
     rows.value = res.broadcasts;
     liveId.value = res.liveId;
     serverNow.value = res.now;
+    watching.value = res.watching ?? null;
     loaded.value = true;
   } catch (e: any) {
     error.value = e?.message || "Could not load.";
@@ -121,6 +127,7 @@ function edit(r: Row) {
     frequency: r.frequency,
     seconds: Math.round(r.dismissAfterMs / 1000),
     enabled: r.enabled,
+    pinned: r.pinned,
   });
   editing.value = true;
   note.value = "";
@@ -145,8 +152,10 @@ const payload = computed<GreetingPayload | VideoPayload>(() =>
 );
 
 const https = (v: string) => /^https:\/\/\S+$/i.test(v.trim());
-const ready = computed(() =>
-  form.kind === "video" ? https(form.src) && (!form.poster.trim() || https(form.poster)) : Boolean(form.title.trim()),
+const ready = computed(
+  () =>
+    (form.kind === "video" ? https(form.src) && (!form.poster.trim() || https(form.poster)) : Boolean(form.title.trim())) &&
+    (!form.pinned || Boolean(form.endsAt)),
 );
 
 /** What a row is called in the list, after its label. */
@@ -165,6 +174,7 @@ function body(r?: Row) {
       endsAt: r.endsAt,
       frequency: r.frequency,
       dismissAfterMs: r.dismissAfterMs,
+      pinned: r.pinned,
     };
   return {
     id: form.id,
@@ -174,18 +184,25 @@ function body(r?: Row) {
     enabled: form.enabled,
     startsAt: fromLocalInput(form.startsAt),
     endsAt: fromLocalInput(form.endsAt),
-    frequency: form.frequency,
-    dismissAfterMs: Math.max(0, Number(form.seconds) || 0) * 1000,
+    frequency: form.pinned ? "always" : form.frequency,
+    dismissAfterMs: form.pinned ? 0 : Math.max(0, Number(form.seconds) || 0) * 1000,
+    pinned: form.pinned,
   };
+}
+
+/** What the Worker says after a change: how many open pages it reached. */
+function reached(n: number | null | undefined) {
+  if (n == null) return "Saved. Visitors get it on their next load.";
+  return n === 1 ? "Saved, and sent to the 1 page open now." : `Saved, and sent to the ${n} pages open now.`;
 }
 
 async function save() {
   saving.value = true;
   error.value = "";
   try {
-    await api("/api/admin/broadcasts", { method: "POST", headers: auth(), json: body() });
+    const res = await api<{ watching: number | null }>("/api/admin/broadcasts", { method: "POST", headers: auth(), json: body() });
     editing.value = false;
-    note.value = "Saved. Visitors see the change within a minute.";
+    note.value = reached(res.watching);
     await load();
   } catch (e: any) {
     error.value = e?.message || "Could not save.";
@@ -197,7 +214,12 @@ async function save() {
 async function toggle(r: Row) {
   error.value = "";
   try {
-    await api("/api/admin/broadcasts", { method: "POST", headers: auth(), json: { ...body(r), enabled: !r.enabled } });
+    const res = await api<{ watching: number | null }>("/api/admin/broadcasts", {
+      method: "POST",
+      headers: auth(),
+      json: { ...body(r), enabled: !r.enabled },
+    });
+    note.value = reached(res.watching);
     await load();
   } catch (e: any) {
     error.value = e?.message || "That didn't work.";
@@ -212,7 +234,12 @@ async function remove(r: Row) {
   confirmDelete.value = null;
   error.value = "";
   try {
-    await api("/api/admin/broadcasts/delete", { method: "POST", headers: auth(), json: { id: r.id } });
+    const res = await api<{ watching: number | null }>("/api/admin/broadcasts/delete", {
+      method: "POST",
+      headers: auth(),
+      json: { id: r.id },
+    });
+    note.value = reached(res.watching).replace("Saved", "Deleted");
     if (form.id === r.id) editing.value = false;
     await load();
   } catch (e: any) {
@@ -220,7 +247,7 @@ async function remove(r: Row) {
   }
 }
 
-/** The real overlay, right here, from the unsaved form (or a saved row). */
+/** The real overlay, right here, from the unsaved form (or a saved row). Always closable, even if it's pinned. */
 async function preview(r?: Row) {
   const { showBroadcast } = await import("~/broadcast/show");
   const b = body(r);
@@ -232,6 +259,9 @@ async function preview(r?: Row) {
   <div class="admin">
     <h1>Broadcast</h1>
     <p class="meta">A full-screen greeting over the home page. Times are in {{ tz }}.</p>
+    <p v-if="loaded && watching != null" class="meta">
+      <span class="dot" aria-hidden="true"></span>{{ watching }} {{ watching === 1 ? "page" : "pages" }} open now. Changes reach them at once.
+    </p>
 
     <form class="bar" @submit.prevent="load">
       <!-- lets the browser's password manager save and fill the token; it is never stored by the page -->
@@ -305,12 +335,19 @@ async function preview(r?: Row) {
             <input v-model="form.startsAt" type="datetime-local" />
           </label>
           <label>
-            <span>Ends <em>empty = until off</em></span>
+            <span>Ends <em>{{ form.pinned ? "needed when pinned" : "empty = until off" }}</em></span>
             <input v-model="form.endsAt" type="datetime-local" />
           </label>
         </div>
 
-        <div class="two">
+        <label class="inline">
+          <input v-model="form.pinned" type="checkbox" /> pinned <em>no close button and no timer, on every visit</em>
+        </label>
+        <p v-if="form.pinned" class="meta" :class="{ err: !form.endsAt }">
+          Nobody can use the site while it's up. It goes when you turn it off or at its end time, which it needs.
+        </p>
+
+        <div v-if="!form.pinned" class="two">
           <label>
             <span>Show it</span>
             <select v-model="form.frequency">
@@ -326,7 +363,7 @@ async function preview(r?: Row) {
         </div>
 
         <label class="inline"><input v-model="form.enabled" type="checkbox" /> on</label>
-        <p v-if="form.id && form.frequency === 'once'" class="meta">
+        <p v-if="form.id && !form.pinned && form.frequency === 'once'" class="meta">
           Anyone who has already closed this one won't see it again after you edit it. Make a new one to show everybody.
         </p>
 
@@ -344,12 +381,15 @@ async function preview(r?: Row) {
         <li v-for="r in rows" :key="r.id">
           <div class="head">
             <strong>{{ r.label }}</strong>
-            <span class="badge" :class="status(r).replace(' ', '-')">{{ status(r) }}</span>
+            <span class="badges">
+              <span v-if="r.pinned" class="badge pinned">pinned</span>
+              <span class="badge" :class="status(r).replace(' ', '-')">{{ status(r) }}</span>
+            </span>
           </div>
           <p class="title"><span class="kind">{{ r.kind }}</span> {{ summary(r) }}</p>
           <p class="meta">
             {{ r.startsAt ? fmt(r.startsAt) : "from saving" }} → {{ r.endsAt ? fmt(r.endsAt) : "until off" }}
-            · {{ { once: "once per visitor", session: "once per visit", always: "every load" }[r.frequency] }}
+            · {{ r.pinned ? "can't be closed" : { once: "once per visitor", session: "once per visit", always: "every load" }[r.frequency] }}
           </p>
           <div class="acts">
             <button @click="preview(r)">preview</button>
@@ -574,5 +614,22 @@ input[type="color"]::-webkit-color-swatch {
 }
 .badge.scheduled {
   color: var(--ink-soft);
+}
+.badges {
+  display: flex;
+  gap: 6px;
+}
+.badge.pinned {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
 }
 </style>
