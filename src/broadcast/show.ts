@@ -40,8 +40,12 @@ export async function showBroadcast(b: Showable, opts: ShowOptions = {}): Promis
   }
   const pinned = b.pinned === true;
 
-  const still = opts.asked ? reducedMotion() : isStill();
-  const tv = opts.look === "tv";
+  // Quiet mode or reduced motion: the overlay cuts in and out, no animation.
+  // Its content is a still frame too, unless the visitor asked for it: then
+  // only reduced motion keeps it still.
+  const calm = isStill();
+  const still = opts.asked ? reducedMotion() : calm;
+  const tv = opts.look === "tv" && !calm;
   const labelId = `bc-title-${Math.random().toString(36).slice(2, 8)}`;
 
   const dialog = document.createElement("dialog");
@@ -73,9 +77,9 @@ export async function showBroadcast(b: Showable, opts: ShowOptions = {}): Promis
     if (closing) return;
     closing = true;
     clearTimeout(timer);
-    if (still) return dialog.close();
+    if (calm) return dialog.close();
     dialog.classList.add("leaving");
-    setTimeout(() => dialog.close(), tv ? 460 : 280);
+    setTimeout(() => dialog.close(), tv ? 820 : 280); // the TV's off, then the lights back up
   }
 
   dialog.addEventListener("cancel", (e) => {
