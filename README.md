@@ -7,7 +7,8 @@ A one-page personal site built with Astro and Vue. A Cloudflare Worker with a D1
 - **Home** (`src/pages/index.astro`): the page itself. Its copy lives in `src/data/home.ts`.
 - **Visitors' book**: visitors leave a small drawing or a one-line note. Each one waits for review before it shows.
 - **Say hi**: a contact form. The worker stores the message and emails it on.
-- **Admin pages** (`/admin/marks/`, `/admin/bookings/`): review visitors' book entries and old booking requests. They need `ADMIN_API_TOKEN`.
+- **Broadcast**: a full-screen greeting (New Year, a festival) over the home page, set from `/admin/broadcast/`. It can be scheduled, and it closes by itself. The page's HTML never changes; a small script asks the Worker after the page has loaded. See `src/broadcast/`.
+- **Admin pages** (`/admin/marks/`, `/admin/bookings/`, `/admin/broadcast/`): review visitors' book entries and old booking requests, and set the broadcast. They need `ADMIN_API_TOKEN`.
 
 Old URLs (`/about`, `/contact`, `/projects`, …) redirect to sections of the home page. See `astro.config.mjs`.
 
@@ -15,8 +16,9 @@ Old URLs (`/about`, `/contact`, `/projects`, …) redirect to sections of the ho
 
 - `src/`: pages, the quiet layout, components and styles
 - `src/utils/api.ts`: the fetch helper. It calls `PUBLIC_API_ENDPOINT`.
-- `cloudflare/worker.js`: the Worker entry point. It routes `/api/marks*` to `cloudflare/marks.js`.
-- `cloudflare/migrations/`: the schema for the visitors' book (`marks`)
+- `cloudflare/worker.js`: the Worker entry point. It routes `/api/marks*` to `cloudflare/marks.js` and `/api/broadcast` and `/api/admin/broadcasts*` to `cloudflare/broadcasts.js`.
+- `cloudflare/migrations/`: the schema for the visitors' book (`marks`) and broadcasts (`broadcasts`)
+- `src/broadcast/`: the broadcast overlay. `load.ts` runs on every home page view; `show.ts` (the shell) and one renderer per kind (`greeting.ts`) load only when one is live. A new kind needs a renderer there and a validator in `cloudflare/broadcasts.js`.
 - `migrations/`: the older D1 schema (messages, bookings, contact messages)
 - `cloudflare/sql/`: reset and seed scripts. They are kept out of `migrations/` so `migrations apply` can never run them.
 - `public/`: favicons and the OG image

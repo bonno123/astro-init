@@ -28,6 +28,7 @@ Each schema file is applied by hand, one at a time:
 
 ```sh
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0001_marks.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0002_broadcasts.sql
 ```
 
 The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.

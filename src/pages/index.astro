@@ -3,6 +3,7 @@ import QuietLayout from "~/layouts/QuietLayout.astro";
 import ContourField from "~/components/quiet/ContourField.astro";
 import Section from "~/components/quiet/Section.astro";
 import Footer from "~/components/quiet/Footer.astro";
+import Broadcast from "~/components/quiet/Broadcast.astro";
 import SayHi from "~/components/quiet/SayHi.vue";
 import VisitorsBook from "~/components/quiet/VisitorsBook.vue";
 import {
@@ -172,6 +173,7 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
   </nav>
 
   <Footer />
+  <Broadcast />
 </QuietLayout>
 
 <script>

@@ -1,0 +1,11 @@
+---
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import AdminBroadcast from "~/components/quiet/AdminBroadcast.vue";
+---
+
+<QuietLayout title="Broadcast · admin" metaDescription="Set the full-screen greeting on the home page.">
+  <meta slot="head" name="robots" content="noindex" />
+  <main id="main">
+    <AdminBroadcast client:load />
+  </main>
+</QuietLayout>

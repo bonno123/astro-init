@@ -1,4 +1,5 @@
 import { handleMarks } from "./marks.js";
+import { handleBroadcasts } from "./broadcasts.js";
 
 /** Escape text that visitors typed before it goes into email HTML. */
 function esc(v) {
@@ -61,6 +62,12 @@ export default {
             // Visitors' book
             if (url.pathname === "/api/marks" || url.pathname.startsWith("/api/admin/marks")) {
                 const res = await handleMarks(request, env, url, corsHeaders);
+                if (res) return res;
+            }
+
+            // Full-screen greeting on the home page
+            if (url.pathname === "/api/broadcast" || url.pathname.startsWith("/api/admin/broadcasts")) {
+                const res = await handleBroadcasts(request, env, url, corsHeaders);
                 if (res) return res;
             }
 

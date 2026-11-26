@@ -1,0 +1,12 @@
+---
+/**
+ * The hook for full-screen broadcasts (src/broadcast/). It renders nothing:
+ * the script checks the Worker after the page settles and shows one only if
+ * it's live. The page's HTML is the same with or without one.
+ */
+---
+
+<script>
+  import { run } from "~/broadcast/load";
+  run();
+</script>
