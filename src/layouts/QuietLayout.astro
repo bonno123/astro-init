@@ -58,11 +58,15 @@ const ogImage = new URL("/og.jpg", Astro.site).href;
 
     <slot name="head" />
 
-    <!-- Apply quiet mode before first paint so nothing flickers. -->
+    <!-- Apply quiet mode before first paint so nothing flickers. A device that
+         asks for reduced motion starts quiet until the visitor chooses either way. -->
     <script is:inline>
+      var q = null;
       try {
-        if (localStorage.getItem("quiet") === "1") document.documentElement.dataset.quiet = "";
+        q = localStorage.getItem("quiet");
       } catch (e) {}
+      if (q === "1" || (q === null && matchMedia("(prefers-reduced-motion: reduce)").matches))
+        document.documentElement.dataset.quiet = "";
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"></script>

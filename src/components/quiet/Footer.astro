@@ -53,7 +53,8 @@ const builtLabel = new Intl.DateTimeFormat("en-GB", { month: "short", year: "num
       days <= 0 ? "last touched today" : days === 1 ? "last touched yesterday" : `last touched ${days} days ago`;
   });
 
-  // Quiet mode: stops the shader and all motion, remembered on this device.
+  // Quiet mode: stops the shader and all motion, remembered on this device (a
+  // reduced-motion device starts with it on until the visitor chooses).
   // Every [data-quiet-toggle] (the header's ধীরে, this footer button) is one switch.
   const root = document.documentElement;
   const toggles = document.querySelectorAll<HTMLButtonElement>("[data-quiet-toggle]");
