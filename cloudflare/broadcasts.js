@@ -79,6 +79,14 @@ const KINDS = {
       loop: p?.loop === true,
     };
   },
+  // The shader's code is in the site's repo (src/broadcast/shaders/); this only
+  // names one. Only the name's shape is checked here, so adding a shader needs
+  // no Worker deploy; a name the site doesn't have shows nothing.
+  shader(p) {
+    const shader = typeof p?.shader === "string" && /^[a-z0-9][a-z0-9-]{0,39}$/.test(p.shader) ? p.shader : null;
+    if (!shader) throw new Error("A shader broadcast needs the name of one of the site's shaders.");
+    return { shader, caption: clean(p?.caption, 120) };
+  },
 };
 
 export const LIVE_SQL = `
