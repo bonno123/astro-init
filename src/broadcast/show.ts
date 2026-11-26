@@ -1,7 +1,8 @@
 // The full-screen shell every broadcast kind shares: a modal <dialog> with a
 // close button, Esc, an optional auto-close, and focus handed back afterwards.
 // A pinned one has none of those: only the returned close() takes it down.
-// What goes inside comes from the kind's renderer.
+// What goes inside comes from the kind's renderer. One the visitor asked for
+// (the power button, replay.ts) can switch on and off like an old TV.
 
 import "./broadcast.css";
 import type { Broadcast, Renderer, Shown } from "./types";
@@ -15,13 +16,20 @@ const RENDERERS: Record<string, () => Promise<{ default: Renderer }>> = {
 
 export const KINDS = Object.keys(RENDERERS);
 
-const isStill = () =>
-  matchMedia("(prefers-reduced-motion: reduce)").matches || document.documentElement.hasAttribute("data-quiet");
+const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isStill = () => reducedMotion() || document.documentElement.hasAttribute("data-quiet");
 
-type Showable = Pick<Broadcast, "kind" | "payload" | "dismissAfterMs"> & { pinned?: boolean };
+export type Showable = Pick<Broadcast, "kind" | "payload" | "dismissAfterMs"> & { pinned?: boolean };
+
+export type ShowOptions = {
+  /** "tv": opens from a line of light and closes back to one. Default: a fade. */
+  look?: "fade" | "tv";
+  /** The visitor pressed something to see it: it plays even in quiet mode (reduced motion still wins). */
+  asked?: boolean;
+};
 
 /** Shows the broadcast. Resolves once it's on screen, or null if this site can't draw its kind. */
-export async function showBroadcast(b: Showable): Promise<Shown | null> {
+export async function showBroadcast(b: Showable, opts: ShowOptions = {}): Promise<Shown | null> {
   const load = RENDERERS[b.kind];
   if (!load) return null;
   let render: Renderer;
@@ -32,11 +40,12 @@ export async function showBroadcast(b: Showable): Promise<Shown | null> {
   }
   const pinned = b.pinned === true;
 
-  const still = isStill();
+  const still = opts.asked ? reducedMotion() : isStill();
+  const tv = opts.look === "tv";
   const labelId = `bc-title-${Math.random().toString(36).slice(2, 8)}`;
 
   const dialog = document.createElement("dialog");
-  dialog.className = pinned ? "bc pinned" : "bc";
+  dialog.className = ["bc", pinned && "pinned", tv && "tv"].filter(Boolean).join(" ");
   dialog.setAttribute("aria-labelledby", labelId);
   // Something has to hold focus; with no close button that's the dialog itself.
   if (pinned) {
@@ -66,7 +75,7 @@ export async function showBroadcast(b: Showable): Promise<Shown | null> {
     clearTimeout(timer);
     if (still) return dialog.close();
     dialog.classList.add("leaving");
-    setTimeout(() => dialog.close(), 280);
+    setTimeout(() => dialog.close(), tv ? 460 : 280);
   }
 
   dialog.addEventListener("cancel", (e) => {

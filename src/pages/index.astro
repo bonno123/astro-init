@@ -35,9 +35,16 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
         <a href="#building">building</a>
         <a href="#say-hi">say hi</a>
       </nav>
-      <button type="button" class="dhire" data-quiet-toggle aria-pressed="false" aria-label="Quiet mode" title="dheere — slowly · tap to still the page">
-        <span class="bn" lang="bn">ধীরে</span>
-      </button>
+      <div class="switches">
+        <!-- Plays a broadcast on demand (src/broadcast/replay.ts). Hidden until its script says there's one. -->
+        <button type="button" class="power" data-replay hidden aria-label="Play">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.9 4.1a5.3 5.3 0 1 0 6.2 0" /><path d="M8 2v5.2" /></svg>
+          <span class="led" aria-hidden="true"></span>
+        </button>
+        <button type="button" class="dhire" data-quiet-toggle aria-pressed="false" aria-label="Quiet mode" title="dheere — slowly · tap to still the page">
+          <span class="bn" lang="bn">ধীরে</span>
+        </button>
+      </div>
     </header>
     <div class="intro">
       <p class="kicker">{site.role} · freelance</p>
@@ -283,6 +290,111 @@ const mail = (subject: string) => `mailto:${site.email}?subject=${encodeURICompo
 
   .dhire[aria-pressed="true"] {
     color: var(--accent);
+  }
+
+  .switches {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  /*
+   * The power button: plays a broadcast. The same quiet grey as ধীরে, with a
+   * standby light that breathes slowly, like a TV's, so it reads as ready
+   * without shouting. Amber on hover, and lit while what it started is on.
+   */
+  .power {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: #b9b6ac;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .power[hidden] {
+    display: none;
+  }
+
+  .power::after {
+    content: "";
+    position: absolute;
+    inset: -13px -11px;
+  }
+
+  .power svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+  }
+
+  .power .led {
+    position: absolute;
+    right: -5px;
+    bottom: -1px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.55;
+    animation: standby 3.6s ease-in-out infinite;
+  }
+
+  .power:hover,
+  .power:focus-visible,
+  .power[data-on] {
+    color: var(--accent);
+  }
+
+  .power:hover .led,
+  .power[data-on] .led {
+    opacity: 1;
+    box-shadow: 0 0 6px 1px color-mix(in srgb, var(--accent) 70%, transparent);
+    animation: none;
+  }
+
+  .power:active svg {
+    transform: scale(0.92);
+  }
+
+  .power:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: 6px;
+    border-radius: 3px;
+  }
+
+  @keyframes standby {
+    0%,
+    100% {
+      opacity: 0.25;
+      box-shadow: none;
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 5px 0 color-mix(in srgb, var(--accent) 55%, transparent);
+    }
+  }
+
+  /* Still: quiet mode or reduced motion. The light stays on, just doesn't breathe. */
+  :global(html[data-quiet]) .power .led {
+    animation: none;
+    opacity: 0.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .power .led {
+      animation: none;
+      opacity: 0.6;
+    }
   }
 
   .intro {

@@ -92,6 +92,88 @@ dialog.bc.held .bc-timer {
   animation-play-state: paused;
 }
 
+/* Switched on by the visitor (the power button): like an old TV, a white line
+   that opens into the picture, and on closing, the picture squeezed back to a
+   line, then a dot. */
+dialog.bc.tv {
+  animation: bc-tv-on 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+dialog.bc.tv.leaving {
+  animation: bc-tv-off 0.44s cubic-bezier(0.7, 0, 0.9, 0.5) both;
+}
+
+dialog.bc.tv::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #f4f1e8;
+  pointer-events: none;
+  animation: bc-tv-glow-on 0.5s ease-out both;
+}
+
+dialog.bc.tv.leaving::after {
+  animation: bc-tv-glow-off 0.44s ease-in both;
+}
+
+@keyframes bc-tv-on {
+  0% {
+    transform: scale(0, 0.003);
+  }
+  30% {
+    transform: scale(1, 0.003);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes bc-tv-glow-on {
+  0%,
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes bc-tv-off {
+  0% {
+    transform: none;
+  }
+  60% {
+    transform: scale(1, 0.003);
+  }
+  100% {
+    transform: scale(0, 0.003);
+    opacity: 0.4;
+  }
+}
+
+@keyframes bc-tv-glow-off {
+  0% {
+    opacity: 0;
+  }
+  60%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.bc.tv,
+  dialog.bc.tv.leaving,
+  dialog.bc.tv::after {
+    animation: none;
+  }
+
+  dialog.bc.tv::after {
+    display: none;
+  }
+}
+
 @keyframes bc-in {
   from {
     opacity: 0;

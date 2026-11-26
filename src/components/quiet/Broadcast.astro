@@ -2,11 +2,14 @@
 /**
  * The hook for full-screen broadcasts (src/broadcast/). It renders nothing:
  * the script checks the Worker after the page settles and shows one only if
- * it's live. The page's HTML is the same with or without one.
+ * it's live. The page's HTML is the same with or without one. It also wires
+ * the power button in the header, which plays one on demand (replay.ts).
  */
 ---
 
 <script>
   import { run } from "~/broadcast/load";
+  import { wireReplay } from "~/broadcast/replay";
   run();
+  wireReplay(document.querySelector<HTMLButtonElement>("[data-replay]"));
 </script>
