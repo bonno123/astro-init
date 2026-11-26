@@ -298,3 +298,47 @@ html[data-quiet] .bc-timer {
 .bc-btn[hidden] {
   display: none;
 }
+
+/* ---- kind: shader ---- */
+
+.bc-shader {
+  position: absolute;
+  inset: 0;
+  background: #0f100d;
+}
+
+.bc-shader canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  touch-action: none; /* drags go to iMouse, not the page */
+}
+
+.bc-shader.ready canvas {
+  opacity: 1;
+}
+
+.bc-credit {
+  position: absolute;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 2;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgb(236 233 224 / 0.55);
+  text-decoration: none;
+}
+
+a.bc-credit:hover {
+  color: var(--accent, #e0a845);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bc-shader canvas {
+    transition: none;
+  }
+}

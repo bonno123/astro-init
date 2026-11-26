@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { api } from "~/utils/api";
-import type { GreetingPayload, VideoPayload } from "~/broadcast/types";
+import type { GreetingPayload, ShaderPayload, VideoPayload } from "~/broadcast/types";
+import { SHADERS, shaderTitle } from "~/broadcast/shaders";
 
-type Kind = "greeting" | "video";
+type Kind = "greeting" | "video" | "shader";
+
+const SHADER_LIST = Object.entries(SHADERS).map(([slug, d]) => ({ slug, title: d.title, by: d.credit?.by }));
 
 type Row = {
   id: string;
   label: string;
   kind: Kind;
-  payload: GreetingPayload & VideoPayload; // whichever fields its kind has
+  payload: GreetingPayload & VideoPayload & ShaderPayload; // whichever fields its kind has
   enabled: boolean;
   startsAt: string | null;
   endsAt: string | null;
@@ -51,11 +54,13 @@ const blank = (kind: Kind = "greeting") => ({
   caption: "",
   fit: "cover" as "cover" | "contain",
   loop: false,
-  // both
+  // shader (caption is shared with video)
+  shader: SHADER_LIST[0]?.slug ?? "",
+  // all
   startsAt: "",
   endsAt: "",
   frequency: "once" as Row["frequency"],
-  seconds: kind === "video" ? 0 : 8, // a video closes when it ends
+  seconds: kind === "video" ? 0 : kind === "shader" ? 20 : 8, // a video closes when it ends; a shader never does
   enabled: true,
   pinned: false,
 });
@@ -122,6 +127,7 @@ function edit(r: Row) {
     caption: p.caption ?? "",
     fit: p.fit ?? "cover",
     loop: p.loop === true,
+    shader: p.shader ?? SHADER_LIST[0]?.slug ?? "",
     startsAt: toLocalInput(r.startsAt),
     endsAt: toLocalInput(r.endsAt),
     frequency: r.frequency,
@@ -134,8 +140,10 @@ function edit(r: Row) {
   scrollTo({ top: 0, behavior: "smooth" });
 }
 
-const payload = computed<GreetingPayload | VideoPayload>(() =>
-  form.kind === "video"
+const payload = computed<GreetingPayload | VideoPayload | ShaderPayload>(() =>
+  form.kind === "shader"
+    ? { shader: form.shader, caption: form.caption.trim() || null }
+    : form.kind === "video"
     ? {
         src: form.src.trim(),
         poster: form.poster.trim() || null,
@@ -154,13 +162,19 @@ const payload = computed<GreetingPayload | VideoPayload>(() =>
 const https = (v: string) => /^https:\/\/\S+$/i.test(v.trim());
 const ready = computed(
   () =>
-    (form.kind === "video" ? https(form.src) && (!form.poster.trim() || https(form.poster)) : Boolean(form.title.trim())) &&
+    (form.kind === "shader"
+      ? Object.hasOwn(SHADERS, form.shader)
+      : form.kind === "video"
+        ? https(form.src) && (!form.poster.trim() || https(form.poster))
+        : Boolean(form.title.trim())) &&
     (!form.pinned || Boolean(form.endsAt)),
 );
 
 /** What a row is called in the list, after its label. */
 const summary = (r: Row) =>
-  r.kind === "video" ? r.payload.caption || decodeURIComponent(r.payload.src?.split("/").pop() || "video") : r.payload.title;
+  r.kind === "shader"
+    ? r.payload.caption || shaderTitle(r.payload.shader)
+    : r.kind === "video" ? r.payload.caption || decodeURIComponent(r.payload.src?.split("/").pop() || "video") : r.payload.title;
 
 function body(r?: Row) {
   if (r)
@@ -178,7 +192,7 @@ function body(r?: Row) {
     };
   return {
     id: form.id,
-    label: form.label.trim(),
+    label: form.label.trim() || (form.kind === "shader" ? shaderTitle(form.shader) : ""),
     kind: form.kind,
     payload: payload.value,
     enabled: form.enabled,
@@ -277,12 +291,27 @@ async function preview(r?: Row) {
       <div v-if="!editing" class="acts">
         <button class="primary" @click="startNew('greeting')">new greeting</button>
         <button class="primary" @click="startNew('video')">new video</button>
+        <button class="primary" @click="startNew('shader')">new shader</button>
       </div>
 
       <form v-else class="edit" @submit.prevent="save">
         <h2>{{ form.id ? "Edit" : "New" }} {{ form.kind }}</h2>
 
-        <template v-if="form.kind === 'video'">
+        <template v-if="form.kind === 'shader'">
+          <label>
+            <span>Shader <em>from src/broadcast/shaders/; add one there to see it here</em></span>
+            <select v-model="form.shader" required>
+              <option v-for="s in SHADER_LIST" :key="s.slug" :value="s.slug">{{ s.title }}{{ s.by ? ` · by ${s.by}` : "" }}</option>
+            </select>
+          </label>
+          <label>
+            <span>Caption <em>optional</em></span>
+            <input v-model="form.caption" maxlength="120" placeholder="Happy New Year" />
+          </label>
+          <p class="meta">It runs on the visitor's GPU and never ends by itself, so give it a time to close, or leave 0 to stay until closed. With motion off it shows one still frame and a play button.</p>
+        </template>
+
+        <template v-else-if="form.kind === 'video'">
           <label>
             <span>Video link <em>https, .mp4 or .webm</em></span>
             <input v-model="form.src" type="url" inputmode="url" required placeholder="https://…/diwali.mp4" />

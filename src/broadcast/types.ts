@@ -54,3 +54,9 @@ export type VideoPayload = {
   /** Otherwise the overlay closes when the video ends. */
   loop?: boolean;
 };
+
+export type ShaderPayload = {
+  /** A key in src/broadcast/shaders/index.ts. The code ships with the site; this only names it. */
+  shader: string;
+  caption?: string | null;
+};

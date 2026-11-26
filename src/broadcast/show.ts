@@ -10,6 +10,7 @@ import type { Broadcast, Renderer, Shown } from "./types";
 const RENDERERS: Record<string, () => Promise<{ default: Renderer }>> = {
   greeting: () => import("./greeting"),
   video: () => import("./video"),
+  shader: () => import("./shader"),
 };
 
 export const KINDS = Object.keys(RENDERERS);
