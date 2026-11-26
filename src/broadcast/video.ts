@@ -29,8 +29,10 @@ const video: Renderer = (stage, p: VideoPayload, ctx) => {
   const sound = document.createElement("button");
   sound.type = "button";
   sound.className = "bc-btn bc-sound";
+  sound.setAttribute("aria-label", "Sound");
   const syncSound = () => {
-    sound.innerHTML = `${v.muted ? ICON.muted : ICON.sound}<span>${v.muted ? "sound on" : "sound off"}</span>`;
+    sound.innerHTML = v.muted ? ICON.muted : ICON.sound;
+    sound.title = v.muted ? "sound on" : "sound off";
     sound.setAttribute("aria-pressed", String(!v.muted));
   };
   syncSound();

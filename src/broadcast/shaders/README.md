@@ -60,9 +60,9 @@ those, record it and use a `video` broadcast instead.
 rendered on the GPU once, ahead, a block a frame (`neon-drive`'s 52 s took
 about half a second on a laptop), then loops through Web Audio.
 
-- It starts silent, with a "sound on" button. Browsers only allow sound after
-  a tap, and a song nobody asked for would be rude anyway. With motion off,
-  the button shows once they press play.
+- It starts silent, with a sound button (an icon under the close button).
+  Browsers only allow sound after a tap, and a song nobody asked for would be
+  rude anyway. With motion off, the button shows once they press play.
 - While it plays, the picture's iTime follows the audio, latency included, so
   the two stay together. Put the tempo and the song's plan in `common.glsl`
   and have both read it: then the picture can hit the kick (`neon-drive` does).

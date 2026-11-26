@@ -91,9 +91,11 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
   sound.type = "button";
   sound.className = "bc-btn bc-sound";
   sound.hidden = true;
+  sound.setAttribute("aria-label", "Sound");
   let heard = false;
   const syncSound = () => {
-    sound.innerHTML = `${heard ? ICON.sound : ICON.muted}<span>${heard ? "sound off" : "sound on"}</span>`;
+    sound.innerHTML = heard ? ICON.sound : ICON.muted;
+    sound.title = heard ? "sound off" : "sound on";
     sound.setAttribute("aria-pressed", String(heard));
   };
   syncSound();

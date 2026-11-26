@@ -42,7 +42,11 @@ html:has(dialog.bc[open]) {
   inset: 0;
 }
 
-.bc-close {
+/* The overlay's controls: icons only, in a column down the right edge, the
+   close button at the top. A pinned one has no close button, so the next one
+   moves up into its place. */
+.bc-close,
+.bc-btn {
   position: absolute;
   top: max(16px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
@@ -60,9 +64,19 @@ html:has(dialog.bc[open]) {
   transition: border-color 0.2s ease, color 0.2s ease;
 }
 
-.bc-close:hover {
+.bc-close:hover,
+.bc-btn:hover,
+.bc-play:hover {
   border-color: var(--accent, #e0a845);
   color: var(--accent, #e0a845);
+}
+
+.bc-sound {
+  top: calc(max(16px, env(safe-area-inset-top)) + 54px);
+}
+
+dialog.bc.pinned .bc-sound {
+  top: max(16px, env(safe-area-inset-top));
 }
 
 .bc-close svg {
@@ -307,35 +321,6 @@ html[data-quiet] .bc-timer {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
-}
-
-.bc-btn {
-  position: absolute;
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 44px;
-  padding: 0 16px 0 12px;
-  border: 1px solid rgb(255 255 255 / 0.25);
-  border-radius: 22px;
-  background: rgb(15 16 13 / 0.6);
-  color: var(--ink, #ece9e0);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
-}
-
-.bc-btn:hover,
-.bc-play:hover {
-  border-color: var(--accent, #e0a845);
-  color: var(--accent, #e0a845);
-}
-
-.bc-sound {
-  top: max(16px, env(safe-area-inset-top));
-  left: max(16px, env(safe-area-inset-left));
 }
 
 .bc-btn svg {
