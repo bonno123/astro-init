@@ -68,6 +68,9 @@ about half a second on a laptop), then loops through Web Audio.
   and have both read it: then the picture can hit the kick (`neon-drive` does).
 - Set `sound.seconds` to the length the picture loops at, so they stay
   together lap after lap.
+- Two pictures can share one song: `sound: { from: "neon-drive" }` plays that
+  shader's `sound.glsl`, puts its `common.glsl` (the song's clock) in front of
+  this one's, and takes its length. `night-ride` does this.
 - A Sound tab that doesn't compile costs the sound, not the picture: the
   console says why. No float rendering on the device: no sound button.
 - Make a song for here, or one you have the rights to. A recreation of

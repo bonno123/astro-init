@@ -24,7 +24,11 @@ export type ShaderDef = {
    * It has a Sound tab, sound.glsl, and the song loops after this many seconds (default 180, at most 180).
    * Make it the same length the picture loops at, so the two stay together lap after lap.
    */
-  sound?: { seconds?: number };
+  sound?: {
+    seconds?: number;
+    /** Play another shader's song instead of a sound.glsl of its own. Its common.glsl (the song's clock) comes too, in front of this one's, and its length unless `seconds` says otherwise. */
+    from?: string;
+  };
 };
 
 export const SHADERS: Record<string, ShaderDef> = {
@@ -38,6 +42,13 @@ export const SHADERS: Record<string, ShaderDef> = {
     stillAt: 31,
     // 24 bars of 4 beats at 110 bpm: SONG in common.glsl
     sound: { seconds: (24 * 4 * 60) / 110 },
+    passes: { image: {} },
+  },
+  "night-ride": {
+    title: "Night Ride",
+    stillAt: 31,
+    // Neon Drive's song, and its clock: a streetlight passes on every beat
+    sound: { from: "neon-drive" },
     passes: { image: {} },
   },
   embers: {

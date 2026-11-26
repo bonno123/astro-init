@@ -31,18 +31,21 @@ async function load(slug: string, def: ShaderDef): Promise<ToyProgram> {
     if (!f) throw new Error(`${slug}: ${n}.glsl is missing.`);
     return f;
   });
-  const common = file("common");
-  const sound = def.sound ? file("sound") : undefined;
-  if (def.sound && !sound) throw new Error(`${slug}: sound.glsl is missing.`);
-  const [commonCode, soundCode, ...codes] = await Promise.all([
-    common ? common() : "",
+  // A song borrowed from another shader brings its common.glsl too (the song's clock), in front of this one's.
+  const from = def.sound?.from;
+  if (from && !Object.hasOwn(SHADERS, from)) throw new Error(`${slug}: borrows the song of ${from}, which isn't here.`);
+  const commons = [from ? SOURCES[`./shaders/${from}/common.glsl`] : undefined, file("common")];
+  const sound = def.sound ? SOURCES[`./shaders/${from ?? slug}/sound.glsl`] : undefined;
+  if (def.sound && !sound) throw new Error(`${slug}: ${from ?? slug}/sound.glsl is missing.`);
+  const [soundCode, ...codes] = await Promise.all([
     sound ? sound() : "",
-    ...loaders.map((f) => f()),
+    ...[...commons, ...loaders].map((f) => (f ? f() : "")),
   ]);
+  const seconds = def.sound?.seconds ?? (from ? SHADERS[from].sound?.seconds : undefined) ?? 180;
   return {
-    common: commonCode,
-    passes: names.map((name, i) => ({ name, code: codes[i], channels: channels(name) })),
-    sound: def.sound ? { code: soundCode, seconds: def.sound.seconds ?? 180 } : null,
+    common: codes.slice(0, 2).filter(Boolean).join("\n"),
+    passes: names.map((name, i) => ({ name, code: codes[i + 2], channels: channels(name) })),
+    sound: def.sound ? { code: soundCode, seconds } : null,
   };
 }
 
