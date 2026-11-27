@@ -23,8 +23,10 @@
 // that leans toward it. Shadertoy has no hover: iMouse moves only while pressed.
 //
 // It also looks after the things a full-screen shader on a visitor's phone
-// needs: it draws at most 60 frames a second, renders at a lower resolution
-// when frames get slow, compiles
+// needs: it draws at most 60 frames a second, starts at a lower resolution on
+// a touch screen, renders at a lower resolution when frames get slow (at once
+// when they're very slow), stops on a still picture when even the lowest is
+// too slow, compiles
 // without freezing the page where the browser allows, keeps time across a
 // hidden tab, and frees the GPU the moment it's destroyed.
 
@@ -60,6 +62,12 @@ export type ToyOptions = {
   hover?: boolean;
   /** The GPU dropped the context (driver reset, too much memory). Nothing more will draw. */
   onLost: () => void;
+  /**
+   * Even at the lowest resolution it can't keep up. It has stopped on a still
+   * picture of where it was, and won't move again: a GPU that busy starves the
+   * rest of the device, and on a phone the whole screen freezes with it.
+   */
+  onSlow?: () => void;
 };
 
 export type Toy = {
@@ -79,7 +87,7 @@ export type ToyAudio = {
   /**
    * Starts the song where the picture is. Call it from the visitor's tap: browsers
    * only let sound start from one. Resolves once it's playing; the song is
-   * rendered in the background from the first play(), so that's usually at once.
+   * rendered in the background after the picture's first second, so that's usually at once.
    */
   start(): Promise<void>;
   stop(): void;
@@ -89,6 +97,16 @@ export type ToyAudio = {
 const MAX_PIXELS = 1920 * 1080;
 /** How far it will drop the resolution to keep up. */
 const MIN_QUALITY = 0.35;
+/**
+ * Where it starts on a touch screen: about a third of the pixels, then climbs if
+ * there's room. A phone's GPU is a fraction of a laptop's, and a first frame at
+ * full size can hold up the whole phone before there's anything to measure.
+ */
+const TOUCH_QUALITY = 0.6;
+/** A frame slower than this is an emergency: drop now, don't wait for an average. */
+const SLOW_FRAME = 0.1;
+/** At the lowest resolution and still slower than this on average, it gives up and stays still. */
+const GIVE_UP = 1 / 15;
 /** The fastest it draws: one frame in this many ms. */
 const FRAME = 1000 / 60;
 /** Shadertoy's sample rate. The browser resamples to the device's. */
@@ -126,8 +144,8 @@ out vec4 st_fragColor;
 `;
 
 // In compile errors, source 1 is the Common tab and source 0 is the pass, each from line 1.
-const fragment = (common: string, pass: ToyPass) =>
-  `${HEAD}
+const fragment = (head: string, common: string, pass: ToyPass) =>
+  `${head}
 ${common ? `#line 1 1\n${common}\n` : ""}#line 1 0
 ${pass.code}
 void main() {
@@ -136,9 +154,9 @@ void main() {
 }`;
 
 // One block of samples a draw: each pixel is one sample, left in red and right in green.
-const soundFragment = (common: string, code: string) => {
+const soundFragment = (head: string, common: string, code: string) => {
   const call = /mainSound\s*\(\s*(in\s+)?float/.test(code) ? "mainSound(time)" : "mainSound(samp, time)";
-  return `${HEAD}uniform int st_offset;
+  return `${head}uniform int st_offset;
 ${common ? `#line 1 1\n${common}\n` : ""}#line 1 0
 ${code}
 void main() {
@@ -222,6 +240,8 @@ async function build(
 
   // ---- compile and link every pass, then wait for all of them at once ----
 
+  const touch = matchMedia("(pointer: coarse)").matches;
+
   const shaders: WebGLShader[] = [];
   const compile = (type: number, src: string) => {
     const s = gl.createShader(type)!;
@@ -230,9 +250,11 @@ async function build(
     shaders.push(s);
     return s;
   };
+  // A touch screen is most likely a phone: ST_LITE tells the shader so, and it can do less (see the README).
+  const head = touch ? `${HEAD}#define ST_LITE 1\n` : HEAD;
   const vs = compile(gl.VERTEX_SHADER, VERT);
   const built: Built[] = passes.map((pass) => {
-    const fs = compile(gl.FRAGMENT_SHADER, fragment(program.common, pass));
+    const fs = compile(gl.FRAGMENT_SHADER, fragment(head, program.common, pass));
     const prog = gl.createProgram()!;
     gl.attachShader(prog, vs);
     gl.attachShader(prog, fs);
@@ -242,7 +264,7 @@ async function build(
   let soundProg: WebGLProgram | null = null;
   let soundFs: WebGLShader | null = null;
   if (song) {
-    soundFs = compile(gl.FRAGMENT_SHADER, soundFragment(program.common, song.code));
+    soundFs = compile(gl.FRAGMENT_SHADER, soundFragment(head, program.common, song.code));
     soundProg = gl.createProgram()!;
     gl.attachShader(soundProg, vs);
     gl.attachShader(soundProg, soundFs);
@@ -338,7 +360,7 @@ async function build(
 
   let W = 0;
   let H = 0;
-  let quality = 1;
+  let quality = touch ? TOUCH_QUALITY : 1;
 
   function fit(): boolean {
     const cw = Math.max(1, canvas.clientWidth);
@@ -464,13 +486,15 @@ async function build(
   const res = new Float32Array(12);
   const chTime = new Float32Array(4);
 
-  function draw(t: number, dt: number) {
+  /** Every pass, or with buffersOnly the buffers alone (a warm-up nobody sees). */
+  function draw(t: number, dt: number, buffersOnly = false) {
     nextPress();
     easeHover(dt);
     const d = new Date();
     const secs = d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds() + d.getMilliseconds() / 1000;
     chTime.fill(t);
     for (const b of built) {
+      if (buffersOnly && b.pass.name === "image") continue;
       const target = b.pass.name === "image" ? null : targets.get(b.pass.name)!;
       gl.bindFramebuffer(gl.FRAMEBUFFER, target ? target.fbo[1 - target.read] : null);
       gl.viewport(0, 0, target ? target.w : W, target ? target.h : H);
@@ -520,6 +544,8 @@ async function build(
   let windowSum = 0;
   let goodWindows = 0;
   let settle = 0; // frames to ignore after a resize, which costs a frame or two itself
+  let slow = 0; // frames in a row slower than SLOW_FRAME
+  let gaveUp = false;
 
   function resized() {
     if (!fit()) return;
@@ -527,21 +553,58 @@ async function build(
     if (mode === "still") draw(stillAt, 0); // a resize clears the canvas; the buffers were kept
   }
 
-  function adapt(dt: number) {
+  // Too slow even at the lowest resolution: stop where it is. The canvas keeps showing the last frame.
+  function giveUp() {
+    if (gaveUp) return;
+    gaveUp = true;
+    cancelAnimationFrame(raf);
+    mode = "still";
+    stillAt = time;
+    console.warn(`shader: ${Math.round(1000 / fps)} ms a frame at the lowest resolution; stopped on a still picture.`);
+    opts.onSlow?.();
+  }
+
+  /** raw: seconds since the last frame drawn, unclamped; 0 when there's no last frame to measure from. */
+  function adapt(raw: number) {
     if (pumping) settle = 10; // rendering the song costs frames that aren't the shader's
-    if (settle > 0) return void settle--;
-    if (dt >= 0.1) return; // a hitch (a tab switch, a GC), not the steady rate
-    windowSum += dt;
+    if (!raw) return;
+    if (settle > 0) settle--;
+    if (raw >= SLOW_FRAME) {
+      // Far too slow. A GPU this busy holds up the rest of the device too (on a phone, its
+      // whole screen), so drop now instead of waiting out an average. Two in a row, so a
+      // one-off hitch (a GC) doesn't count; and not the resize's own first frames.
+      if (settle > 7 || ++slow < 2) return;
+      slow = 0;
+      windowN = 0;
+      windowSum = 0;
+      fps = 1 / raw;
+      if (quality <= MIN_QUALITY) return giveUp();
+      // The cost goes with the pixels, the square of quality: aim for 40 a second, at most halving at once.
+      quality = Math.max(MIN_QUALITY, quality * Math.min(0.8, Math.max(0.5, Math.sqrt(1 / 40 / raw))));
+      goodWindows = 0;
+      resized();
+      return;
+    }
+    slow = 0;
+    if (settle > 0) return;
+    windowSum += raw;
     if (++windowN < 30) return;
     const avg = windowSum / windowN;
     windowN = 0;
     windowSum = 0;
     fps = 1 / avg;
+    if (avg > GIVE_UP && quality <= MIN_QUALITY) return giveUp();
+    // A first full second measured: render the song now, ahead of anyone asking for it.
+    // Not sooner (the first frames are the heaviest), nor later: a slow phone may never
+    // settle, and the song would then only start rendering on the tap, a wait you'd hear.
+    prepare();
     if (avg > 1 / 40 && quality > MIN_QUALITY) {
       quality = Math.max(MIN_QUALITY, quality * 0.8);
       goodWindows = 0;
       resized();
-    } else if (avg < 1 / 55 && quality < 1) {
+      return;
+    }
+    if (avg < 1 / 55 && quality < 1) {
       // Climb back slowly, only after a couple of seconds of headroom, so it doesn't see-saw.
       if (++goodWindows >= 4) {
         quality = Math.min(1, quality * 1.12);
@@ -550,6 +613,14 @@ async function build(
       }
     } else goodWindows = 0;
   }
+
+  // A hidden tab gets no frames. The first one back measures the time away, not a frame.
+  const onShown = () => {
+    if (document.hidden) return;
+    last = 0;
+    seen = 0;
+  };
+  document.addEventListener("visibilitychange", onShown);
 
   function tick(now: number) {
     raf = requestAnimationFrame(tick);
@@ -562,7 +633,8 @@ async function build(
     if (owed < FRAME - 2) return;
     owed -= FRAME;
     // A hidden tab gets no frames; when it's back, time carries on instead of jumping.
-    const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
+    const raw = last ? (now - last) / 1000 : 0;
+    const dt = last ? Math.min(0.1, raw) : 1 / 60;
     last = now;
     const was = time;
     time += dt;
@@ -573,7 +645,7 @@ async function build(
       time = Math.abs(off) > 0.25 ? heard : time + off * 0.1;
     }
     draw(time, Math.min(0.1, Math.max(0, time - was)));
-    adapt(dt);
+    adapt(raw);
   }
 
   // A still picture that answers to dragging (opts.drag): redrawn at the same
@@ -582,7 +654,7 @@ async function build(
   let stillUntil = 0;
   let stillRaf = 0;
   function stillDrag() {
-    if (!opts.drag || mode !== "still" || stillRaf || destroyed) return;
+    if (!opts.drag || mode !== "still" || stillRaf || destroyed || gaveUp) return;
     const step = (now: number) => {
       stillRaf = 0;
       if (mode !== "still" || destroyed) return;
@@ -592,10 +664,11 @@ async function build(
     stillRaf = requestAnimationFrame(step);
   }
 
+  // Buffers get a second of frames to fill in; the picture is drawn once, on the last.
   function renderStill() {
     const frames = buffers.length ? 60 : 1;
     frame = 0;
-    for (let i = 0; i < frames; i++) draw(Math.max(0, stillAt - (frames - 1 - i) / 60), 1 / 60);
+    for (let i = 0; i < frames; i++) draw(Math.max(0, stillAt - (frames - 1 - i) / 60), 1 / 60, i < frames - 1);
     time = stillAt;
   }
 
@@ -814,7 +887,7 @@ async function build(
     sound: audio,
     missing,
     play() {
-      if (destroyed || isLost() || mode === "playing") return;
+      if (destroyed || isLost() || mode === "playing" || gaveUp) return;
       cancelAnimationFrame(stillRaf);
       stillRaf = 0;
       mode = "playing";
@@ -822,7 +895,8 @@ async function build(
       seen = 0;
       owed = 0;
       raf = requestAnimationFrame(tick);
-      prepare(); // so the sound is ready by the time someone asks for it
+      // The song is rendered after a second of frames (adapt), not now: on a slow GPU
+      // the first frames are the heaviest, and the song would only add to them.
     },
     still(t) {
       if (destroyed || isLost()) return;
@@ -837,6 +911,7 @@ async function build(
       cancelAnimationFrame(raf);
       cancelAnimationFrame(stillRaf);
       ro.disconnect();
+      document.removeEventListener("visibilitychange", onShown);
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);

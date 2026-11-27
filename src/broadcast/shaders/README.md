@@ -138,7 +138,17 @@ artwork or characters brings their rights too, not only the shader author's.
   work, and the fan and the battery with it.
 - It renders at most 1920×1080 pixels, and drops the resolution, down to 35%,
   when frames go under about 40 a second. It climbs back when there's room.
-- A heavy one can still lag a slow phone before that kicks in. Measure it
+  On a touch screen it starts at 60% (about a third of the pixels) and climbs
+  from there. Frames slower than 100 ms drop it at once, without waiting for an
+  average: a GPU that busy freezes the whole phone, not only the page.
+- Still under about 15 a second at 35%, it gives up: it stops on a still
+  picture of where it was, with no dragging, and logs why to the console. The
+  song can still play over it.
+- The song is rendered after the picture's first second, not as it starts, so
+  it doesn't add to the heaviest frames.
+- On a touch screen every pass is compiled with `#define ST_LITE 1`, so a heavy
+  shader can do less on a phone: `#ifdef ST_LITE` around cheaper constants.
+- A heavy one can still lag a slow phone for a few frames first. Measure it
   (`night-ride` takes about 13 ms a frame at 2560×1440 on the laptop it was
   made on, dragged or not) and look for the usual wins: loops over fewer lights, shorter
   marches for reflections, stopping rays that can't hit anything, long strides

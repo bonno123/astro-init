@@ -1,6 +1,7 @@
 // kind: shader. A full-screen Shadertoy-style shader from src/broadcast/shaders/,
 // named by the broadcast; the code ships with the site and is never stored.
 // It fades in once compiled, and closes quietly if this device can't run it.
+// Where it runs but can't keep up, it stops on a still picture rather than freeze the device.
 // With motion off it shows one still frame and waits for a tap to play.
 // One with a Sound tab starts silent, with a button for sound: browsers only
 // allow sound after a tap, and a song nobody asked for would be rude anyway.
@@ -168,7 +169,13 @@ const shader: Renderer = (stage, p: ShaderPayload, ctx) => {
       if (gone) return;
       // Leaning with the mouse is parallax, the motion reduced motion asks to be spared.
       const hover = Boolean(def.hover) && !matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const made = await createToy(canvas, program, { scale: def.scale, drag: def.drag, hover, onLost: () => ctx.close() });
+      // Too slow here even at the lowest resolution: it stays a still picture (the song can
+      // still play over it), and stops answering to dragging, which would redraw it.
+      const onSlow = () => {
+        wrap.classList.remove("bc-drag");
+        play.hidden = true;
+      };
+      const made = await createToy(canvas, program, { scale: def.scale, drag: def.drag, hover, onLost: () => ctx.close(), onSlow });
       if (gone) return made.destroy();
       toy = made;
       // Without its optional buffers (no float rendering here) a shader may not answer to dragging; don't offer it.
