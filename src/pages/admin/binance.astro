@@ -1,0 +1,11 @@
+---
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import AdminBinance from "~/components/quiet/AdminBinance.vue";
+---
+
+<QuietLayout title="Binance books · admin" metaDescription="Who paid for what in the Binance sub-account.">
+  <meta slot="head" name="robots" content="noindex" />
+  <main id="main">
+    <AdminBinance client:load />
+  </main>
+</QuietLayout>

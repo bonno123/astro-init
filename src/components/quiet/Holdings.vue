@@ -4,26 +4,28 @@ import { api, ApiError } from "~/utils/api";
 
 type Wallet = "spot" | "funding" | "earn";
 type Raw = { asset: string; wallet: Wallet; amount: number };
-type Holder = { name: string; share: number; since: string };
+type Owner = { name: string; btc: number; inr: number };
 type Move = {
+  id: string;
   kind: "in" | "out" | "buy" | "sell" | "convert";
   at: number;
   asset: string;
   amount: number;
   usdt: number | null; // value at that minute
-  inr: number | null; // rupees really paid (or received), set by hand
   note: string | null;
+  paid: { holder: string; inr: number }[]; // who paid for it (or got paid, for "out"), set at /admin/binance/
 };
 type Summary = {
   updatedAt: string;
   assets: Raw[];
   stale?: boolean;
   notice?: string;
-  // The books, from D1: who owns what share, and what moved in and out.
-  holders?: Holder[];
+  // The books, from D1: what moved in and out, and who paid for it.
   activity?: Move[];
+  owners?: Owner[]; // BTC each person paid for, and their net rupees
+  unsplitBtc?: number | null; // BTC from moves nobody is recorded as paying for
   putInUsdt?: number | null; // net USDT in, valued at the minute each move happened
-  paidInr?: number | null; // net rupees really paid
+  paidInr?: number | null; // net rupees really paid (null while a move is unsplit)
 };
 type Row = Raw & { usdt: number | null };
 
@@ -152,20 +154,24 @@ const story = computed(() => {
   return { paid, arrived, lost: paid === null ? null : arrived - paid, market: now - arrived, now };
 });
 
-/** Each holder's part of the BTC, of what was paid, and of what it's worth now. */
+/**
+ * Each person's part is the BTC they paid for, out of all the BTC paid for. So
+ * someone who buys in later doesn't share in gains made before. Their part of
+ * the account (fees, interest and all) follows from that.
+ */
 const holders = computed(() => {
-  const list = data.value?.holders ?? [];
-  const sum = list.reduce((s, h) => s + h.share, 0);
-  if (!sum) return [];
-  const rate = inrPerUsdt.value;
-  const paid = data.value?.paidInr ?? (data.value?.putInUsdt != null && rate !== null ? data.value.putInUsdt * rate : null);
-  return list.map((h) => {
-    const part = h.share / sum;
+  const owners = data.value?.owners ?? [];
+  const unsplit = data.value?.unsplitBtc ?? 0;
+  const all = owners.reduce((s, o) => s + o.btc, 0) + unsplit;
+  if (!(all > 0)) return [];
+  const list = owners.map((o) => ({ name: o.name, btc: o.btc, paid: o.inr as number | null }));
+  if (unsplit > 1e-12) list.push({ name: "", btc: unsplit, paid: null });
+  return list.map((o) => {
+    const part = o.btc / all;
     return {
-      ...h,
+      ...o,
       part,
-      btc: totalBtc.value === null ? null : totalBtc.value * part,
-      paid: paid === null ? null : paid * part,
+      held: totalBtc.value === null ? null : totalBtc.value * part,
       now: priced.value ? totalUsdt.value * part : null,
     };
   });
@@ -176,7 +182,8 @@ const activity = computed(() =>
     const title = { in: m.note, out: m.note, buy: `Bought ${m.asset}`, sell: `Sold ${m.asset}`, convert: `Converted to ${m.asset}` }[m.kind];
     const detail = m.kind === "in" || m.kind === "out" ? null : m.note;
     const sign = m.kind === "out" || m.kind === "sell" ? "−" : "+";
-    return { ...m, title: title ? title[0].toUpperCase() + title.slice(1) : m.kind, detail, sign };
+    const paidTotal = (m.paid ?? []).reduce((s, p) => s + p.inr, 0);
+    return { ...m, paid: m.paid ?? [], paidTotal, title: title ? title[0].toUpperCase() + title.slice(1) : m.kind, detail, sign };
   }),
 );
 
@@ -261,9 +268,13 @@ const when = (t: string | number) =>
       <h2 class="label">Holders</h2>
       <ul class="list">
         <li v-for="h in holders" :key="h.name">
-          <span>{{ h.name }}<span class="sub">{{ pct.format(h.part) }}</span></span>
+          <span>
+            <template v-if="h.name">{{ h.name }}</template>
+            <span v-else class="meta">Not split yet</span>
+            <span class="sub">{{ pct.format(h.part) }}</span>
+          </span>
           <span class="num">
-            <template v-if="h.btc !== null">{{ qty.format(h.btc) }} BTC</template>
+            <template v-if="h.held !== null">{{ qty.format(h.held) }} BTC</template>
             <span class="sub">
               <template v-if="h.paid !== null">paid {{ rupees.format(h.paid) }} · </template>now {{ money(h.now) }}
             </span>
@@ -280,9 +291,10 @@ const when = (t: string | number) =>
           <span class="num">
             {{ m.sign }}{{ qty.format(m.amount) }} {{ m.asset }}
             <span class="sub">
-              <template v-if="m.inr !== null">paid {{ rupees.format(m.inr) }} · </template>
+              <template v-if="m.paidTotal">{{ m.kind === "out" ? "got" : "paid" }} {{ rupees.format(m.paidTotal) }} · </template>
               <template v-if="m.usdt !== null">worth {{ money(m.usdt) }} then</template>
             </span>
+            <span v-if="m.paid.length > 1" class="sub">{{ m.paid.map((p) => `${p.holder} ${rupees.format(p.inr)}`).join(" · ") }}</span>
           </span>
         </li>
       </ul>

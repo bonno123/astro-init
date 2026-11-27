@@ -56,27 +56,35 @@ D1's Time Travel can still restore the database to an earlier point for a while 
 
 If Binance ever refuses every Cloudflare IP for a day, the page shows "Binance didn't answer this time." The fix then is to make the signed call from a server outside Cloudflare (a small proxy on AWS Lambda or Vercel in Mumbai).
 
-### Holders and activity (the books)
+### Holders and who paid (the books)
 
-Two more tables sit beside the balances (`0005_binance_books.sql`):
+Three tables sit beside the balances:
 
-- `binance_holders`: who owns the sub-account. A holder's part is `share / sum(share)`, so a 4:1 split is shares 4 and 1. Names are added by hand, never in a committed file, since the repo is public.
-- `binance_activity`: what moved in and out, as Binance recorded it. The cron adds new rows from: transfers with the main account, deposits, withdrawals, converts, and spot trades against USDT for any asset held or seen before. Rows are only ever added. A transfer or deposit gets its USDT value from Binance's 1-minute price when it moved, filled in by a later cron run if the price couldn't be fetched.
+- `binance_activity`: what moved in and out, as Binance recorded it. The cron adds new rows from: transfers with the main account, deposits, withdrawals, converts, and spot trades against USDT for any asset held or seen before. Rows are only ever added. Each move in or out gets its value in USDT and its size in BTC at the minute it moved, filled in by a later run if the price couldn't be fetched.
+- `binance_contributions`: who paid how many rupees for each move in (or got how many for a move out). Binance can't tell this: the purchase happens on the main account, which the sub-account's key can't see.
+- `binance_holders`: the people, and their usual share (4 and 1), which only fills in the form.
 
-The page leads with the BTC held, then "where the money went": the rupees paid, the part lost buying (fees, TDS and the rate on the way in), the market's move since, and what it's worth now. Below that, each holder's share of the BTC, of what was paid, and of what it's worth now.
+**Ownership** comes from who paid. Each move's BTC is split between the people who paid for it, in proportion to their rupees. A person's part of the account is the BTC they paid for, out of all the BTC paid for. So someone who buys in later doesn't share in gains made before, and fees or interest on the account are shared in the same parts. A move nobody is recorded as paying for shows on `/v/` as "Not split yet".
 
-Binance records only the coins that arrived. A purchase made on the main account isn't visible to the sub-account's key. So the rupees really paid go in the `inr` column by hand (`0006_binance_paid_inr.sql`), and the cron never touches it. Until every transfer in or out has an `inr` value, the page uses the coins' value when they arrived instead. A `usdt` value that's already set is never overwritten either:
+**After a new investment:**
+
+1. Buy on the main account and transfer the coins to the sub-account.
+2. Open `https://avikb.dev/admin/binance/`, load it with `ADMIN_API_TOKEN`, and press "check Binance now" (or wait for the cron, up to 30 minutes).
+3. Press "split" on the new move, type the total paid (it fills in the usual shares), change anyone's amount if they paid differently, and save.
+
+The `/v/` page then leads with the BTC held, then "where the money went" (paid, lost buying, market since, worth now), each holder's part, and every move with who paid for it. Holders are added or removed on the same admin page. Someone who has paid for a move can't be removed until they're taken out of its split. The names live only in D1, never in a committed file, since the repo is public.
+
+The same from the command line:
 
 ```sh
 D="npx wrangler d1 execute portfolio-messages-db --remote --command"
-$D "SELECT * FROM binance_holders;"
-$D "INSERT INTO binance_holders (name, share, since) VALUES ('<name>', 4, '2026-11-27');"
-$D "UPDATE binance_holders SET share = 3 WHERE name = '<name>';"
-$D "SELECT id, kind, datetime(at/1000, 'unixepoch') AS at, asset, amount, usdt, note FROM binance_activity ORDER BY at;"
-$D "UPDATE binance_activity SET inr = 5000 WHERE id = 'transfer:<tranId>';"   # rupees paid for it
+$D "SELECT id, kind, datetime(at/1000, 'unixepoch') AS at, asset, amount, usdt, btc, note FROM binance_activity WHERE kind IN ('in','out') ORDER BY at;"
+$D "SELECT * FROM binance_contributions;"
+$D "INSERT INTO binance_contributions (activity_id, holder, inr) VALUES ('transfer:<tranId>', '<name>', 2400);"
+$D "INSERT INTO binance_holders (name, share, since) VALUES ('<name>', 1, date('now'));"
 ```
 
-New activity shows up within 30 minutes, at the next cron run. Unlike the saved balance, the books aren't deleted when the key is rejected or removed. They're records, and the page shows nothing then anyway. To wipe them: `$D "DELETE FROM binance_activity; DELETE FROM binance_holders;"`.
+Unlike the saved balance, the books aren't deleted when the key is rejected or removed. They're records, and the page shows nothing then anyway. To wipe them: `$D "DELETE FROM binance_contributions; DELETE FROM binance_activity; DELETE FROM binance_holders;"`.
 
 **New link** (kills the old one at once, no deploy needed):
 
@@ -115,6 +123,7 @@ npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrati
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0004_binance_snapshot.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0005_binance_books.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0006_binance_paid_inr.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0007_binance_contributions.sql
 ```
 
 The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.

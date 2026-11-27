@@ -17,9 +17,10 @@
 //   - Binance answers but rejects the key (deleted, revoked, wrong permissions),
 //   - the key secrets are removed from the Worker.
 //
-// The books (binance_holders, binance_activity) are separate: who owns what share,
-// and what moved in and out, as Binance recorded it. The cron adds new activity;
-// every answer to the page carries both, read from D1. They're records, so they
+// The books are separate: what moved in and out, as Binance recorded it
+// (binance_activity, added by the cron), and who paid for each move
+// (binance_contributions, set at /admin/binance/ through binance-admin.js).
+// Every answer to the page carries them, read from D1. They're records, so they
 // stay when the key is rejected; the page just shows nothing then.
 //
 // Secrets: BINANCE_API_KEY, BINANCE_API_SECRET (a read-only key made on the
@@ -165,31 +166,60 @@ async function refresh(env) {
 
 // ---- Books ----
 
+// Each holder's BTC: every move's coins, split by the rupees each person paid for it.
+const OWNERS_SQL = `
+  SELECT c.holder AS name,
+         SUM(m.sign * m.btc * c.inr / p.total) AS btc,
+         SUM(m.sign * c.inr) AS inr
+    FROM binance_contributions c
+    JOIN (SELECT id, CASE kind WHEN 'in' THEN 1 ELSE -1 END AS sign, btc
+            FROM binance_activity WHERE kind IN ('in', 'out')) m ON m.id = c.activity_id
+    JOIN (SELECT activity_id, SUM(inr) AS total
+            FROM binance_contributions GROUP BY activity_id) p ON p.activity_id = c.activity_id
+   GROUP BY c.holder
+   ORDER BY btc DESC`;
+
+// Everything that came in or went out, and how much of it nobody has been recorded as paying for.
+const TOTALS_SQL = `
+  SELECT COUNT(*) AS moves,
+         SUM(usdt IS NULL) AS no_usdt,
+         SUM(btc IS NULL) AS no_btc,
+         SUM(NOT split) AS unsplit,
+         SUM(sign * usdt) AS usdt,
+         SUM(CASE WHEN split THEN 0 ELSE sign * btc END) AS unsplit_btc
+    FROM (SELECT CASE kind WHEN 'in' THEN 1 ELSE -1 END AS sign, usdt, btc,
+                 EXISTS (SELECT 1 FROM binance_contributions c WHERE c.activity_id = a.id) AS split
+            FROM binance_activity a WHERE kind IN ('in', 'out'))`;
+
 /**
- * Holders, recent activity, and what was put in: net USDT at the minute each move
- * happened, and net rupees really paid. Each is null while nothing has moved yet,
- * or while some move lacks it.
+ * The books, for the page:
+ *   activity       recent moves, each with who paid what for it
+ *   owners         each holder's BTC and net rupees paid (empty while a move has no BTC size yet)
+ *   unsplitBtc     BTC from moves nobody has been recorded as paying for
+ *   putInUsdt      net USDT in, at the minute each move happened
+ *   paidInr        net rupees paid (null while any move is unsplit)
  */
-async function readBooks(env) {
+export async function readBooks(env) {
   if (!env.DB) return {};
-  const [holders, activity, net] = await env.DB.batch([
-    env.DB.prepare("SELECT name, share, since FROM binance_holders ORDER BY share DESC, name"),
-    env.DB.prepare("SELECT kind, at, asset, amount, usdt, inr, note FROM binance_activity ORDER BY at DESC LIMIT 200"),
-    env.DB.prepare(
-      `SELECT SUM(CASE kind WHEN 'in' THEN usdt WHEN 'out' THEN -usdt END) AS usdt,
-              SUM(CASE kind WHEN 'in' THEN inr WHEN 'out' THEN -inr END) AS inr,
-              SUM(kind IN ('in', 'out')) AS moves,
-              SUM(kind IN ('in', 'out') AND usdt IS NULL) AS no_usdt,
-              SUM(kind IN ('in', 'out') AND inr IS NULL) AS no_inr
-         FROM binance_activity`,
-    ),
+  const [activity, split, owners, totals] = await env.DB.batch([
+    env.DB.prepare("SELECT id, kind, at, asset, amount, usdt, btc, note FROM binance_activity ORDER BY at DESC LIMIT 200"),
+    env.DB.prepare("SELECT activity_id, holder, inr FROM binance_contributions ORDER BY inr DESC, holder"),
+    env.DB.prepare(OWNERS_SQL),
+    env.DB.prepare(TOTALS_SQL),
   ]);
-  const n = net.results[0] || {};
+  const byMove = new Map();
+  for (const c of split.results) {
+    if (!byMove.has(c.activity_id)) byMove.set(c.activity_id, []);
+    byMove.get(c.activity_id).push({ holder: c.holder, inr: c.inr });
+  }
+  const t = totals.results[0] || {};
+  const known = t.moves > 0 && !t.no_btc;
   return {
-    holders: holders.results,
-    activity: activity.results,
-    putInUsdt: !n.moves || n.no_usdt ? null : n.usdt,
-    paidInr: !n.moves || n.no_inr ? null : n.inr,
+    activity: activity.results.map((m) => ({ ...m, paid: byMove.get(m.id) ?? [] })),
+    owners: known ? owners.results : [],
+    unsplitBtc: known ? t.unsplit_btc || 0 : null,
+    putInUsdt: t.moves > 0 && !t.no_usdt ? t.usdt : null,
+    paidInr: t.moves > 0 && !t.unsplit ? owners.results.reduce((s, o) => s + o.inr, 0) : null,
   };
 }
 
@@ -208,7 +238,10 @@ async function priceAt(asset, at) {
   return null;
 }
 
-const move = (id, kind, at, asset, amount, usdt = null, note = null) => ({ id, kind, at, asset, amount, usdt, note });
+// A BTC move's size in BTC is its amount; anything else is converted at that minute, later.
+const move = (id, kind, at, asset, amount, usdt = null, note = null) => ({
+  id, kind, at, asset, amount, usdt, note, btc: asset === "BTC" ? amount : null,
+});
 
 /** Everything Binance lists for the sub-account. Each source is separate, so one failing doesn't stop the rest. */
 async function collect(env) {
@@ -268,25 +301,49 @@ async function collect(env) {
   ];
 
   const results = await Promise.allSettled(sources.map((f) => f()));
-  for (const r of results) if (r.status === "rejected") console.log(`binance books: ${r.reason?.message || r.reason}`);
-  return out;
+  const failed = results.filter((r) => r.status === "rejected");
+  for (const r of failed) console.log(`binance books: ${r.reason?.message || r.reason}`);
+  return { moves: out, failed: failed.length };
 }
 
-/** Add new activity, then price up to five rows that have no USDT value yet. */
-async function syncBooks(env) {
-  if (!env.DB) return;
-  const moves = await collect(env);
+/**
+ * Add new activity, then price up to five rows still missing a USDT value (or,
+ * for moves in and out, a BTC size). Returns how many rows were new, and how
+ * many of Binance's lists couldn't be read this time.
+ */
+export async function syncBooks(env) {
+  if (!env.DB) return { added: 0, failed: 0 };
+  const { moves, failed } = await collect(env);
+  let added = 0;
   if (moves.length) {
     const insert = env.DB.prepare(
-      "INSERT OR IGNORE INTO binance_activity (id, kind, at, asset, amount, usdt, note) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      "INSERT OR IGNORE INTO binance_activity (id, kind, at, asset, amount, usdt, btc, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
-    await env.DB.batch(moves.map((m) => insert.bind(m.id, m.kind, m.at, m.asset, m.amount, m.usdt, m.note)));
+    const done = await env.DB.batch(moves.map((m) => insert.bind(m.id, m.kind, m.at, m.asset, m.amount, m.usdt, m.btc, m.note)));
+    added = done.reduce((n, r) => n + (r.meta?.changes || 0), 0);
   }
-  const { results } = await env.DB.prepare("SELECT id, at, asset, amount FROM binance_activity WHERE usdt IS NULL ORDER BY at DESC LIMIT 5").all();
+  const { results } = await env.DB.prepare(
+    `SELECT id, at, asset, amount, usdt, btc FROM binance_activity
+      WHERE usdt IS NULL OR (btc IS NULL AND kind IN ('in', 'out'))
+      ORDER BY at DESC LIMIT 5`,
+  ).all();
   for (const r of results) {
-    const unit = await priceAt(r.asset, r.at);
-    if (unit !== null) await env.DB.prepare("UPDATE binance_activity SET usdt = ? WHERE id = ? AND usdt IS NULL").bind(r.amount * unit, r.id).run();
+    let { usdt, btc } = r;
+    if (usdt === null) {
+      const unit = await priceAt(r.asset, r.at);
+      if (unit !== null) usdt = unit * r.amount;
+    }
+    if (btc === null && usdt !== null) {
+      const btcUsdt = await priceAt("BTC", r.at);
+      if (btcUsdt) btc = usdt / btcUsdt;
+    }
+    if (usdt !== r.usdt || btc !== r.btc) {
+      await env.DB.prepare("UPDATE binance_activity SET usdt = COALESCE(usdt, ?), btc = COALESCE(btc, ?) WHERE id = ?")
+        .bind(usdt, btc, r.id)
+        .run();
+    }
   }
+  return { added, failed };
 }
 
 /** For the cron. Quiet when Binance doesn't answer: the next run, or the next visit, tries again. */
