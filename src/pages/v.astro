@@ -1,0 +1,12 @@
+---
+import QuietLayout from "~/layouts/QuietLayout.astro";
+import Holdings from "~/components/quiet/Holdings.vue";
+---
+
+<!-- Private: reached only by a link with the view token after the "#". -->
+<QuietLayout title="Holdings" metaDescription="Private." noTrack>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <main id="main">
+    <Holdings client:load />
+  </main>
+</QuietLayout>

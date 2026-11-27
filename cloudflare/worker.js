@@ -1,5 +1,6 @@
 import { handleMarks } from "./marks.js";
 import { handleBroadcasts } from "./broadcasts.js";
+import { handleBinance } from "./binance.js";
 
 // Durable Object classes have to be exported from the Worker's main module.
 export { BroadcastHub } from "./hub.js";
@@ -71,6 +72,12 @@ export default {
             // Full-screen greeting on the home page
             if (url.pathname.startsWith("/api/broadcast") || url.pathname.startsWith("/api/admin/broadcasts")) {
                 const res = await handleBroadcasts(request, env, url, corsHeaders);
+                if (res) return res;
+            }
+
+            // Private read-only view of the Binance sub-account (/v/ page)
+            if (url.pathname.startsWith("/api/binance/")) {
+                const res = await handleBinance(request, env, url, corsHeaders);
                 if (res) return res;
             }
 

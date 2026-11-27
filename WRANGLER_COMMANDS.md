@@ -19,8 +19,41 @@ These are set with `npx wrangler secret put <NAME>`. Never put them in `wrangler
 | `ADMIN_API_TOKEN` | the `/api/admin/*` routes and the admin pages                  |
 | `MAIL_API_KEY`    | sending mail through `MAIL_API_URL` (Resend)                   |
 | `MARKS_SALT`      | hashing visitor IPs in the visitors' book. Falls back to `ADMIN_API_TOKEN`. |
+| `BINANCE_API_KEY`, `BINANCE_API_SECRET` | the read-only key made on the Binance sub-account, for `/api/binance/summary` |
+| `BINANCE_VIEW_TOKEN` | the private page's link, `https://avikb.dev/v/#<token>`. Put a new value to kill the old link. |
 
 `ADMIN_EMAIL`, `MAIL_API_URL` and `DEFAULT_TIMEZONE` are plain vars in `wrangler.toml`.
+
+For `wrangler dev`, put the same names in `.dev.vars` (git-ignored). Wrangler needs Node 22.12 or newer.
+
+`BINANCE_LIMITER` in `wrangler.toml` limits `/api/binance/*` to 20 requests a minute per IP.
+
+## Binance view (`/v/`)
+
+A private page showing the Binance sub-account's balances. `cloudflare/binance.js` signs the Binance calls, so the key never reaches a browser. The page reads its token from the link's `#` part, which browsers never send to a server, and the Worker checks it against `BINANCE_VIEW_TOKEN`. The link is `https://avikb.dev/v/#<token>`, and the current token is in `.env`.
+
+**New link** (kills the old one at once, no deploy needed):
+
+```sh
+T=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 12)
+printf '%s' "$T" | npx wrangler secret put BINANCE_VIEW_TOKEN
+echo "https://avikb.dev/v/#$T"     # also update BINANCE_VIEW_TOKEN in .env and .dev.vars
+```
+
+**New Binance key:** on Binance, log in to the sub-account and create an API key with only "Enable Reading" ticked. Then:
+
+```sh
+npx wrangler secret put BINANCE_API_KEY
+npx wrangler secret put BINANCE_API_SECRET
+```
+
+Delete the old key on Binance afterwards. The Worker keeps balances for 60 seconds per isolate, so a new key can take up to a minute to show.
+
+**Errors on the page:**
+
+- "This link isn't valid.": the token is wrong or was rotated.
+- "Binance said: Invalid API-key, IP, or permissions…": the key was deleted, lacks reading permission, or has an IP whitelist. A Worker has no fixed IP, so leave the whitelist off.
+- "Binance refused to answer from this server's region.": Binance turns the Worker away with HTTP 451 (restricted location) on every host, `api-gcp` included. Tested 27 Nov 2026 with the Worker running in Mumbai (`colo=BOM`), so it's Cloudflare's outgoing IPs being blocked, not the region. Moving the Worker with `[placement]` doesn't help. The signed call has to come from a server outside Cloudflare.
 
 ## Schema
 

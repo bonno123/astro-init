@@ -7,9 +7,11 @@ interface Props {
   title: string;
   metaDescription: string;
   bare?: boolean;
+  /** Private page whose link carries a secret: no analytics, not indexed. */
+  noTrack?: boolean;
 }
 
-const { title, metaDescription, bare } = Astro.props;
+const { title, metaDescription, bare, noTrack } = Astro.props;
 const fullTitle = bare ? title : `${title} · Avik Banik`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 // 1200x630, rendered from the hero shader. Regenerate if the hero changes.
@@ -27,6 +29,8 @@ const ogImage = new URL("/og.jpg", Astro.site).href;
       title={fullTitle}
       description={metaDescription}
       canonical={canonical}
+      noindex={noTrack}
+      nofollow={noTrack}
       openGraph={{
         basic: { title: fullTitle, type: "website", image: ogImage, url: canonical.href },
         image: { width: 1200, height: 630, alt: "Avik Banik, over contour lines centred on Bardhaman" },
@@ -69,15 +73,21 @@ const ogImage = new URL("/og.jpg", Astro.site).href;
         document.documentElement.dataset.quiet = "";
     </script>
 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7"></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-      gtag("config", "G-GDKJFDWKW7");
-    </script>
+    {
+      !noTrack && (
+        <>
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-GDKJFDWKW7" />
+          <script is:inline>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "G-GDKJFDWKW7");
+          </script>
+        </>
+      )
+    }
   </head>
 
   <body>

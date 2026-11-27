@@ -31,3 +31,7 @@ pnpm-debug.log*
 .DS_Store
 # Wrangler local development files
 .wrangler/
+
+# Wrangler local secrets (wrangler dev reads these)
+.dev.vars
+.dev.vars.*

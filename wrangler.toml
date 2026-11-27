@@ -21,6 +21,13 @@ class_name = "BroadcastHub"
 tag = "v1"
 new_sqlite_classes = ["BroadcastHub"]
 
+# Per-IP limit on the private Binance view (cloudflare/binance.js), so guessing
+# its link is slow as well as hopeless. namespace_id is any number unique to the account.
+[[ratelimits]]
+name = "BINANCE_LIMITER"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
 # Environment variables (non-secret). Put secrets via `wrangler secret put ...`.
 [env.production]
 vars = {ADMIN_EMAIL = "avik@avikb.dev", DEFAULT_TIMEZONE = "Asia/Kolkata", MAIL_API_URL = "https://api.resend.com/emails"}
