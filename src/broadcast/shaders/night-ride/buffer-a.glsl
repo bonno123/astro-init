@@ -27,7 +27,7 @@
 const float HOLD = 4.0; // seconds left alone before the director takes the camera back
 const float BACK = 1.6; // how long the handback takes
 const float GRAB = 0.35; // how long taking it takes
-const float MOVE = 0.012; // how far a press goes, in picture heights, before it's a drag (about 8 px on a phone)
+const float MOVE = 0.012; // how far a press goes, in frame units (frameUnit), before it's a drag (about 8 px on a phone)
 const float TWICE = 0.3; // seconds between the taps of a double tap
 const vec2 TURN = vec2(2.8, 1.8); // radians for a drag the picture's height, across and up
 
@@ -56,7 +56,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
       s2.z = 0.0;
       s1.xy = vec2(0.0);
     }
-    vec2 drag = (iMouse.xy - abs(iMouse.zw)) / iResolution.y;
+    vec2 drag = (iMouse.xy - abs(iMouse.zw)) / frameUnit();
     if (s2.z < 0.5 && length(drag) > MOVE && s3.z < 0.5) {
       // it's a drag: if the director has the camera, start from where it is
       if (s0.x < 0.01) {

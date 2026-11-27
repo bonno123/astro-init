@@ -25,6 +25,24 @@ const vec3 CYAN = vec3(0.15, 0.75, 1.0);
 const vec3 FOG = vec3(0.012, 0.009, 0.02);
 const vec2 LEAN = vec2(0.45, 0.25); // metres the camera leans, across and up, toward a mouse at the picture's edge
 
+// How much it does. ST_LITE is set on a phone (see shaders/README.md): there it
+// marches less far, mirrors the city only near the camera (the lights' streaks
+// on the road stay all the way), lights fewer lamps' haze and has one sheet of
+// rain fewer. At a phone's size and through the fog, the difference is slight.
+#ifdef ST_LITE
+const int STEPS = 56; // the main march
+const float MIRROR_FAR = 18.0; // road this near the camera mirrors the city and the bike
+const int MIRROR_STEPS = 14;
+const int GLOWS = 5; // streetlights' haze added along each ray
+const int SHEETS = 2; // sheets of rain
+#else
+const int STEPS = 90;
+const float MIRROR_FAR = 50.0;
+const int MIRROR_STEPS = 24;
+const int GLOWS = 7;
+const int SHEETS = 3;
+#endif
+
 float gChorus; // 1 through the chorus
 float gFlash; // lightning, when the chorus lands
 float gSecs; // seconds into the song
@@ -454,7 +472,7 @@ vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd, vec3 eye) {
   vec3 r = reflect(rd, rn);
   vec3 ro = p + n * 0.01;
   float far = length(p - eye);
-  vec2 h = far < 50.0 ? march(ro, r, 45.0, 24) : vec2(45.0, -1.0);
+  vec2 h = far < MIRROR_FAR ? march(ro, r, 45.0, MIRROR_STEPS) : vec2(45.0, -1.0);
   vec3 rc;
   if (h.y > 0.0) {
     vec3 q = ro + r * h.x;
@@ -473,7 +491,7 @@ vec3 shadeGround(vec3 p, vec3 n, float kind, vec3 rd, vec3 eye) {
 vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
 
 /**
- * Rain: drops on four sheets in front of the camera, each sheet sweeping toward
+ * Rain: drops on SHEETS sheets in front of the camera, each sheet sweeping toward
  * it (or away) as the camera moves and starting over. Each drop is drawn as the
  * short streak it makes across the screen in a fiftieth of a second. s is the
  * point on screen, zoom the lens, V the rain's speed past the camera in the
@@ -483,8 +501,8 @@ vec3 aces(vec3 x) { return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59
 float rain(vec2 s, float zoom, vec3 V, vec3 ro, vec3 cu, vec3 cv, vec3 cw, out vec3 light) {
   float acc = 0.0;
   light = vec3(0.0);
-  float px = 2.0 / iResolution.y;
-  for (int k = 0; k < 3; k++) {
+  float px = 2.0 / frameUnit();
+  for (int k = 0; k < SHEETS; k++) {
     float fk = float(k);
     float span = 3.0 + 3.0 * fk;
     float near = 1.2 + 1.5 * fk;
@@ -556,7 +574,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float fl = b - 48.0;
   gFlash = fl > 0.0 && fl < 3.0 ? exp(-fl * 5.0) + 0.6 * exp(-abs(fl - 0.35) * 25.0) : 0.0;
 
-  vec2 uv = (2.0 * fragCoord - iResolution.xy) / iResolution.y;
+  vec2 uv = (2.0 * fragCoord - iResolution.xy) / frameUnit();
   vec3 ro, ta, up;
   float zoom, vel;
   shot(b, ro, ta, up, zoom, vel);
@@ -590,7 +608,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   float tg = ground(ro, rd, gn, kind);
   float tmax = min(tg, 140.0);
   if (rd.y > 0.0) tmax = min(tmax, max(34.0 - ro.y, 0.0) / rd.y);
-  vec2 h = march(ro, rd, tmax, 90);
+  vec2 h = march(ro, rd, tmax, STEPS);
   vec3 col;
   float t = h.x;
   if (h.y > 0.0) {
@@ -603,7 +621,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     t = 160.0;
   }
   col = mix(col, FOG + vec3(0.1, 0.11, 0.18) * gFlash, 1.0 - exp(-t * 0.02));
-  col += glow(ro, rd, t, 0.015, 7);
+  col += glow(ro, rd, t, 0.015, GLOWS);
   col += vec3(1.0, 0.05, 0.08) * pointGlow(ro, rd, fromBike(vec3(0.0, 0.9, -0.86)), t, 0.0002);
   // the headlight, blinding when it points at the camera
   vec3 hl = fromBike(vec3(0.0, 0.95, 0.76));

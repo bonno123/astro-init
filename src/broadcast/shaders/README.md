@@ -148,11 +148,17 @@ artwork or characters brings their rights too, not only the shader author's.
   it doesn't add to the heaviest frames.
 - On a touch screen every pass is compiled with `#define ST_LITE 1`, so a heavy
   shader can do less on a phone: `#ifdef ST_LITE` around cheaper constants.
+  `night-ride` marches 56 steps instead of 90, mirrors the city only within
+  18 m, and has fewer lamps' haze and one sheet of rain fewer.
 - A heavy one can still lag a slow phone for a few frames first. Measure it
   (`night-ride` takes about 13 ms a frame at 2560×1440 on the laptop it was
   made on, dragged or not) and look for the usual wins: loops over fewer lights, shorter
   marches for reflections, stopping rays that can't hit anything, long strides
   through empty space. Or set `scale`.
+- Shadertoy measures the screen in picture heights, which on a phone held
+  upright crops a scene to a sliver. `night-ride` uses `frameUnit()` (its
+  common.glsl) instead: the height, or on a tall screen a little less than
+  the width, so a phone sees most of what a laptop does.
 - It compiles in the background where the browser can, so the page doesn't
   freeze, and fades in once it's ready.
 - No WebGL2, a compile error or a lost GPU context closes the overlay quietly;

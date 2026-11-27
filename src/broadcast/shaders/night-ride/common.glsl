@@ -130,3 +130,14 @@ float wrapAngle(float a) { return a - TAU * floor((a + PI) / TAU); }
 
 /** One of Buffer A's four slots of camera state (see buffer-a.glsl): a pixel each, in a row. */
 vec4 cameraSlot(sampler2D state, int i) { return texelFetch(state, ivec2(i, 0), 0); }
+
+// --- the frame ---
+
+/**
+ * How many pixels make one unit on screen. Shadertoy's usual is the picture's
+ * height, which on a phone held upright leaves a sliver of the street, the bike
+ * filling it. So a tall picture goes by its width instead, about 0.83 units
+ * either side of the middle: it sees much more of the street, and a drag
+ * across it swings about as far as one across a wide screen.
+ */
+float frameUnit() { return min(iResolution.y, iResolution.x * 1.2); }
