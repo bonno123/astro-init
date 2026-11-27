@@ -1,6 +1,6 @@
 import { handleMarks } from "./marks.js";
 import { handleBroadcasts } from "./broadcasts.js";
-import { handleBinance } from "./binance.js";
+import { handleBinance, refreshBinance } from "./binance.js";
 
 // Durable Object classes have to be exported from the Worker's main module.
 export { BroadcastHub } from "./hub.js";
@@ -320,5 +320,10 @@ export default {
                 headers: { ...corsHeaders, "Content-Type": "application/json" } 
             });
         }
+    },
+
+    // Cron (wrangler.toml [triggers]): keep the Binance snapshot fresh between visits.
+    async scheduled(event, env, ctx) {
+        ctx.waitUntil(refreshBinance(env));
     }
 }

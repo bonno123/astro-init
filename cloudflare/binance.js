@@ -4,20 +4,28 @@
 //
 // The page's link carries the token after the "#", so it never reaches a server
 // log. Binance's key and secret never leave the Worker: it signs the requests
-// itself and returns only asset, wallet, amount and a USDT value.
+// itself and returns only asset, wallet and amount. The page prices them itself,
+// from Binance's public prices, which a browser can always reach.
+//
+// Binance turns away some of Cloudflare's outgoing IPs with HTTP 451, and which
+// IP a request leaves from is luck. So every good answer is saved in D1
+// (binance_snapshot, one row, overwritten), and when Binance doesn't answer,
+// that is served with `stale: true`. A cron (scheduled() in worker.js) refreshes it.
+//
+// The saved row is deleted, and never shown again, when:
+//   - it is older than MAX_STALE_MS,
+//   - Binance answers but rejects the key (deleted, revoked, wrong permissions),
+//   - the key secrets are removed from the Worker.
 //
 // Secrets: BINANCE_API_KEY, BINANCE_API_SECRET (a read-only key made on the
-// sub-account itself), BINANCE_VIEW_TOKEN. Binding: BINANCE_LIMITER (per-IP).
+// sub-account itself), BINANCE_VIEW_TOKEN. Bindings: DB, BINANCE_LIMITER (per-IP).
 
-// api-gcp runs on Google Cloud; the others sit behind CloudFront, which can turn
-// away a Worker's request with an HTML 403 page. Tried in order.
+// api-gcp runs on Google Cloud; the others sit behind CloudFront. Tried in order.
 const ACCOUNT_HOSTS = ["https://api.binance.com", "https://api-gcp.binance.com", "https://api1.binance.com", "https://api2.binance.com"];
-// Public market data, no key and no request weight on the account.
-const PRICES_URL = "https://data-api.binance.vision/api/v3/ticker/price";
 const CACHE_MS = 60_000;
-const STABLE = new Set(["USDT", "USDC", "FDUSD", "TUSD", "DAI", "USDP"]);
+const MAX_STALE_MS = 24 * 60 * 60_000;
 
-// One copy per isolate. The Cache API does nothing on workers.dev, so this is it.
+// One copy per isolate, of a fresh answer only. The Cache API does nothing on workers.dev.
 let cached = null; // { at, body }
 
 const json = (data, status, cors, extra = {}) =>
@@ -46,14 +54,16 @@ async function sign(query, secret) {
   return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/** `temporary`: Binance didn't answer (451, 5xx, network). Otherwise it answered and said no. */
 class BinanceError extends Error {
-  constructor(message, status) {
+  constructor(message, status, temporary) {
     super(message);
     this.status = status;
+    this.temporary = temporary;
   }
 }
 
-/** A signed call to the account API. Tries the next host on 5xx, a CDN block or a network error. */
+/** A signed call to the account API. Tries the next host on 5xx, a refusal or a network error. */
 async function signed(env, method, path, params = {}) {
   const query = new URLSearchParams({ ...params, recvWindow: "10000", timestamp: String(Date.now()) }).toString();
   const signature = await sign(query, env.BINANCE_API_SECRET);
@@ -66,12 +76,12 @@ async function signed(env, method, path, params = {}) {
         headers: { "X-MBX-APIKEY": env.BINANCE_API_KEY },
       });
     } catch (e) {
-      last = new BinanceError("Couldn't reach Binance.", 502);
+      last = new BinanceError("Couldn't reach Binance.", 502, true);
       continue;
     }
     if (res.ok) return res.json();
     if (res.status >= 500) {
-      last = new BinanceError(`Binance is having trouble (${res.status}).`, 502);
+      last = new BinanceError(`Binance is having trouble (${res.status}).`, 502, true);
       continue;
     }
     const text = await res.text();
@@ -80,66 +90,81 @@ async function signed(env, method, path, params = {}) {
       body = JSON.parse(text);
     } catch {}
     // Shows in `wrangler tail`. Binance's own errors are JSON; a request turned away
-    // at the CDN (or by region, 451) is an HTML page, and another host may still answer.
+    // by region (451) or at the CDN is an HTML page, and another host may still answer.
     console.error(`binance ${path} ${res.status} via ${host}: ${text.slice(0, 200)}`);
     if (res.status === 451 || !body) {
-      last = new BinanceError("Binance refused to answer from this server's region.", 451);
+      last = new BinanceError("Binance didn't answer this time.", 451, true);
       continue;
     }
     // -2014/-2015: bad key, wrong permissions or IP not allowed. Never echo the key.
-    throw new BinanceError(body?.msg ? `Binance said: ${body.msg}` : `Binance answered ${res.status}.`, 502);
+    throw new BinanceError(body?.msg ? `Binance said: ${body.msg}` : `Binance answered ${res.status}.`, 502, false);
   }
   throw last;
 }
 
-async function prices() {
-  const res = await fetch(PRICES_URL);
-  if (!res.ok) return new Map();
-  const list = await res.json();
-  return new Map(list.map((p) => [p.symbol, Number(p.price)]));
-}
-
-/** USDT value of one unit of the asset, or null when there's no route to USDT. */
-function unitUsdt(asset, px) {
-  if (asset === "USDT") return 1;
-  if (px.has(`${asset}USDT`)) return px.get(`${asset}USDT`);
-  if (px.has(`USDT${asset}`)) return 1 / px.get(`USDT${asset}`);
-  if (px.has(`${asset}BTC`) && px.has("BTCUSDT")) return px.get(`${asset}BTC`) * px.get("BTCUSDT");
-  if (STABLE.has(asset)) return 1;
-  return null;
-}
-
+/** Spot and funding balances. "LDBTC" in spot is BTC in Simple Earn; the page sorts that out. */
 async function summary(env) {
-  const [account, funding, px] = await Promise.all([
+  const [account, funding] = await Promise.all([
     signed(env, "GET", "/api/v3/account", { omitZeroBalances: "true" }),
     // The funding wallet is optional: a key or account without it still shows spot.
-    signed(env, "POST", "/sapi/v1/asset/get-funding-asset").catch((e) => (e.status === 451 ? Promise.reject(e) : [])),
-    prices(),
+    signed(env, "POST", "/sapi/v1/asset/get-funding-asset").catch((e) => (e.temporary ? Promise.reject(e) : [])),
   ]);
 
-  const rows = [];
+  const assets = [];
   for (const b of account.balances || []) {
     const amount = Number(b.free) + Number(b.locked);
-    if (amount > 0) rows.push({ asset: b.asset, wallet: "spot", amount });
+    if (amount > 0) assets.push({ asset: b.asset, wallet: "spot", amount });
   }
   for (const f of Array.isArray(funding) ? funding : []) {
     const amount = Number(f.free) + Number(f.locked) + Number(f.freeze) + Number(f.withdrawing || 0);
-    if (amount > 0) rows.push({ asset: f.asset, wallet: "funding", amount });
+    if (amount > 0) assets.push({ asset: f.asset, wallet: "funding", amount });
   }
+  return { updatedAt: new Date().toISOString(), assets };
+}
 
-  let total = 0;
-  const assets = rows.map((r) => {
-    // "LDBTC" in spot is BTC in Simple Earn (flexible).
-    const earn = r.asset.startsWith("LD") && unitUsdt(r.asset, px) === null;
-    const base = earn ? r.asset.slice(2) : r.asset;
-    const unit = unitUsdt(base, px);
-    const usdt = unit === null ? null : r.amount * unit;
-    if (usdt !== null) total += usdt;
-    return { asset: base, wallet: earn ? "earn" : r.wallet, amount: r.amount, usdt };
-  });
-  assets.sort((a, b) => (b.usdt ?? -1) - (a.usdt ?? -1));
+async function save(env, body) {
+  if (!env.DB) return;
+  await env.DB.prepare("INSERT OR REPLACE INTO binance_snapshot (id, body, at) VALUES (1, ?, ?)")
+    .bind(JSON.stringify(body), Date.now())
+    .run();
+}
 
-  return { updatedAt: new Date().toISOString(), totalUsdt: total, assets };
+async function forget(env) {
+  cached = null;
+  if (env.DB) await env.DB.prepare("DELETE FROM binance_snapshot").run();
+}
+
+/** The saved answer, unless it's too old to show, in which case it's deleted. */
+async function lastSaved(env) {
+  if (!env.DB) return null;
+  const row = await env.DB.prepare("SELECT body, at FROM binance_snapshot WHERE id = 1").first();
+  if (!row) return null;
+  if (Date.now() - row.at > MAX_STALE_MS) {
+    await forget(env);
+    return null;
+  }
+  return JSON.parse(row.body);
+}
+
+/** Ask Binance, and save the answer. Throws BinanceError when it refuses. */
+async function refresh(env) {
+  const body = await summary(env);
+  cached = { at: Date.now(), body };
+  await save(env, body);
+  return body;
+}
+
+/** For the cron. Quiet when Binance doesn't answer: the next run, or the next visit, tries again. */
+export async function refreshBinance(env) {
+  if (!env.BINANCE_API_KEY || !env.BINANCE_API_SECRET) return forget(env);
+  try {
+    await refresh(env);
+  } catch (e) {
+    if (!(e instanceof BinanceError)) throw e;
+    console.log(`binance cron: ${e.message}`);
+    if (e.temporary) await lastSaved(env); // deletes it once it's too old
+    else await forget(env);
+  }
 }
 
 /** Returns a Response for /api/binance routes, or null when the path is not ours. */
@@ -154,16 +179,25 @@ export async function handleBinance(request, env, url, cors) {
   }
 
   if (!(await authorised(request, env))) return json({ error: "This link isn't valid." }, 401, cors);
-  if (!env.BINANCE_API_KEY || !env.BINANCE_API_SECRET) return json({ error: "Not set up yet." }, 503, cors);
+  if (!env.BINANCE_API_KEY || !env.BINANCE_API_SECRET) {
+    await forget(env).catch(() => {});
+    return json({ error: "Not set up yet." }, 503, cors);
+  }
 
   if (cached && Date.now() - cached.at < CACHE_MS) return json(cached.body, 200, cors);
 
   try {
-    const body = await summary(env);
-    cached = { at: Date.now(), body };
-    return json(body, 200, cors);
+    return json(await refresh(env), 200, cors);
   } catch (e) {
-    if (e instanceof BinanceError) return json({ error: e.message }, e.status === 451 ? 502 : e.status, cors);
-    throw e;
+    if (!(e instanceof BinanceError)) throw e;
+    // A rejected key means stop showing anything: the key was probably revoked on purpose.
+    if (!e.temporary) {
+      await forget(env).catch(() => {});
+      return json({ error: e.message }, 403, cors);
+    }
+    // Binance just didn't answer: show the last good balances, and say they're old.
+    const saved = await lastSaved(env).catch(() => null);
+    if (saved) return json({ ...saved, stale: true, notice: e.message }, 200, cors);
+    return json({ error: e.message }, 502, cors);
   }
 }

@@ -28,6 +28,11 @@ name = "BINANCE_LIMITER"
 namespace_id = "1001"
 simple = { limit = 20, period = 60 }
 
+# Refreshes the saved Binance balances (binance.js) every 30 minutes, so the
+# private page has something recent when Binance turns a visit away.
+[triggers]
+crons = ["*/30 * * * *"]
+
 # Environment variables (non-secret). Put secrets via `wrangler secret put ...`.
 [env.production]
 vars = {ADMIN_EMAIL = "avik@avikb.dev", DEFAULT_TIMEZONE = "Asia/Kolkata", MAIL_API_URL = "https://api.resend.com/emails"}

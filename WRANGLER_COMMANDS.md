@@ -32,6 +32,30 @@ For `wrangler dev`, put the same names in `.dev.vars` (git-ignored). Wrangler ne
 
 A private page showing the Binance sub-account's balances. `cloudflare/binance.js` signs the Binance calls, so the key never reaches a browser. The page reads its token from the link's `#` part, which browsers never send to a server, and the Worker checks it against `BINANCE_VIEW_TOKEN`. The link is `https://avikb.dev/v/#<token>`, and the current token is in `.env`.
 
+The Worker returns amounts only. The page (`Holdings.vue`) prices them itself from Binance's public prices, and converts to ₹ with CoinGecko's USDT→INR rate (falling back to the USD→INR rate from open.er-api.com).
+
+Binance turns away some of Cloudflare's outgoing IPs (HTTP 451), and which IP a request leaves from is luck: in a test on 27 Nov 2026, about one request in four was refused. So:
+
+- every good answer is saved in D1 (`binance_snapshot`, one row), and when Binance refuses, the page gets that with `stale: true` and says how old it is;
+- the page then quietly asks twice more, since a new request usually leaves from another IP;
+- a cron (`[triggers]` in `wrangler.toml`, every 30 minutes) refreshes the saved row between visits.
+
+The table only ever holds that one row; each save overwrites it. The row is deleted, and the page shows an error instead, when:
+
+- it is more than 24 hours old (`MAX_STALE_MS` in `binance.js`);
+- Binance answers but rejects the key (deleted, revoked, lost reading permission);
+- `BINANCE_API_KEY` or `BINANCE_API_SECRET` is removed from the Worker (`npx wrangler secret delete …`).
+
+So turning the page off is: delete the key on Binance. Within 30 minutes, or at the next visit, the saved balance is gone too. To wipe it at once:
+
+```sh
+npx wrangler d1 execute portfolio-messages-db --remote --command "DELETE FROM binance_snapshot;"
+```
+
+D1's Time Travel can still restore the database to an earlier point for a while (7 days on the free plan), so a deleted row isn't gone from Cloudflare until then.
+
+If Binance ever refuses every Cloudflare IP for a day, the page shows "Binance didn't answer this time." The fix then is to make the signed call from a server outside Cloudflare (a small proxy on AWS Lambda or Vercel in Mumbai).
+
 **New link** (kills the old one at once, no deploy needed):
 
 ```sh
@@ -52,8 +76,11 @@ Delete the old key on Binance afterwards. The Worker keeps balances for 60 secon
 **Errors on the page:**
 
 - "This link isn't valid.": the token is wrong or was rotated.
-- "Binance said: Invalid API-key, IP, or permissions…": the key was deleted, lacks reading permission, or has an IP whitelist. A Worker has no fixed IP, so leave the whitelist off.
-- "Binance refused to answer from this server's region.": Binance turns the Worker away with HTTP 451 (restricted location) on every host, `api-gcp` included. Tested 27 Nov 2026 with the Worker running in Mumbai (`colo=BOM`), so it's Cloudflare's outgoing IPs being blocked, not the region. Moving the Worker with `[placement]` doesn't help. The signed call has to come from a server outside Cloudflare.
+- "Binance said: Invalid API-key, IP, or permissions…": the key was deleted, lacks reading permission, or has an IP whitelist. A Worker has no fixed IP, so leave the whitelist off. The saved balance is deleted when this happens.
+- "Binance didn't answer this time.": the 451 above. Normal now and then. If the "as of" time stops moving for hours, check `npx wrangler tail` while the cron runs. Moving the Worker with `[placement]` doesn't help, because the block is on Cloudflare's IPs, not the region.
+- The total shows "—" or only USDT: the browser couldn't reach the price or ₹ rate sites. Refresh.
+
+To test the cron locally: `npx wrangler dev --test-scheduled`, then `curl "http://localhost:8787/__scheduled?cron=*/30+*+*+*+*"`.
 
 ## Schema
 
@@ -63,6 +90,7 @@ Each schema file is applied by hand, one at a time:
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0001_marks.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0002_broadcasts.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0003_broadcast_pinned.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0004_binance_snapshot.sql
 ```
 
 The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.
