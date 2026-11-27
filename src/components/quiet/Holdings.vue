@@ -4,8 +4,28 @@ import { api, ApiError } from "~/utils/api";
 
 type Wallet = "spot" | "funding" | "earn";
 type Raw = { asset: string; wallet: Wallet; amount: number };
-type Summary = { updatedAt: string; assets: Raw[]; stale?: boolean; notice?: string };
-type Row = Raw & { usdt: number | null; inr: number | null };
+type Holder = { name: string; share: number; since: string };
+type Move = {
+  kind: "in" | "out" | "buy" | "sell" | "convert";
+  at: number;
+  asset: string;
+  amount: number;
+  usdt: number | null; // value at that minute
+  inr: number | null; // rupees really paid (or received), set by hand
+  note: string | null;
+};
+type Summary = {
+  updatedAt: string;
+  assets: Raw[];
+  stale?: boolean;
+  notice?: string;
+  // The books, from D1: who owns what share, and what moved in and out.
+  holders?: Holder[];
+  activity?: Move[];
+  putInUsdt?: number | null; // net USDT in, valued at the minute each move happened
+  paidInr?: number | null; // net rupees really paid
+};
+type Row = Raw & { usdt: number | null };
 
 // Public prices, fetched by the browser: Binance turns away some of Cloudflare's
 // IPs, but never a visitor's. CoinGecko's USDT→INR is the Indian market rate;
@@ -105,21 +125,72 @@ const rows = computed<Row[]>(() => {
     const earn = r.asset.startsWith("LD") && unitUsdt(r.asset) === null && unitUsdt(r.asset.slice(2)) !== null;
     const asset = earn ? r.asset.slice(2) : r.asset;
     const unit = unitUsdt(asset);
-    const usdt = unit === null ? null : r.amount * unit;
-    const inr = usdt === null || inrPerUsdt.value === null ? null : usdt * inrPerUsdt.value;
-    return { asset, wallet: earn ? ("earn" as const) : r.wallet, amount: r.amount, usdt, inr };
+    return { asset, wallet: earn ? ("earn" as const) : r.wallet, amount: r.amount, usdt: unit === null ? null : r.amount * unit };
   });
   return out.sort((a, b) => (b.usdt ?? -1) - (a.usdt ?? -1));
 });
 
 const totalUsdt = computed(() => rows.value.reduce((s, r) => s + (r.usdt ?? 0), 0));
 const priced = computed(() => rows.value.some((r) => r.usdt !== null) || !rows.value.length);
-const totalInr = computed(() => (inrPerUsdt.value === null ? null : totalUsdt.value * inrPerUsdt.value));
+const onlyBtc = computed(() => rows.value.every((r) => r.asset === "BTC"));
+
+/** The whole account in BTC: exact when it's all BTC, otherwise at today's price. */
+const totalBtc = computed(() => {
+  if (onlyBtc.value) return rows.value.reduce((s, r) => s + r.amount, 0);
+  const btc = px.value.get("BTCUSDT");
+  return btc && priced.value ? totalUsdt.value / btc : null;
+});
+
+/** Where the rupees went: paid → lost buying → market since → worth now. */
+const story = computed(() => {
+  const rate = inrPerUsdt.value;
+  const putIn = data.value?.putInUsdt;
+  if (rate === null || !priced.value || putIn == null) return null;
+  const paid = data.value?.paidInr ?? null;
+  const arrived = putIn * rate;
+  const now = totalUsdt.value * rate;
+  return { paid, arrived, lost: paid === null ? null : arrived - paid, market: now - arrived, now };
+});
+
+/** Each holder's part of the BTC, of what was paid, and of what it's worth now. */
+const holders = computed(() => {
+  const list = data.value?.holders ?? [];
+  const sum = list.reduce((s, h) => s + h.share, 0);
+  if (!sum) return [];
+  const rate = inrPerUsdt.value;
+  const paid = data.value?.paidInr ?? (data.value?.putInUsdt != null && rate !== null ? data.value.putInUsdt * rate : null);
+  return list.map((h) => {
+    const part = h.share / sum;
+    return {
+      ...h,
+      part,
+      btc: totalBtc.value === null ? null : totalBtc.value * part,
+      paid: paid === null ? null : paid * part,
+      now: priced.value ? totalUsdt.value * part : null,
+    };
+  });
+});
+
+const activity = computed(() =>
+  (data.value?.activity ?? []).map((m) => {
+    const title = { in: m.note, out: m.note, buy: `Bought ${m.asset}`, sell: `Sold ${m.asset}`, convert: `Converted to ${m.asset}` }[m.kind];
+    const detail = m.kind === "in" || m.kind === "out" ? null : m.note;
+    const sign = m.kind === "out" || m.kind === "sell" ? "−" : "+";
+    return { ...m, title: title ? title[0].toUpperCase() + title.slice(1) : m.kind, detail, sign };
+  }),
+);
 
 const rupees = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
+const change = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0, signDisplay: "exceptZero" });
 const usdt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const qty = new Intl.NumberFormat("en-US", { maximumFractionDigits: 8 });
-const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 });
+
+/** USDT as ₹ at today's rate, or as USDT while the rate is missing. */
+const money = (v: number | null) =>
+  v === null ? "—" : inrPerUsdt.value === null ? `${usdt.format(v)} USDT` : rupees.format(v * inrPerUsdt.value);
+const when = (t: string | number) =>
+  new Date(t).toLocaleString(undefined, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
 </script>
 
 <template>
@@ -128,19 +199,16 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyl
       <p class="label">Binance sub-account</p>
       <template v-if="data">
         <p class="total">
-          <template v-if="!priced">—</template>
-          <template v-else-if="totalInr !== null">{{ rupees.format(totalInr) }}</template>
-          <template v-else>{{ usdt.format(totalUsdt) }} USDT</template>
+          <template v-if="totalBtc === null">—</template>
+          <template v-else>{{ qty.format(totalBtc) }}<span class="unit">BTC</span></template>
         </p>
         <p class="meta">
-          <span v-if="priced && totalInr !== null">≈ {{ usdt.format(totalUsdt) }} USDT · </span>
-          <span v-if="inrPerUsdt">₹{{ inrPerUsdt.toFixed(2) }} per USDT · </span>
+          <span v-if="priced">≈ {{ money(totalUsdt) }} · </span>
           as of {{ when(data.updatedAt) }}
           <button :disabled="loading || retrying" @click="load">
             {{ loading || retrying ? "loading…" : "refresh" }}
           </button>
         </p>
-        <p v-if="!priced" class="meta">Couldn't get prices just now.</p>
       </template>
     </header>
 
@@ -151,60 +219,113 @@ const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyl
     <p v-if="error" class="err" role="alert">{{ error }}</p>
     <p v-else-if="!data && (loading || retrying)" class="meta">Loading…</p>
     <p v-else-if="data && !rows.length" class="meta">Nothing here yet.</p>
+    <p v-else-if="data && !priced" class="meta">Couldn't get prices just now.</p>
 
-    <table v-if="rows.length">
-      <thead>
-        <tr>
-          <th scope="col">asset</th>
-          <th scope="col">wallet</th>
-          <th scope="col" class="num">amount</th>
-          <th scope="col" class="num">value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="a in rows" :key="a.asset + a.wallet">
-          <td>{{ a.asset }}</td>
-          <td class="meta">{{ a.wallet }}</td>
-          <td class="num">{{ qty.format(a.amount) }}</td>
-          <td class="num">
-            <template v-if="a.usdt === null">—</template>
-            <template v-else>
-              <span v-if="a.inr !== null">{{ rupees.format(a.inr) }}</span>
-              <span class="sub" :class="{ only: a.inr === null }">{{ usdt.format(a.usdt) }} USDT</span>
-            </template>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Only when there's more than BTC: the headline already says it all otherwise. -->
+    <ul v-if="rows.length && !onlyBtc" class="list">
+      <li v-for="a in rows" :key="a.asset + a.wallet">
+        <span>{{ a.asset }}<span class="sub">{{ a.wallet }}</span></span>
+        <span class="num">{{ qty.format(a.amount) }}<span class="sub">{{ money(a.usdt) }}</span></span>
+      </li>
+    </ul>
+
+    <section v-if="story">
+      <h2 class="label">Where the money went</h2>
+      <ul class="list">
+        <li v-if="story.paid !== null">
+          <span>Paid</span>
+          <span class="num">{{ rupees.format(story.paid) }}</span>
+        </li>
+        <li v-if="story.lost !== null">
+          <span>Lost buying<span class="sub">fees, tax and the rate on the way in</span></span>
+          <span class="num" :class="story.lost < 0 ? 'down' : 'up'">
+            {{ change.format(story.lost) }}<span v-if="story.paid" class="sub">{{ pct.format(Math.abs(story.lost) / story.paid) }}</span>
+          </span>
+        </li>
+        <li v-else>
+          <span>Worth when it arrived</span>
+          <span class="num">{{ rupees.format(story.arrived) }}</span>
+        </li>
+        <li>
+          <span>Market since</span>
+          <span class="num" :class="story.market < 0 ? 'down' : 'up'">{{ change.format(story.market) }}</span>
+        </li>
+        <li class="end">
+          <span>Worth now</span>
+          <span class="num">{{ rupees.format(story.now) }}</span>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="holders.length">
+      <h2 class="label">Holders</h2>
+      <ul class="list">
+        <li v-for="h in holders" :key="h.name">
+          <span>{{ h.name }}<span class="sub">{{ pct.format(h.part) }}</span></span>
+          <span class="num">
+            <template v-if="h.btc !== null">{{ qty.format(h.btc) }} BTC</template>
+            <span class="sub">
+              <template v-if="h.paid !== null">paid {{ rupees.format(h.paid) }} · </template>now {{ money(h.now) }}
+            </span>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="activity.length">
+      <h2 class="label">Activity</h2>
+      <ul class="list">
+        <li v-for="m in activity" :key="m.kind + m.at + m.asset">
+          <span>{{ m.title }}<span class="sub">{{ when(m.at) }}<template v-if="m.detail"> · {{ m.detail }}</template></span></span>
+          <span class="num">
+            {{ m.sign }}{{ qty.format(m.amount) }} {{ m.asset }}
+            <span class="sub">
+              <template v-if="m.inr !== null">paid {{ rupees.format(m.inr) }} · </template>
+              <template v-if="m.usdt !== null">worth {{ money(m.usdt) }} then</template>
+            </span>
+          </span>
+        </li>
+      </ul>
+    </section>
+
+    <p v-if="data && inrPerUsdt" class="foot">Prices from Binance. ₹ at {{ inrPerUsdt.toFixed(2) }} per USDT.</p>
   </div>
 </template>
 
 <style scoped>
 .holdings {
-  max-width: 640px;
+  max-width: 560px;
   margin: 0 auto;
-  padding: 56px var(--pad);
+  padding: 72px var(--pad) 96px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 56px;
 }
-header {
+header,
+section {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 14px;
 }
 .label {
   font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 400;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 .total {
   font-family: var(--font-serif);
-  font-size: clamp(40px, 9vw, 64px);
+  font-size: clamp(44px, 11vw, 72px);
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.unit {
+  margin-left: 0.25em;
+  font-size: 0.4em;
+  color: var(--muted);
 }
 .meta {
   color: var(--muted);
@@ -240,38 +361,42 @@ button:hover:not(:disabled) {
 .err {
   color: var(--danger);
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   font-variant-numeric: tabular-nums;
 }
-th {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--muted);
-  text-align: left;
-  padding: 0 0 10px;
-}
-td {
-  padding: 12px 0;
+.list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 24px;
+  padding: 16px 0;
   border-top: 1px solid var(--line);
-  vertical-align: top;
 }
-th + th,
-td + td {
-  padding-left: 16px;
+.list li.end {
+  border-top-color: var(--line-strong);
+  font-weight: 500;
 }
 .num {
   text-align: right;
 }
 .sub {
   display: block;
+  margin-top: 4px;
   font-size: 12px;
+  font-weight: 400;
   color: var(--muted);
 }
-.sub.only {
-  font-size: inherit;
-  color: inherit;
+.up {
+  color: var(--accent);
+}
+.down {
+  color: var(--danger);
+}
+.foot {
+  font-size: 12px;
+  color: var(--muted);
 }
 </style>

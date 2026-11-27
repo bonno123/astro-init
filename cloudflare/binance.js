@@ -17,11 +17,20 @@
 //   - Binance answers but rejects the key (deleted, revoked, wrong permissions),
 //   - the key secrets are removed from the Worker.
 //
+// The books (binance_holders, binance_activity) are separate: who owns what share,
+// and what moved in and out, as Binance recorded it. The cron adds new activity;
+// every answer to the page carries both, read from D1. They're records, so they
+// stay when the key is rejected; the page just shows nothing then.
+//
 // Secrets: BINANCE_API_KEY, BINANCE_API_SECRET (a read-only key made on the
 // sub-account itself), BINANCE_VIEW_TOKEN. Bindings: DB, BINANCE_LIMITER (per-IP).
 
 // api-gcp runs on Google Cloud; the others sit behind CloudFront. Tried in order.
 const ACCOUNT_HOSTS = ["https://api.binance.com", "https://api-gcp.binance.com", "https://api1.binance.com", "https://api2.binance.com"];
+// Public market data. data-api is Binance's mirror for it.
+const PUBLIC_HOSTS = ["https://data-api.binance.vision", "https://api.binance.com"];
+const STABLE = new Set(["USDT", "USDC", "FDUSD", "TUSD", "DAI", "USDP"]);
+const DAY = 24 * 60 * 60_000;
 const CACHE_MS = 60_000;
 const MAX_STALE_MS = 24 * 60 * 60_000;
 
@@ -154,6 +163,132 @@ async function refresh(env) {
   return body;
 }
 
+// ---- Books ----
+
+/**
+ * Holders, recent activity, and what was put in: net USDT at the minute each move
+ * happened, and net rupees really paid. Each is null while nothing has moved yet,
+ * or while some move lacks it.
+ */
+async function readBooks(env) {
+  if (!env.DB) return {};
+  const [holders, activity, net] = await env.DB.batch([
+    env.DB.prepare("SELECT name, share, since FROM binance_holders ORDER BY share DESC, name"),
+    env.DB.prepare("SELECT kind, at, asset, amount, usdt, inr, note FROM binance_activity ORDER BY at DESC LIMIT 200"),
+    env.DB.prepare(
+      `SELECT SUM(CASE kind WHEN 'in' THEN usdt WHEN 'out' THEN -usdt END) AS usdt,
+              SUM(CASE kind WHEN 'in' THEN inr WHEN 'out' THEN -inr END) AS inr,
+              SUM(kind IN ('in', 'out')) AS moves,
+              SUM(kind IN ('in', 'out') AND usdt IS NULL) AS no_usdt,
+              SUM(kind IN ('in', 'out') AND inr IS NULL) AS no_inr
+         FROM binance_activity`,
+    ),
+  ]);
+  const n = net.results[0] || {};
+  return {
+    holders: holders.results,
+    activity: activity.results,
+    putInUsdt: !n.moves || n.no_usdt ? null : n.usdt,
+    paidInr: !n.moves || n.no_inr ? null : n.inr,
+  };
+}
+
+/** USDT for one unit of the asset in the minute that holds `at`, from Binance's 1-minute candles. */
+async function priceAt(asset, at) {
+  if (STABLE.has(asset)) return 1;
+  const start = Math.floor(at / 60_000) * 60_000;
+  for (const host of PUBLIC_HOSTS) {
+    try {
+      const res = await fetch(`${host}/api/v3/klines?symbol=${asset}USDT&interval=1m&startTime=${start}&limit=1`);
+      if (!res.ok) continue;
+      const [candle] = await res.json();
+      if (candle) return Number(candle[1]);
+    } catch {}
+  }
+  return null;
+}
+
+const move = (id, kind, at, asset, amount, usdt = null, note = null) => ({ id, kind, at, asset, amount, usdt, note });
+
+/** Everything Binance lists for the sub-account. Each source is separate, so one failing doesn't stop the rest. */
+async function collect(env) {
+  const now = Date.now();
+  const window30 = { startTime: String(now - 30 * DAY), endTime: String(now) };
+  const out = [];
+
+  // Assets to look for spot trades in: what's held, and what has moved before.
+  const held = (await lastSaved(env).catch(() => null))?.assets?.map((a) => a.asset) ?? [];
+  const seen = (await env.DB.prepare("SELECT DISTINCT asset FROM binance_activity").all()).results.map((r) => r.asset);
+  const bases = new Set();
+  for (const a of [...held, ...seen]) {
+    if (STABLE.has(a)) continue;
+    bases.add(a);
+    if (a.startsWith("LD")) bases.add(a.slice(2)); // LDBTC is BTC in Simple Earn
+  }
+
+  const sources = [
+    // Transfers with the main account. type 1 is in, 2 is out; without it Binance lists only "out".
+    ...[1, 2].map((type) => async () => {
+      const list = await signed(env, "GET", "/sapi/v1/sub-account/transfer/subUserHistory", { type: String(type), ...window30, limit: "500" });
+      for (const t of list) {
+        if (t.status !== "SUCCESS") continue;
+        const other = t.counterParty === "master" ? "main account" : "another sub-account";
+        out.push(move(`transfer:${t.tranId}`, type === 1 ? "in" : "out", t.time, t.asset, Number(t.qty), null, `${type === 1 ? "from" : "to"} ${other}`));
+      }
+    }),
+    async () => {
+      const list = await signed(env, "GET", "/sapi/v1/capital/deposit/hisrec");
+      // 1: credited; 6: credited but not yet withdrawable.
+      for (const d of list) if (d.status === 1 || d.status === 6) out.push(move(`deposit:${d.id || d.txId}`, "in", d.insertTime, d.coin, Number(d.amount), null, `deposit via ${d.network}`));
+    },
+    async () => {
+      const list = await signed(env, "GET", "/sapi/v1/capital/withdraw/history");
+      for (const w of list) {
+        if (w.status !== 6) continue; // 6: completed
+        const at = Date.parse(`${w.applyTime.replace(" ", "T")}Z`); // "2026-11-27 05:48:19", UTC
+        const fee = Number(w.transactionFee || 0) ? `, fee ${w.transactionFee}` : "";
+        out.push(move(`withdrawal:${w.id}`, "out", at, w.coin, Number(w.amount), null, `withdrawal via ${w.network}${fee}`));
+      }
+    },
+    async () => {
+      const { list = [] } = await signed(env, "GET", "/sapi/v1/convert/tradeFlow", window30);
+      for (const c of list) {
+        if (c.orderStatus !== "SUCCESS") continue;
+        const usdt = STABLE.has(c.fromAsset) ? Number(c.fromAmount) : STABLE.has(c.toAsset) ? Number(c.toAmount) : null;
+        out.push(move(`convert:${c.orderId}`, "convert", c.createTime, c.toAsset, Number(c.toAmount), usdt, `from ${c.fromAmount} ${c.fromAsset}`));
+      }
+    },
+    ...[...bases].map((base) => async () => {
+      const symbol = `${base}USDT`;
+      const list = await signed(env, "GET", "/api/v3/myTrades", { symbol, limit: "1000" });
+      for (const t of list) {
+        out.push(move(`trade:${symbol}:${t.id}`, t.isBuyer ? "buy" : "sell", t.time, base, Number(t.qty), Number(t.quoteQty), `at ${Number(t.price)} USDT`));
+      }
+    }),
+  ];
+
+  const results = await Promise.allSettled(sources.map((f) => f()));
+  for (const r of results) if (r.status === "rejected") console.log(`binance books: ${r.reason?.message || r.reason}`);
+  return out;
+}
+
+/** Add new activity, then price up to five rows that have no USDT value yet. */
+async function syncBooks(env) {
+  if (!env.DB) return;
+  const moves = await collect(env);
+  if (moves.length) {
+    const insert = env.DB.prepare(
+      "INSERT OR IGNORE INTO binance_activity (id, kind, at, asset, amount, usdt, note) VALUES (?, ?, ?, ?, ?, ?, ?)",
+    );
+    await env.DB.batch(moves.map((m) => insert.bind(m.id, m.kind, m.at, m.asset, m.amount, m.usdt, m.note)));
+  }
+  const { results } = await env.DB.prepare("SELECT id, at, asset, amount FROM binance_activity WHERE usdt IS NULL ORDER BY at DESC LIMIT 5").all();
+  for (const r of results) {
+    const unit = await priceAt(r.asset, r.at);
+    if (unit !== null) await env.DB.prepare("UPDATE binance_activity SET usdt = ? WHERE id = ? AND usdt IS NULL").bind(r.amount * unit, r.id).run();
+  }
+}
+
 /** For the cron. Quiet when Binance doesn't answer: the next run, or the next visit, tries again. */
 export async function refreshBinance(env) {
   if (!env.BINANCE_API_KEY || !env.BINANCE_API_SECRET) return forget(env);
@@ -162,9 +297,10 @@ export async function refreshBinance(env) {
   } catch (e) {
     if (!(e instanceof BinanceError)) throw e;
     console.log(`binance cron: ${e.message}`);
-    if (e.temporary) await lastSaved(env); // deletes it once it's too old
-    else await forget(env);
+    if (!e.temporary) return forget(env); // a rejected key: nothing more to ask
+    await lastSaved(env); // deletes it once it's too old
   }
+  await syncBooks(env).catch((e) => console.error(`binance books: ${e.message}`));
 }
 
 /** Returns a Response for /api/binance routes, or null when the path is not ours. */
@@ -184,10 +320,13 @@ export async function handleBinance(request, env, url, cors) {
     return json({ error: "Not set up yet." }, 503, cors);
   }
 
-  if (cached && Date.now() - cached.at < CACHE_MS) return json(cached.body, 200, cors);
+  // Balances from Binance (or the saved copy), plus the books from D1.
+  const reply = async (body) => json({ ...body, ...(await readBooks(env).catch(() => ({}))) }, 200, cors);
+
+  if (cached && Date.now() - cached.at < CACHE_MS) return reply(cached.body);
 
   try {
-    return json(await refresh(env), 200, cors);
+    return reply(await refresh(env));
   } catch (e) {
     if (!(e instanceof BinanceError)) throw e;
     // A rejected key means stop showing anything: the key was probably revoked on purpose.
@@ -197,7 +336,7 @@ export async function handleBinance(request, env, url, cors) {
     }
     // Binance just didn't answer: show the last good balances, and say they're old.
     const saved = await lastSaved(env).catch(() => null);
-    if (saved) return json({ ...saved, stale: true, notice: e.message }, 200, cors);
+    if (saved) return reply({ ...saved, stale: true, notice: e.message });
     return json({ error: e.message }, 502, cors);
   }
 }

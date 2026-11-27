@@ -56,6 +56,28 @@ D1's Time Travel can still restore the database to an earlier point for a while 
 
 If Binance ever refuses every Cloudflare IP for a day, the page shows "Binance didn't answer this time." The fix then is to make the signed call from a server outside Cloudflare (a small proxy on AWS Lambda or Vercel in Mumbai).
 
+### Holders and activity (the books)
+
+Two more tables sit beside the balances (`0005_binance_books.sql`):
+
+- `binance_holders`: who owns the sub-account. A holder's part is `share / sum(share)`, so a 4:1 split is shares 4 and 1. Names are added by hand, never in a committed file, since the repo is public.
+- `binance_activity`: what moved in and out, as Binance recorded it. The cron adds new rows from: transfers with the main account, deposits, withdrawals, converts, and spot trades against USDT for any asset held or seen before. Rows are only ever added. A transfer or deposit gets its USDT value from Binance's 1-minute price when it moved, filled in by a later cron run if the price couldn't be fetched.
+
+The page leads with the BTC held, then "where the money went": the rupees paid, the part lost buying (fees, TDS and the rate on the way in), the market's move since, and what it's worth now. Below that, each holder's share of the BTC, of what was paid, and of what it's worth now.
+
+Binance records only the coins that arrived. A purchase made on the main account isn't visible to the sub-account's key. So the rupees really paid go in the `inr` column by hand (`0006_binance_paid_inr.sql`), and the cron never touches it. Until every transfer in or out has an `inr` value, the page uses the coins' value when they arrived instead. A `usdt` value that's already set is never overwritten either:
+
+```sh
+D="npx wrangler d1 execute portfolio-messages-db --remote --command"
+$D "SELECT * FROM binance_holders;"
+$D "INSERT INTO binance_holders (name, share, since) VALUES ('<name>', 4, '2026-11-27');"
+$D "UPDATE binance_holders SET share = 3 WHERE name = '<name>';"
+$D "SELECT id, kind, datetime(at/1000, 'unixepoch') AS at, asset, amount, usdt, note FROM binance_activity ORDER BY at;"
+$D "UPDATE binance_activity SET inr = 5000 WHERE id = 'transfer:<tranId>';"   # rupees paid for it
+```
+
+New activity shows up within 30 minutes, at the next cron run. Unlike the saved balance, the books aren't deleted when the key is rejected or removed. They're records, and the page shows nothing then anyway. To wipe them: `$D "DELETE FROM binance_activity; DELETE FROM binance_holders;"`.
+
 **New link** (kills the old one at once, no deploy needed):
 
 ```sh
@@ -91,6 +113,8 @@ npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrati
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0002_broadcasts.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0003_broadcast_pinned.sql
 npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0004_binance_snapshot.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0005_binance_books.sql
+npx wrangler d1 execute portfolio-messages-db --remote --file=cloudflare/migrations/0006_binance_paid_inr.sql
 ```
 
 The older files in `migrations/` (messages, bookings, contact_messages) are already applied to production. Don't run `wrangler d1 migrations apply` there. D1 has no record of them, so it would run them all again, and `0002` starts by dropping `messages`.
